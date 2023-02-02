@@ -5,7 +5,9 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerX", "MarinerX\MarinerX.csproj", "{D5444851-D196-485E-AD56-42B753FF09AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryTradingModel", "MercuryTradingModel\MercuryTradingModel.csproj", "{E58587A6-D743-442F-B105-E9B381D8E883}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryTradingModel", "MercuryTradingModel\MercuryTradingModel.csproj", "{E58587A6-D743-442F-B105-E9B381D8E883}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryEditor", "MercuryEditor\MercuryEditor.csproj", "{B660937D-8E93-4944-8D0E-D55F50F981BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{E58587A6-D743-442F-B105-E9B381D8E883}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E58587A6-D743-442F-B105-E9B381D8E883}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E58587A6-D743-442F-B105-E9B381D8E883}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
