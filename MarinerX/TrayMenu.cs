@@ -18,7 +18,6 @@ using Newtonsoft.Json;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -159,14 +158,26 @@ namespace MarinerX
             var menu6 = new ToolStripMenuItem("데이터 모니터링");
             menu6.DropDownItems.Add("검색기", null, new EventHandler(QuoteMonitoringEvent));
             //var menu61 = new ToolStripMenuItem("검색기");
-            var menu62 = new ToolStripMenuItem("현재 포지션 모니터링");
             symbolNames.Sort();
-            foreach (var symbolName in symbolNames)
+            var menu62 = new ToolStripMenuItem("현재 포지션 모니터링(A-D)");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
             {
                 menu62.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, CurrentPositioningEvent, symbolName));
             }
+            var menu63 = new ToolStripMenuItem("현재 포지션 모니터링(E-N)");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
+            {
+                menu63.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, CurrentPositioningEvent, symbolName));
+            }
+            var menu64 = new ToolStripMenuItem("현재 포지션 모니터링(O-Z)");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
+            {
+                menu64.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, CurrentPositioningEvent, symbolName));
+            }
             //menu6.DropDownItems.Add(menu61);
             menu6.DropDownItems.Add(menu62);
+            menu6.DropDownItems.Add(menu63);
+            menu6.DropDownItems.Add(menu64);
             menu6.DropDownItems.Add("모니터링 종료", null, new EventHandler(CurrentPositioningEndEvent));
             menuStrip.Items.Add(menu6);
             menuStrip.Items.Add(new ToolStripSeparator());
@@ -224,10 +235,7 @@ namespace MarinerX
             try
             {
                 ChartLoader.GetCandleDataFromBinance(worker);
-                DispatcherService.Invoke(() =>
-                {
-                    progressView.Hide();
-                });
+                DispatcherService.Invoke(progressView.Hide);
 
                 MessageBox.Show("바이낸스 1분봉 데이터 수집 완료");
             }
@@ -253,10 +261,7 @@ namespace MarinerX
             try
             {
                 ChartLoader.ExtractCandle(KlineInterval.OneDay, worker);
-                DispatcherService.Invoke(() =>
-                {
-                    progressView.Hide();
-                });
+                DispatcherService.Invoke(progressView.Hide);
 
                 MessageBox.Show("바이낸스 1일봉 데이터 추출 완료");
             }
@@ -303,10 +308,7 @@ namespace MarinerX
                 ChartLoader.Init(chartDataType.symbol, chartDataType.interval, worker);
                 if (!chartDataType.isExternal)
                 {
-                    DispatcherService.Invoke(() =>
-                    {
-                        progressView.Hide();
-                    });
+                    DispatcherService.Invoke(progressView.Hide);
                 }
             }
             catch (Exception ex)
@@ -378,10 +380,7 @@ namespace MarinerX
             {
                 if (obj is not BackTestParameter param)
                 {
-                    DispatcherService.Invoke(() =>
-                    {
-                        progressView.Hide();
-                    });
+                    DispatcherService.Invoke(progressView.Hide);
                     return;
                 }
 
@@ -392,10 +391,7 @@ namespace MarinerX
 
                 bot = new BackTestBot(param.model, worker, param.isShowChart);
                 var result = bot.Run();
-                DispatcherService.Invoke(() =>
-                {
-                    progressView.Hide();
-                });
+                DispatcherService.Invoke(progressView.Hide);
 
                 if (result.Count == 0)
                 {
@@ -414,10 +410,7 @@ namespace MarinerX
 
                 if (param.isShowChart)
                 {
-                    DispatcherService.Invoke(() =>
-                    {
-                        bot.ChartViewer.Show();
-                    });
+                    DispatcherService.Invoke(bot.ChartViewer.Show);
                 }
                 else
                 {
@@ -557,10 +550,7 @@ namespace MarinerX
                 var flask = new BackTestFlask(worker);
                 var result = flask.Run(100000, "BTCUSDT", KlineInterval.FiveMinutes, new DateTime(2022, 11, 22, 0, 0, 0), TimeSpan.FromDays(3), 0.5, 0.5m);
 
-                DispatcherService.Invoke(() =>
-                {
-                    progressView.Hide();
-                });
+                DispatcherService.Invoke(progressView.Hide);
 
                 if (result == null)
                 {
@@ -627,10 +617,7 @@ namespace MarinerX
                 var flask = new BackTestFlask(worker);
                 var result = flask.Run(100000, "XRPUSDT", KlineInterval.FiveMinutes, new DateTime(2022, 10, 1, 0, 0, 0), TimeSpan.FromDays(30), bandwidth, profitRoe);
 
-                DispatcherService.Invoke(() =>
-                {
-                    Window.GetWindow(worker.ProgressBar).Hide();
-                });
+                DispatcherService.Invoke(Window.GetWindow(worker.ProgressBar).Hide);
 
                 if (result == null)
                 {

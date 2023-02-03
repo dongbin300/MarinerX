@@ -14,10 +14,14 @@ namespace MarinerX.Markets
         {
             #region Symbol Benchmark Calculate
             var volatilityResult = new Dictionary<string, decimal>();
+            var amountResult = new Dictionary<string, decimal>();
             var data = LocalStorageApi.GetAllOneDayQuotes();
 
             foreach (var d in data)
             {
+                var amount = d.Value.Average(x => x.Volume * (x.Low + x.High)/2);
+                amountResult.Add(d.Key, Math.Round(amount));
+
                 var list = d.Value.Select(x => Math.Round((x.High - x.Low) / x.Low * 100, 2)).ToList();
                 volatilityResult.Add(d.Key, Math.Round(list.Average(), 4));
             }

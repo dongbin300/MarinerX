@@ -2,20 +2,11 @@
 using MarinerX.Utils;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace MarinerX.Views
 {
@@ -93,10 +84,13 @@ namespace MarinerX.Views
         {
             var info = BinanceClientApi.GetPositioningInformation(symbol);
 
-            if (info == null)
+            if (info.Count == 0)
             {
-                PnlText.Foreground = new SolidColorBrush(Colors.Gray);
-                PnlText.Text = "No Position";
+                DispatcherService.Invoke(() =>
+                {
+                    PnlText.Foreground = new SolidColorBrush(Colors.Gray);
+                    PnlText.Text = "No Position";
+                });
                 return;
             }
 

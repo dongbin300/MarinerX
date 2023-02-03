@@ -40,8 +40,8 @@
             </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Symbol" Width="1*" Binding="{Binding Symbol}"/>
-                <DataGridTextColumn Header="UAD" Width="1*" Binding="{Binding Uad}"/>
-                <DataGridTemplateColumn Header="Score" Width="1*">
+                <DataGridTextColumn Header="U＆D" Width="1*" Binding="{Binding Uad}"/>
+                <DataGridTemplateColumn Header="Volume" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Rectangle>
@@ -49,8 +49,8 @@
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                         <LinearGradientBrush.GradientStops>
                                             <GradientStop Offset="0" Color="#3BCF86"/>
-                                            <GradientStop Offset="{Binding Score}" Color="#3BCF86"/>
-                                            <GradientStop Offset="{Binding Score}" Color="Transparent"/>
+                                            <GradientStop Offset="{Binding Volume}" Color="#3BCF86"/>
+                                            <GradientStop Offset="{Binding Volume}" Color="Transparent"/>
                                             <GradientStop Offset="1" Color="Transparent"/>
                                         </LinearGradientBrush.GradientStops>
                                     </LinearGradientBrush>

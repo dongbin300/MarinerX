@@ -26,14 +26,14 @@ namespace MarinerX.Views
     {
         public string Symbol { get; set; } = string.Empty;
         public string Uad { get; set; } = string.Empty;
-        public double Score { get; set; }
+        public double Volume { get; set; }
         public bool IsLongPosition { get; set; }
 
-        public QuoteMonitorData(string symbol, string uad, double score, bool isLongPosition = true)
+        public QuoteMonitorData(string symbol, string uad, double volume, bool isLongPosition = true)
         {
             Symbol = symbol;
             Uad = uad;
-            Score = score;
+            Volume = volume;
             IsLongPosition = isLongPosition;
         }
     }
@@ -248,7 +248,7 @@ namespace MarinerX.Views
                     Symbol = symbol,
                     Ma20 = Convert.ToDecimal(ma.ElementAt(ma.Count() - 1).Sma),
                     Ema224 = Convert.ToDecimal(ema.ElementAt(ema.Count() - 1).Ema),
-                    Volume = 2 * quotes[^2].Volume
+                    Volume = 2.5m * quotes[^2].Volume
                 });
             }
             return result;
@@ -261,7 +261,7 @@ namespace MarinerX.Views
                 DispatcherService.Invoke(() =>
                 {
                     ClockText.Text = DateTime.Now.ToString("HH:mm:ss");
-                    var candleDurationRatio = (DateTime.Now.Minute % 5 * 60 + DateTime.Now.Second) / 300;
+                    var candleDurationRatio = (decimal)(DateTime.Now.Minute % 5 * 60 + DateTime.Now.Second + 1) / 300;
 
                     if (quoteRatings.Count <= 0)
                     {
@@ -288,34 +288,18 @@ namespace MarinerX.Views
                         var emaRoe = StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, rating.Ema224, quote.Close);
                         var maRoe = StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, rating.Ma20, quote.Close);
 
-                        // long position detection
-                        if (roe >= 0.2m && quote.Volume >= rating.Volume * candleDurationRatio &&
-                        (emaRoe >= 0 && emaRoe <= 0.4m) &&
-                        (maRoe >= 0 && maRoe <= 0.4m))
+                        // long and short position detection
+                        if (quote.Volume >= rating.Volume * candleDurationRatio &&
+                        (maRoe >= -0.4m && maRoe <= 0.4m))
                         {
-                            var uad = "+" + roe + "%";
+                            var uad = roe >= 0 ? "+" + roe + "%" : roe + "%";
                             var benchmark = BinanceMarket.Benchmarks.Find(b => b.Symbol.Equals(symbol));
                             if (benchmark == null)
                             {
                                 continue;
                             }
-                            var score = benchmark.ForceBenchmarkScore / 200;
-                            MonitorDataGrid.Items.Add(new QuoteMonitorData(quote.Symbol, uad, score, true));
-                        }
-
-                        // short position detection
-                        else if (roe <= -0.2m && quote.Volume >= rating.Volume * candleDurationRatio &&
-                        (emaRoe <= 0 && emaRoe >= -0.4m) &&
-                        (maRoe <= 0 && maRoe >= -0.4m))
-                        {
-                            var uad = roe + "%";
-                            var benchmark = BinanceMarket.Benchmarks.Find(b => b.Symbol.Equals(symbol));
-                            if (benchmark == null)
-                            {
-                                continue;
-                            }
-                            var score = benchmark.ForceBenchmarkScore / 200;
-                            MonitorDataGrid.Items.Add(new QuoteMonitorData(quote.Symbol, uad, score, false));
+                            var volume = (quote.Volume / (rating.Volume * candleDurationRatio)) / 10;
+                            MonitorDataGrid.Items.Add(new QuoteMonitorData(quote.Symbol, uad, Convert.ToDouble(volume)));
                         }
                     }
                 });
