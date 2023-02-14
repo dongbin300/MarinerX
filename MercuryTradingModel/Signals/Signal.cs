@@ -21,13 +21,14 @@ namespace MercuryTradingModel.Signals
             Formula = formula;
         }
 
-        private decimal? GetElementValue(IElement element, ChartInfo chart)
+        private decimal? GetElementValue(IElement element, Asset asset, ChartInfo chart)
         {
             return element switch
             {
                 ChartElement x => chart.GetChartElementValue(x.ElementType),
                 NamedElement x => chart.GetNamedElementValue(x.Name),
                 ValueElement x => x.Value,
+                TradeElement x => chart.GetTradeElementValue(asset, x) == 0 ? null : chart.GetTradeElementValue(asset, x),
                 _ => null
             };
         }
@@ -47,18 +48,18 @@ namespace MercuryTradingModel.Signals
             {
                 ComparisonFormula x => x.Comparison switch
                 {
-                    Comparison.Equal => GetElementValue(x.Element1, chart) == GetElementValue(x.Element2, chart),
-                    Comparison.NotEqual => GetElementValue(x.Element1, chart) != GetElementValue(x.Element2, chart),
-                    Comparison.LessThan => GetElementValue(x.Element1, chart) < GetElementValue(x.Element2, chart),
-                    Comparison.LessThanOrEqual => GetElementValue(x.Element1, chart) <= GetElementValue(x.Element2, chart),
-                    Comparison.GreaterThan => GetElementValue(x.Element1, chart) > GetElementValue(x.Element2, chart),
-                    Comparison.GreaterThanOrEqual => GetElementValue(x.Element1, chart) >= GetElementValue(x.Element2, chart),
+                    Comparison.Equal => GetElementValue(x.Element1, asset, chart) == GetElementValue(x.Element2, asset, chart),
+                    Comparison.NotEqual => GetElementValue(x.Element1, asset, chart) != GetElementValue(x.Element2, asset, chart),
+                    Comparison.LessThan => GetElementValue(x.Element1, asset, chart) < GetElementValue(x.Element2, asset, chart),
+                    Comparison.LessThanOrEqual => GetElementValue(x.Element1, asset, chart) <= GetElementValue(x.Element2, asset, chart),
+                    Comparison.GreaterThan => GetElementValue(x.Element1, asset, chart) > GetElementValue(x.Element2, asset, chart),
+                    Comparison.GreaterThanOrEqual => GetElementValue(x.Element1, asset, chart) >= GetElementValue(x.Element2, asset, chart),
                     _ => false
                 },
                 CrossFormula x => x.Cross switch
                 {
-                    Cross.GoldenCross => GetElementValue(x.Element1, prevChart) <= GetElementValue(x.Element2, prevChart) && GetElementValue(x.Element1, chart) >= GetElementValue(x.Element2, chart),
-                    Cross.DeadCross => GetElementValue(x.Element1, prevChart) >= GetElementValue(x.Element2, prevChart) && GetElementValue(x.Element1, chart) <= GetElementValue(x.Element2, chart),
+                    Cross.GoldenCross => GetElementValue(x.Element1, asset, prevChart) <= GetElementValue(x.Element2, asset, prevChart) && GetElementValue(x.Element1, asset, chart) >= GetElementValue(x.Element2, asset, chart),
+                    Cross.DeadCross => GetElementValue(x.Element1, asset, prevChart) >= GetElementValue(x.Element2, asset, prevChart) && GetElementValue(x.Element1, asset, chart) <= GetElementValue(x.Element2, asset, chart),
                     _ => false
                 },
                 _ => false

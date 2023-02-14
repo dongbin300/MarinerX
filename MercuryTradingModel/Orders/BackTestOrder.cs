@@ -143,7 +143,7 @@ namespace MercuryTradingModel.Orders
             var transactionAmount = price * quantity;
             var fee = transactionAmount * TakerFee;
             asset.Balance -= transactionAmount + fee;
-            asset.Position.Long(quantity);
+            asset.Position.Long(quantity, price);
 
             return fee;
         }
@@ -154,7 +154,7 @@ namespace MercuryTradingModel.Orders
             var fee = transactionAmount * TakerFee;
             asset.Balance += transactionAmount;
             asset.Balance -= fee;
-            asset.Position.Short(quantity);
+            asset.Position.Short(quantity, price);
 
             return fee;
         }

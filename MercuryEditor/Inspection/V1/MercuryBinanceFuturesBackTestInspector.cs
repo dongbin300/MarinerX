@@ -458,11 +458,11 @@ namespace MercuryEditor.Inspection.V1
         }
 
         /// <summary>
-        /// rsi,21 (Chart Element)
-        /// rsi,24 @ myrsi (Named Element)
         /// 3.6 (Value Element)
-        /// 1~3 (Range Element)
         /// roe (Trade Element)
+        /// 1~3 (Range Element)
+        /// rsi,24 @ myrsi (Named Element)
+        /// rsi,21 (Chart Element)
         /// </summary>
         /// <param name="segment"></param>
         /// <returns></returns>
@@ -470,9 +470,20 @@ namespace MercuryEditor.Inspection.V1
         {
             try
             {
+                var segment2 = segment.Split(',');
+
                 if (decimal.TryParse(segment, out decimal value))
                 {
                     return new ValueElement(value);
+                }
+                else if (Enum.TryParse<TradeElementType>(segment2[0], out var tradeElementType))
+                {
+                    return new TradeElement(tradeElementType, decimal.Parse(segment2[1]));
+                }
+                else if(segment.Contains('~'))
+                {
+                    var content = segment.Split('~');
+                    return new RangeElement(decimal.Parse(content[0]), decimal.Parse(content[1]));
                 }
                 else if (TradingModel.AnyNamedElement(segment))
                 {

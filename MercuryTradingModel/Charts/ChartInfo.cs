@@ -1,4 +1,5 @@
-﻿using MercuryTradingModel.Elements;
+﻿using MercuryTradingModel.Assets;
+using MercuryTradingModel.Elements;
 using MercuryTradingModel.Enums;
 
 using Skender.Stock.Indicators;
@@ -35,5 +36,10 @@ namespace MercuryTradingModel.Charts
         };
         public NamedElementResult? GetNamedElementResult(string name) => NamedElements.FirstOrDefault(x => x != null && x.Name.Equals(name), null);
         public decimal? GetNamedElementValue(string name) => GetNamedElementResult(name)?.Value;
+        public decimal? GetTradeElementValue(Asset asset, TradeElement tradeElement) => tradeElement.ElementType switch
+        {
+            TradeElementType.roe => asset.Position.AveragePrice * (1 + (tradeElement.Value / 100)),
+            _ => tradeElement.Value
+        };
     }
 }

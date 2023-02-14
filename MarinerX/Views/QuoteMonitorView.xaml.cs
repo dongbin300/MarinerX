@@ -298,7 +298,7 @@ namespace MarinerX.Views
                             {
                                 continue;
                             }
-                            var volume = (quote.Volume / (rating.Volume * candleDurationRatio)) / 10;
+                            var volume = (quote.Volume / (rating.Volume * candleDurationRatio + 1)) / 10;
                             MonitorDataGrid.Items.Add(new QuoteMonitorData(quote.Symbol, uad, Convert.ToDouble(volume)));
                         }
                     }

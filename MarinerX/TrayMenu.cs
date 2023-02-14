@@ -12,6 +12,7 @@ using MarinerX.Views;
 
 using MercuryTradingModel.Extensions;
 using MercuryTradingModel.IO;
+using MercuryTradingModel.Maths;
 using MercuryTradingModel.TradingModels;
 
 using Newtonsoft.Json;
@@ -54,7 +55,7 @@ namespace MarinerX
             {
                 Icon = new Icon(iconFileName),
                 Text = $"MarinerX By Gaten",
-                Visible = true
+                Visible = true,
             };
 
             var watcher = new FileSystemWatcher
@@ -186,6 +187,7 @@ namespace MarinerX
             menu7.DropDownItems.Add(new ToolStripMenuItem("RI Histogram", null, RiHistogramEvent));
             menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask", null, RunBackTestFlaskEvent));
             menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask Multi", null, RunBackTestFlaskMultiEvent));
+            menu7.DropDownItems.Add(new ToolStripMenuItem("Significant Rise and Fall", null, SignificantRiseAndFallRatioEvent));
             menuStrip.Items.Add(menu7);
             menuStrip.Items.Add(new ToolStripSeparator());
 
@@ -424,7 +426,7 @@ namespace MarinerX
 
         public static void BackTestResultViewEvent(object? sender, EventArgs e)
         {
-            if(sender is not ToolStripMenuItem item)
+            if (sender is not ToolStripMenuItem item)
             {
                 return;
             }
@@ -579,7 +581,7 @@ namespace MarinerX
             {
                 for (int i = 0; i < 8; i++)
                 {
-                    for(int j = 0; j < 10; j++)
+                    for (int j = 0; j < 10; j++)
                     {
                         var pv = progressViews[i * 10 + j];
 
@@ -606,7 +608,7 @@ namespace MarinerX
         {
             try
             {
-                if(obj is not _temp_bb tb)
+                if (obj is not _temp_bb tb)
                 {
                     return;
                 }
@@ -633,6 +635,22 @@ namespace MarinerX
                 //    historyView.Init(result);
                 //    historyView.Show();
                 //});
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void SignificantRiseAndFallRatioEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                var data = LocalStorageApi.GetOneDayQuotes("BTCUSDT");
+                var significantCount = data.Count(x => Math.Abs(StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, x.Open, x.Close)) >= 4.0m);
+                var ratio = (double)significantCount / data.Count * 100;
+
+                MessageBox.Show($"Significant Count: {significantCount} / {data.Count} ({ratio:f2}%)");
             }
             catch (Exception ex)
             {
