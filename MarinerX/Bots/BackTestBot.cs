@@ -54,7 +54,7 @@ namespace MarinerX.Bots
                 charts = ChartLoader.GetChartPack(TradingModel.Targets[0], TradingModel.Interval);
             }
 
-            // Named Element Init
+            // Calculate chart elements and named elements
             charts.CalculateIndicators(TradingModel.ChartElements, TradingModel.NamedElements);
 
             // Back test start!

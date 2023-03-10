@@ -5,7 +5,7 @@
         /// <summary>
         /// 시드 금액
         /// </summary>
-        public decimal Seed { get; set; } = 0m;
+        public decimal Seed { get; init; } = 0m;
 
         /// <summary>
         /// 현금 잔고
@@ -19,8 +19,7 @@
 
         public Asset(decimal seed, Position position)
         {
-            Seed = seed;
-            Balance = seed;
+            Balance = Seed = seed;
             Position = position;
         }
     }

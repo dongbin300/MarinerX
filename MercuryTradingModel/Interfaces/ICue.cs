@@ -5,10 +5,10 @@ namespace MercuryTradingModel.Interfaces
 {
     public interface ICue
     {
-        public IFormula Formula { get; set; }
-        public int Life { get; set; }
-        public int CurrentLife { get; set; }
-        public abstract bool CheckFlare(Asset asset, ChartInfo chart, ChartInfo prevChart);
-        public abstract void Expire();
+        IFormula Formula { get; set; }
+        int Life { get; set; }
+        int CurrentLife { get; set; }
+        abstract bool CheckFlare(Asset asset, ChartInfo chart, ChartInfo prevChart);
+        abstract void Expire();
     }
 }

@@ -7,11 +7,11 @@ namespace MercuryTradingModel.Interfaces
         /// <summary>
         /// 현금 잔고
         /// </summary>
-        public decimal Balance { get; set; }
+        decimal Balance { get; set; }
 
         /// <summary>
         /// 포지션
         /// </summary>
-        public Position Position { get; set; }
+        Position Position { get; set; }
     }
 }

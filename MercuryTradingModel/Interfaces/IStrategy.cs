@@ -2,10 +2,10 @@
 {
     public interface IStrategy
     {
-        public string Name { get; set; }
-        public ICue? Cue { get; set; }
-        public ISignal Signal { get; set; }
-        public IOrder Order { get; set; }
-        public string Tag { get; set; }
+        string Name { get; set; }
+        ICue? Cue { get; set; }
+        ISignal Signal { get; set; }
+        IOrder Order { get; set; }
+        string Tag { get; set; }
     }
 }

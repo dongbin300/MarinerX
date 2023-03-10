@@ -5,7 +5,7 @@ namespace MercuryTradingModel.Interfaces
 {
     public interface ISignal
     {
-        public IFormula Formula { get; set; }
-        public abstract bool IsFlare(Asset asset, ChartInfo chart, ChartInfo prevChart);
+        IFormula Formula { get; set; }
+        abstract bool IsFlare(Asset asset, ChartInfo chart, ChartInfo prevChart);
     }
 }

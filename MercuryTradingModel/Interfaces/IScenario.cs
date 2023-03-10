@@ -2,9 +2,9 @@
 {
     public interface IScenario
     {
-        public string Name { get; set; }
-        public IList<IStrategy> Strategies { get; set; }
+        string Name { get; set; }
+        IList<IStrategy> Strategies { get; set; }
 
-        public IScenario AddStrategy(IStrategy strategy);
+        IScenario AddStrategy(IStrategy strategy);
     }
 }

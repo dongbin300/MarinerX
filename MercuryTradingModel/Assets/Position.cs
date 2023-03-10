@@ -14,13 +14,13 @@ namespace MercuryTradingModel.Assets
         {
             if (Side == PositionSide.Long)
             {
-                Amount += quantity;
                 TransactionAmount += quantity * price;
+                Amount += quantity;
             }
-            else
+            else if (Side == PositionSide.Short)
             {
+                TransactionAmount -= TransactionAmount * (quantity / Amount);
                 Amount -= quantity;
-                TransactionAmount -= quantity * price;
                 if (Amount < 0)
                 {
                     Side = PositionSide.Long;
@@ -28,25 +28,37 @@ namespace MercuryTradingModel.Assets
                     TransactionAmount = -TransactionAmount;
                 }
             }
+            else
+            {
+                TransactionAmount += quantity * price;
+                Amount += quantity;
+                Side = PositionSide.Long;
+            }
         }
 
         public void Short(decimal quantity, decimal price)
         {
             if (Side == PositionSide.Short)
             {
-                Amount += quantity;
                 TransactionAmount += quantity * price;
+                Amount += quantity;
             }
-            else
+            else if (Side == PositionSide.Long)
             {
+                TransactionAmount -= TransactionAmount * (quantity / Amount);
                 Amount -= quantity;
-                TransactionAmount -= quantity * price;
                 if (Amount < 0)
                 {
                     Side = PositionSide.Short;
                     Amount = -Amount;
                     TransactionAmount = -TransactionAmount;
                 }
+            }
+            else
+            {
+                TransactionAmount += quantity * price;
+                Amount += quantity;
+                Side = PositionSide.Short;
             }
         }
 

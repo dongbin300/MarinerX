@@ -2,7 +2,7 @@
 {
     public interface ITradingModel
     {
-        public IList<IScenario> Scenarios { get; set; }
-        public string ScenarioNameInProgress { get; set; }
+        IList<IScenario> Scenarios { get; set; }
+        string ScenarioNameInProgress { get; set; }
     }
 }
