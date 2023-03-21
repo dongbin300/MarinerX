@@ -47,7 +47,6 @@ namespace MarinerX.Charts
 
             int unitCount = Interval switch
             {
-                KlineInterval.OneMinute => 1,
                 KlineInterval.ThreeMinutes => 3,
                 KlineInterval.FiveMinutes => 5,
                 KlineInterval.FifteenMinutes => 15,
@@ -62,7 +61,16 @@ namespace MarinerX.Charts
                 _ => 1
             };
 
-            for (int i = 0; i < Charts.Count; i += unitCount)
+            int i = 0;
+            for(; i < Charts.Count; i++)
+            {
+                if ((Charts[i].DateTime.Hour * 60 + Charts[i].DateTime.Minute) % unitCount == 0)
+                {
+                    break;
+                }
+            }
+
+            for (; i < Charts.Count; i += unitCount)
             {
                 var targets = Charts.Skip(i).Take(unitCount).Select(x => x.Quote).ToList();
 

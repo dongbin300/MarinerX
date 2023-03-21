@@ -4,10 +4,12 @@ using MercuryTradingModel.Enums;
 
 using Skender.Stock.Indicators;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace MarinerX.Views.Controls
@@ -17,7 +19,6 @@ namespace MarinerX.Views.Controls
     /// </summary>
     public partial class BackTestChartControl : UserControl
     {
-        private double scale = 0.2;
         public List<Quote> Quotes = new();
         public List<BackTestTrade> Trades = new();
 
@@ -27,6 +28,14 @@ namespace MarinerX.Views.Controls
         private Brush yinBrush = new SolidColorBrush(Color.FromRgb(237, 49, 97));
         private int candleMargin = 1;
 
+        public int Start = 0;
+        public int End = 0;
+        public int ViewCountMin = 10;
+        public int ViewCountMax = 1000;
+        public int ViewCount => End - Start;
+        public int TotalCount = 0;
+        public Point CurrentMousePosition;
+
         public BackTestChartControl()
         {
             InitializeComponent();
@@ -35,28 +44,27 @@ namespace MarinerX.Views.Controls
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            int xNum = Quotes.Count;
-            int scaledXNum = (int)(xNum * scale);
 
-            double x = ActualWidth / scaledXNum;
-            var max = Quotes.Take(scaledXNum).Max(x => x.High);
-            var min = Quotes.Take(scaledXNum).Min(x => x.Low);
+            var itemWidth = ActualWidth / (ViewCount - 1);
+            var max = Quotes.Skip(Start).Take(ViewCount).Max(x => x.High);
+            var min = Quotes.Skip(Start).Take(ViewCount).Min(x => x.Low);
 
-            for (int i = 0; i < scaledXNum; i++)
+            for (int i = Start; i < End - 1; i++)
             {
                 var quote = Quotes[i];
+                var viewIndex = i - Start;
 
                 // Draw Candle
                 drawingContext.DrawLine(
                     quote.Open < quote.Close ? yangPen : yinPen,
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min))),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min))));
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min))),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min))));
                 drawingContext.DrawRectangle(
                     quote.Open < quote.Close ? yangBrush : yinBrush,
                     quote.Open < quote.Close ? yangPen : yinPen,
                     new Rect(
-                    new Point(x * i + candleMargin, ActualHeight * (double)(1.0m - (quote.Open - min) / (max - min))),
-                    new Point(x * (i + 1) - candleMargin, ActualHeight * (double)(1.0m - (quote.Close - min) / (max - min)))
+                    new Point(itemWidth * viewIndex + candleMargin, ActualHeight * (double)(1.0m - (quote.Open - min) / (max - min))),
+                    new Point(itemWidth * (viewIndex + 1) - candleMargin, ActualHeight * (double)(1.0m - (quote.Close - min) / (max - min)))
                     ));
 
                 // Draw Buy/Sell History Arrow
@@ -66,53 +74,97 @@ namespace MarinerX.Views.Controls
                     if (trade.side == PositionSide.Long)
                     {
                         drawingContext.DrawLine(yangPen,
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 24),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 10));
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 24),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 10));
                         drawingContext.DrawLine(yangPen,
-                    new Point(x * (i + 0.25), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 15),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 10));
+                    new Point(itemWidth * (viewIndex + 0.25), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 15),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 10));
                         drawingContext.DrawLine(yangPen,
-                    new Point(x * (i + 0.75), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 15),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 10));
+                    new Point(itemWidth * (viewIndex + 0.75), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 15),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 10));
                     }
                     else
                     {
                         drawingContext.DrawLine(yinPen,
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 24),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 10));
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 24),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 10));
                         drawingContext.DrawLine(yinPen,
-                    new Point(x * (i + 0.25), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 15),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 10));
+                    new Point(itemWidth * (viewIndex + 0.25), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 15),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 10));
                         drawingContext.DrawLine(yinPen,
-                    new Point(x * (i + 0.75), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 15),
-                    new Point(x * (i + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 10));
+                    new Point(itemWidth * (viewIndex + 0.75), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 15),
+                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min)) - 10));
                     }
                 }
             }
         }
 
-        private void UserControl_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void UserControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta > 0)
+            var scaleUnit = Math.Max(1, ViewCount * Math.Abs(e.Delta) / 2000);
+            if (e.Delta > 0) // Zoom-in
             {
-                if (scale <= 0.02)
+                if (ViewCount <= ViewCountMin)
                 {
                     return;
                 }
 
-                scale -= 0.02;
+                Start = Math.Min(TotalCount - ViewCountMin, Start + scaleUnit);
+                End = Math.Max(ViewCountMin, End - scaleUnit);
             }
-            else
+            else // Zoom-out
             {
-                if (scale >= 1.0)
+                if (ViewCount >= ViewCountMax)
                 {
                     return;
                 }
 
-                scale += 0.02;
+                Start = Math.Max(0, Start - scaleUnit);
+                End = Math.Min(TotalCount, End + scaleUnit);
             }
 
             InvalidateVisual();
+        }
+
+        private void UserControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            Vector diff = e.GetPosition(Parent as Window) - CurrentMousePosition;
+            if (IsMouseCaptured)
+            {
+                var moveUnit = (int)(diff.X * ViewCount / 18000);
+                if (diff.X > 0) // Graph Move Left
+                {
+                    if (Start > moveUnit)
+                    {
+                        Start -= moveUnit;
+                        End -= moveUnit;
+                        InvalidateVisual();
+                    }
+                }
+                else if (diff.X < 0) // Graph Move Right
+                {
+                    if (End < TotalCount + moveUnit)
+                    {
+                        Start -= moveUnit;
+                        End -= moveUnit;
+                        InvalidateVisual();
+                    }
+                }
+            }
+        }
+
+        private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            CurrentMousePosition = e.GetPosition(Parent as Window);
+            CaptureMouse();
+        }
+
+        private void UserControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (IsMouseCaptured)
+            {
+                ReleaseMouseCapture();
+            }
         }
     }
 }

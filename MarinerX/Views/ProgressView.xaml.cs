@@ -13,7 +13,7 @@ namespace MarinerX.Views
             Top = 0;
             Left = 0;
             Width = SystemParameters.PrimaryScreenWidth;
-            Height = 20;
+            Height = 14;
         }
 
         public ProgressView(int top, int left, int width, int height)

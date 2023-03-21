@@ -106,6 +106,8 @@ namespace MarinerX
             menu1.DropDownItems.Add("Binance 심볼 데이터 수집", null, new EventHandler(GetBinanceSymbolDataEvent));
             menu1.DropDownItems.Add("Binance 1분봉 데이터 수집", null, new EventHandler(GetBinanceCandleDataEvent));
             menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
+            menu1.DropDownItems.Add(new ToolStripSeparator());
+            menu1.DropDownItems.Add("Binance 1분봉 매뉴얼 데이터 수집", null, new EventHandler(GetBinanceCandleDataManualEvent));
             menuStrip.Items.Add(menu1);
             menuStrip.Items.Add(new ToolStripSeparator());
 
@@ -245,6 +247,30 @@ namespace MarinerX
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        public static void GetBinanceCandleDataManualEvent(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = (worker, obj) =>
+                {
+                    try
+                    {
+                        ChartLoader.GetCandleDataFromBinanceManual(worker);
+                        DispatcherService.Invoke(progressView.Hide);
+
+                        MessageBox.Show("바이낸스 1분봉 매뉴얼 데이터 수집 완료");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            };
+            worker.Start();
         }
 
         public static void Extract1DCandleEvent(object? sender, EventArgs e)

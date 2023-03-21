@@ -24,6 +24,7 @@ namespace MarinerX.Views
         public void AddChartInfo(ChartInfo info)
         {
             backTestChartControl.Quotes.Add(info.Quote);
+            backTestChartControl.TotalCount = backTestChartControl.End = backTestChartControl.Quotes.Count;
             InvalidateVisual(); // Might have to change it later.
         }
 

@@ -240,6 +240,48 @@ namespace MarinerX.Charts
             }
         }
 
+        public static void GetCandleDataFromBinanceManual(Worker worker)
+        {
+            try
+            {
+                var getStartTime = new DateTime(2022, 10, 23);
+                var symbol = "BATUSDT";
+                var csvFileCount = (DateTime.Today - getStartTime).Days + 1;
+                worker.SetProgressBar(0, csvFileCount);
+
+                int p = 0;
+                var startTime = getStartTime;
+                var count = 3;
+                var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+
+                if (!Directory.Exists(symbolPath))
+                {
+                    Directory.CreateDirectory(symbolPath);
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    var standardTime = startTime.AddDays(i);
+
+                    if (DateTime.Compare(standardTime, DateTime.Today) > 0)
+                    {
+                        break;
+                    }
+
+                    worker.Progress(++p);
+                    worker.ProgressText($"{symbol}, {standardTime:yyyy-MM-dd}");
+
+                    BinanceClientApi.GetCandleDataForOneDay(symbol, standardTime);
+
+                    Thread.Sleep(500);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
         public static List<(string, KlineInterval)> GetLoadedSymbols => Charts.Select(x => (x.Symbol, x.Interval)).ToList();
         public static ChartPack GetChartPack(string symbol, KlineInterval interval) => Charts.Find(x => x.Symbol.Equals(symbol) && x.Interval.Equals(interval)) ?? default!;
     }
