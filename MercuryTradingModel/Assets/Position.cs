@@ -4,33 +4,52 @@ namespace MercuryTradingModel.Assets
 {
     public class Position
     {
+        /// <summary>
+        /// Long or Short, default is None
+        /// </summary>
         public PositionSide Side { get; set; } = PositionSide.None;
+
+        /// <summary>
+        /// Quantity * Price, Always +
+        /// </summary>
         public decimal TransactionAmount { get; set; } = 0m;
-        public decimal Amount { get; set; } = 0m;
-        public decimal AveragePrice => Amount == 0 ? 0 : TransactionAmount / Amount;
-        public decimal Value => Side == PositionSide.Short ? -Amount : Amount;
+
+        /// <summary>
+        /// Position Quantity, Always +
+        /// </summary>
+        public decimal Quantity { get; set; } = 0m;
+
+        /// <summary>
+        /// Average Price, Always +
+        /// </summary>
+        public decimal AveragePrice => Quantity == 0 ? 0 : TransactionAmount / Quantity;
+
+        /// <summary>
+        /// Signed Quantity, -(short position) or +(long position)
+        /// </summary>
+        public decimal Value => Side == PositionSide.Short ? -Quantity : Quantity;
 
         public void Long(decimal quantity, decimal price)
         {
-            if (Amount == 0)
+            if (Quantity == 0)
             {
                 TransactionAmount += quantity * price;
-                Amount += quantity;
+                Quantity += quantity;
                 Side = PositionSide.Long;
             }
             else if (Side == PositionSide.Long)
             {
                 TransactionAmount += quantity * price;
-                Amount += quantity;
+                Quantity += quantity;
             }
             else if (Side == PositionSide.Short)
             {
-                TransactionAmount -= TransactionAmount * (quantity / Amount);
-                Amount -= quantity;
-                if (Amount < 0)
+                TransactionAmount -= TransactionAmount * (quantity / Quantity);
+                Quantity -= quantity;
+                if (Quantity < 0)
                 {
                     Side = PositionSide.Long;
-                    Amount = -Amount;
+                    Quantity = -Quantity;
                     TransactionAmount = -TransactionAmount;
                 }
             }
@@ -38,25 +57,25 @@ namespace MercuryTradingModel.Assets
 
         public void Short(decimal quantity, decimal price)
         {
-            if (Amount == 0)
+            if (Quantity == 0)
             {
                 TransactionAmount += quantity * price;
-                Amount += quantity;
+                Quantity += quantity;
                 Side = PositionSide.Short;
             }
             else if (Side == PositionSide.Short)
             {
                 TransactionAmount += quantity * price;
-                Amount += quantity;
+                Quantity += quantity;
             }
             else if (Side == PositionSide.Long)
             {
-                TransactionAmount -= TransactionAmount * (quantity / Amount);
-                Amount -= quantity;
-                if (Amount < 0)
+                TransactionAmount -= TransactionAmount * (quantity / Quantity);
+                Quantity -= quantity;
+                if (Quantity < 0)
                 {
                     Side = PositionSide.Short;
-                    Amount = -Amount;
+                    Quantity = -Quantity;
                     TransactionAmount = -TransactionAmount;
                 }
             }
@@ -64,7 +83,7 @@ namespace MercuryTradingModel.Assets
 
         public override string ToString()
         {
-            return (Side == PositionSide.Long ? "+" : "-") + Amount;
+            return (Side == PositionSide.Long ? "+" : "-") + Quantity;
         }
     }
 }

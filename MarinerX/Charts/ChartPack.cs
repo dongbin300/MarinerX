@@ -89,6 +89,20 @@ namespace MarinerX.Charts
             Charts = newChart;
         }
 
+        public void CalculateRsi()
+        {
+            var quotes = Charts.Select(x => x.Quote);
+            var result = quotes.GetRsi().Select(x=>x.Rsi);
+            for (int j = 0; j < Charts.Count; j++)
+            {
+                var chart = Charts[j];
+                chart.ChartElements.Clear();
+
+                var rsi = result.ElementAt(j) == null ? -1 : (decimal)(result.ElementAt(j) ?? -1);
+                chart.ChartElements.Add(new ChartElementResult(ChartElementType.rsi, rsi));
+            }
+        }
+
         public void CalculateIndicators(IList<ChartElement> chartElements, IList<NamedElement> namedElements)
         {
             var quotes = Charts.Select(x => x.Quote);

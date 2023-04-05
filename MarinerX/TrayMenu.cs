@@ -12,6 +12,7 @@ using MarinerX.Markets;
 using MarinerX.Utils;
 using MarinerX.Views;
 
+using MercuryTradingModel.Assets;
 using MercuryTradingModel.Extensions;
 using MercuryTradingModel.IO;
 using MercuryTradingModel.Maths;
@@ -270,7 +271,7 @@ namespace MarinerX
             menuStrip.Items.Add(menu7);
             var menu8 = new ToolStripMenuItem("3Commas 테스트");
             menu8.DropDownItems.Add(new ToolStripMenuItem("RSI", null, CommasRsiEvent));
-            menuStrip.Items.Add(menu7);
+            menuStrip.Items.Add(menu8);
             menuStrip.Items.Add(new ToolStripSeparator());
 
             menuStrip.Items.Add(new ToolStripMenuItem("종료", null, Exit));
@@ -396,6 +397,7 @@ namespace MarinerX
         #endregion
 
         #region 데이터 로드
+        record PeriodChartDataType(string symbol, KlineInterval interval, DateTime startDate, DateTime endDate);
         record ChartDataType(string symbol, KlineInterval interval, bool isExternal);
         record TradeDataType(string symbol, bool isExternal);
         record PriceDataType(string symbol, bool isExternal);
@@ -919,13 +921,78 @@ namespace MarinerX
             {
                 var symbol = "MATICUSDT";
                 var interval = KlineInterval.FiveMinutes;
-                LoadChartDataEvent(sender, e, symbol, interval, true);
+                var startDate = DateTime.Parse("2023-03-01");
+                var endDate = DateTime.Parse("2023-03-07");
 
+                // 차트 로드 및 초기화
+                progressView.Show();
+                new Worker()
+                {
+                    ProgressBar = progressView.ProgressBar,
+                    Action = CommasRsi,
+                    Arguments = new PeriodChartDataType(symbol, interval, startDate, endDate)
+                }.Start().Wait();
+                progressView.Hide();
+                var charts = ChartLoader.GetChartPack(symbol, interval);
+                charts.CalculateRsi();
 
+                // 차트 진행하면서 매매
+                progressView.Show();
+                new Worker()
+                {
+                    ProgressBar = progressView.ProgressBar,
+                    Action = CommasTrade,
+                    Arguments = new PeriodChartDataType(symbol, interval, startDate, endDate)
+                }.Start().Wait();
+                progressView.Hide();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CommasRsi(Worker worker, object? obj)
+        {
+            if (obj is not PeriodChartDataType periodChartDataType)
+            {
+                return;
+            }
+            ChartLoader.InitChartsByDate(periodChartDataType.symbol, periodChartDataType.interval, worker, periodChartDataType.startDate, periodChartDataType.endDate);
+        }
+
+        private void CommasTrade(Worker worker, object? obj)
+        {
+            if (obj is not PeriodChartDataType periodChartDataType)
+            {
+                return;
+            }
+            var charts = ChartLoader.GetChartPack(periodChartDataType.symbol, periodChartDataType.interval);
+            charts.CalculateRsi();
+
+            var asset = new Asset(10000, new MercuryTradingModel.Assets.Position());
+            foreach (var info in charts.Charts)
+            {
+                var price = (info.Quote.Low + info.Quote.High) / 2; // 임시로 저고 중간값을 가격으로 지정
+                var roe = asset.Position.Quantity > 0.0001m ? StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, asset.Position.AveragePrice, price) : 0;
+                var rsi = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.rsi);
+
+                // 포지션이 없고 RSI<30 이면 매수
+                if (asset.Position.Quantity < 0.0001m && rsi > 0 && rsi < 30)
+                {
+                    asset.Position.Long(1, price);
+                    asset.Balance -= 1 * price;
+                }
+                // 포지션이 있고 수익률이 0.5% 이상이 되면 매도
+                else if (asset.Position.Quantity > 0.0001m && roe >= 0.5m)
+                {
+                    asset.Position.Short(1, price);
+                    asset.Balance += 1 * price;
+                }
+
+                // listing how many took a long time, how many got in one deal
+
+                // calculate deals statistics
             }
         }
         #endregion

@@ -246,7 +246,7 @@ namespace MarinerX.Bots
                     break;
 
                 case OrderAmountType.BalanceSymbol:
-                    var symbolAmount = asset.Position.Amount;
+                    var symbolAmount = asset.Position.Quantity;
                     var transactionAmount4 = decimal.Round(symbolAmount * amount, 2);
                     quantity = decimal.Round(transactionAmount4 / price, 2);
                     break;

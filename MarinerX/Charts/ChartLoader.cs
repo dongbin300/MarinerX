@@ -142,13 +142,12 @@ namespace MarinerX.Charts
                     case KlineInterval.SixHour:
                     case KlineInterval.EightHour:
                     case KlineInterval.TwelveHour:
-                        var dayCount = (int)(endDate - startDate).TotalDays;
-                        var files = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol)).GetFiles("*.csv");
+                        var dayCount = (int)(endDate - startDate).TotalDays + 1;
 
-                        worker.For(0, files.Length, 1, (i) =>
+                        worker.For(0, dayCount, 1, (i) =>
                         {
-                            var fileName = files[i].FullName;
-                            var date = SymbolUtil.GetDate(fileName);
+                            var _currentDate = startDate.AddDays(i);
+                            var fileName = PathUtil.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{_currentDate:yyyy-MM-dd}.csv");
                             var data = File.ReadAllLines(fileName);
 
                             foreach (var d in data)

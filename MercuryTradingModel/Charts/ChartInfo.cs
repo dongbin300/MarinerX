@@ -24,6 +24,11 @@ namespace MercuryTradingModel.Charts
             Quote = quote;
         }
 
+        public override string ToString()
+        {
+            return $"{Symbol}, {DateTime}, {Quote.Open}:{Quote.High}:{Quote.Low}:{Quote.Close}:{Quote.Volume}, {string.Join(',', ChartElements)}, {string.Join(',', NamedElements)}";
+        }
+
         public ChartElementResult? GetChartElementResult(ChartElementType type) => ChartElements.FirstOrDefault(x => x != null && x.Type.Equals(type), null);
         public decimal? GetChartElementValue(ChartElementType type) => type switch
         {
