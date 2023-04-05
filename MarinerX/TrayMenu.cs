@@ -1,5 +1,7 @@
 ﻿using Binance.Net.Enums;
 
+using CryptoExchange.Net.CommonObjects;
+
 using MarinaX.Utils;
 
 using MarinerX.Apis;
@@ -43,6 +45,7 @@ namespace MarinerX
         private List<string> backTestResultFileNames = new();
         private List<string> symbolNames = new();
         private PositionMonitorView positionMonitorView = new();
+        private BalanceMonitorView balanceMonitorView = new();
         private QuoteMonitorView quoteMonitorView = new();
 
         public TrayMenu()
@@ -98,6 +101,8 @@ namespace MarinerX
 
         public void RefreshMenu()
         {
+            symbolNames.Sort();
+
             menuStrip = new ContextMenuStrip();
             menuStrip.Items.Add(new ToolStripMenuItem("MarinerX By Gaten", iconImage));
             menuStrip.Items.Add(new ToolStripSeparator());
@@ -107,26 +112,93 @@ namespace MarinerX
             menu1.DropDownItems.Add("Binance 1분봉 데이터 수집", null, new EventHandler(GetBinanceCandleDataEvent));
             menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
             menu1.DropDownItems.Add(new ToolStripSeparator());
+            menu1.DropDownItems.Add("Binance 1분봉 데이터 체크", null, new EventHandler(GetBinanceCandleDataCheckEvent));
             menu1.DropDownItems.Add("Binance 1분봉 매뉴얼 데이터 수집", null, new EventHandler(GetBinanceCandleDataManualEvent));
             menuStrip.Items.Add(menu1);
-            menuStrip.Items.Add(new ToolStripSeparator());
 
-            var menu2 = new ToolStripMenuItem("1분봉 데이터 로드");
-            menuStrip.Items.Add(menu2);
-            var menu3 = new ToolStripMenuItem("5분봉 데이터 로드");
-            foreach (var symbol in new string[] {
-                "BTCUSDT",
-                "ETHUSDT",
-                "BNBUSDT",
-                "XRPUSDT",
-                "ADAUSDT",
-                "SOLUSDT"
-            })
+            var menu2 = new ToolStripMenuItem("데이터 로드");
+            var menu21 = new ToolStripMenuItem("1분봉 데이터 로드");
+            var menu211 = new ToolStripMenuItem("A-D");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
             {
-                menu2.DropDownItems.Add(new ToolStripMenuItem(symbol, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbol, KlineInterval.OneMinute))));
-                menu3.DropDownItems.Add(new ToolStripMenuItem(symbol, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbol, KlineInterval.FiveMinutes))));
+                menu211.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.OneMinute))));
             }
-            menuStrip.Items.Add(menu3);
+            var menu212 = new ToolStripMenuItem("E-N");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
+            {
+                menu212.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.OneMinute))));
+            }
+            var menu213 = new ToolStripMenuItem("O-Z");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
+            {
+                menu213.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.OneMinute))));
+            }
+            var menu22 = new ToolStripMenuItem("5분봉 데이터 로드");
+            var menu221 = new ToolStripMenuItem("A-D");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
+            {
+                menu221.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.FiveMinutes))));
+            }
+            var menu222 = new ToolStripMenuItem("E-N");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
+            {
+                menu222.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.FiveMinutes))));
+            }
+            var menu223 = new ToolStripMenuItem("O-Z");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
+            {
+                menu223.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.FiveMinutes))));
+            }
+            var menu23 = new ToolStripMenuItem("거래 데이터 로드");
+            var menu231 = new ToolStripMenuItem("A-D");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
+            {
+                menu231.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadTradeDataEvent(sender, e, symbolName))));
+            }
+            var menu232 = new ToolStripMenuItem("E-N");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
+            {
+                menu232.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadTradeDataEvent(sender, e, symbolName))));
+            }
+            var menu233 = new ToolStripMenuItem("O-Z");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
+            {
+                menu233.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadTradeDataEvent(sender, e, symbolName))));
+            }
+            var menu24 = new ToolStripMenuItem("가격 데이터 로드");
+            var menu241 = new ToolStripMenuItem("A-D");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
+            {
+                menu241.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadPriceDataEvent(sender, e, symbolName))));
+            }
+            var menu242 = new ToolStripMenuItem("E-N");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
+            {
+                menu242.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadPriceDataEvent(sender, e, symbolName))));
+            }
+            var menu243 = new ToolStripMenuItem("O-Z");
+            foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
+            {
+                menu243.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadPriceDataEvent(sender, e, symbolName))));
+            }
+
+            menu21.DropDownItems.Add(menu211);
+            menu21.DropDownItems.Add(menu212);
+            menu21.DropDownItems.Add(menu213);
+            menu22.DropDownItems.Add(menu221);
+            menu22.DropDownItems.Add(menu222);
+            menu22.DropDownItems.Add(menu223);
+            menu23.DropDownItems.Add(menu231);
+            menu23.DropDownItems.Add(menu232);
+            menu23.DropDownItems.Add(menu233);
+            menu24.DropDownItems.Add(menu241);
+            menu24.DropDownItems.Add(menu242);
+            menu24.DropDownItems.Add(menu243);
+            menu2.DropDownItems.Add(menu21);
+            menu2.DropDownItems.Add(menu22);
+            menu2.DropDownItems.Add(menu23);
+            menu2.DropDownItems.Add(menu24);
+            menuStrip.Items.Add(menu2);
             menuStrip.Items.Add(new ToolStripSeparator());
 
             menuStrip.Items.Add(new ToolStripMenuItem("Mercury Editor 열기", null, MercuryEditorOpenEvent));
@@ -151,6 +223,10 @@ namespace MarinerX
             menuStrip.Items.Add(menu4);
             menuStrip.Items.Add(menu41);
             menuStrip.Items.Add(menu42);
+            menuStrip.Items.Add(new ToolStripMenuItem("그리드 백테스트", null, GridBackTestEvent));
+            menuStrip.Items.Add(new ToolStripSeparator());
+
+            menuStrip.Items.Add(new ToolStripMenuItem("실전매매 봇", null, RealTradeBotEvent));
             menuStrip.Items.Add(new ToolStripSeparator());
 
             var menu5 = new ToolStripMenuItem("데이터 분석");
@@ -161,7 +237,6 @@ namespace MarinerX
             var menu6 = new ToolStripMenuItem("데이터 모니터링");
             menu6.DropDownItems.Add("검색기", null, new EventHandler(QuoteMonitoringEvent));
             //var menu61 = new ToolStripMenuItem("검색기");
-            symbolNames.Sort();
             var menu62 = new ToolStripMenuItem("현재 포지션 모니터링(A-D)");
             foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
             {
@@ -182,6 +257,8 @@ namespace MarinerX
             menu6.DropDownItems.Add(menu63);
             menu6.DropDownItems.Add(menu64);
             menu6.DropDownItems.Add("모니터링 종료", null, new EventHandler(CurrentPositioningEndEvent));
+            menu6.DropDownItems.Add("현재 자산 모니터링", null, new EventHandler(CurrentBalanceEvent));
+            menu6.DropDownItems.Add("현재 자산 모니터링 종료", null, new EventHandler(CurrentBalanceEndEvent));
             menuStrip.Items.Add(menu6);
             menuStrip.Items.Add(new ToolStripSeparator());
 
@@ -190,6 +267,9 @@ namespace MarinerX
             menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask", null, RunBackTestFlaskEvent));
             menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask Multi", null, RunBackTestFlaskMultiEvent));
             menu7.DropDownItems.Add(new ToolStripMenuItem("Significant Rise and Fall", null, SignificantRiseAndFallRatioEvent));
+            menuStrip.Items.Add(menu7);
+            var menu8 = new ToolStripMenuItem("3Commas 테스트");
+            menu8.DropDownItems.Add(new ToolStripMenuItem("RSI", null, CommasRsiEvent));
             menuStrip.Items.Add(menu7);
             menuStrip.Items.Add(new ToolStripSeparator());
 
@@ -216,6 +296,7 @@ namespace MarinerX
                 MessageBox.Show("바이낸스 심볼 데이터 수집 완료");
 
                 ProcessUtil.Start(PathUtil.BinanceFuturesData);
+                LocalStorageApi.Init();
             }
             catch (Exception ex)
             {
@@ -242,6 +323,20 @@ namespace MarinerX
                 DispatcherService.Invoke(progressView.Hide);
 
                 MessageBox.Show("바이낸스 1분봉 데이터 수집 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void GetBinanceCandleDataCheckEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                var fileNames = ChartLoader.GetInvalidDataFileNames();
+
+                MessageBox.Show(fileNames?.Count + "건\n" + string.Join("\n", fileNames));
             }
             catch (Exception ex)
             {
@@ -302,6 +397,8 @@ namespace MarinerX
 
         #region 데이터 로드
         record ChartDataType(string symbol, KlineInterval interval, bool isExternal);
+        record TradeDataType(string symbol, bool isExternal);
+        record PriceDataType(string symbol, bool isExternal);
 
         public static void LoadChartDataEvent(object? sender, EventArgs e, string symbol, KlineInterval interval, bool external = false)
         {
@@ -333,8 +430,92 @@ namespace MarinerX
                 {
                     return;
                 }
-                ChartLoader.Init(chartDataType.symbol, chartDataType.interval, worker);
+                ChartLoader.InitCharts(chartDataType.symbol, chartDataType.interval, worker);
                 if (!chartDataType.isExternal)
+                {
+                    DispatcherService.Invoke(progressView.Hide);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void LoadTradeDataEvent(object? sender, EventArgs e, string symbol, bool external = false)
+        {
+            if (!external)
+            {
+                progressView.Show();
+            }
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = LoadTradeData,
+                Arguments = new TradeDataType(symbol, external)
+            };
+            if (external)
+            {
+                worker.Start().Wait();
+            }
+            else
+            {
+                worker.Start();
+            }
+        }
+
+        public static void LoadTradeData(Worker worker, object? obj)
+        {
+            try
+            {
+                if (obj is not TradeDataType tradeDataType)
+                {
+                    return;
+                }
+                ChartLoader.InitTrades(tradeDataType.symbol, worker);
+                if (!tradeDataType.isExternal)
+                {
+                    DispatcherService.Invoke(progressView.Hide);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void LoadPriceDataEvent(object? sender, EventArgs e, string symbol, bool external = false)
+        {
+            if (!external)
+            {
+                progressView.Show();
+            }
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = LoadPriceData,
+                Arguments = new PriceDataType(symbol, external)
+            };
+            if (external)
+            {
+                worker.Start().Wait();
+            }
+            else
+            {
+                worker.Start();
+            }
+        }
+
+        public static void LoadPriceData(Worker worker, object? obj)
+        {
+            try
+            {
+                if (obj is not PriceDataType priceDataType)
+                {
+                    return;
+                }
+                ChartLoader.InitPrices(priceDataType.symbol, worker);
+                if (!priceDataType.isExternal)
                 {
                     DispatcherService.Invoke(progressView.Hide);
                 }
@@ -462,6 +643,27 @@ namespace MarinerX
             historyView.Init(fileName);
             historyView.Show();
         }
+
+        public static void GridBackTestEvent(object? sender, EventArgs e)
+        {
+            var view = new GridBotBackTesterView();
+            view.Show();
+        }
+        #endregion
+
+        #region 실전매매 봇
+        private void RealTradeBotEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                var realTradeBotView = new RealTradeBotView();
+                realTradeBotView.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         #endregion
 
         #region 데이터 분석
@@ -532,6 +734,31 @@ namespace MarinerX
             try
             {
                 positionMonitorView.Hide();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CurrentBalanceEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                LocalStorageApi.GetSeed();
+                balanceMonitorView.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CurrentBalanceEndEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                balanceMonitorView.Hide();
             }
             catch (Exception ex)
             {
@@ -677,6 +904,24 @@ namespace MarinerX
                 var ratio = (double)significantCount / data.Count * 100;
 
                 MessageBox.Show($"Significant Count: {significantCount} / {data.Count} ({ratio:f2}%)");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+
+        #region 3Commas 테스트
+        private void CommasRsiEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                var symbol = "MATICUSDT";
+                var interval = KlineInterval.FiveMinutes;
+                LoadChartDataEvent(sender, e, symbol, interval, true);
+
+
             }
             catch (Exception ex)
             {

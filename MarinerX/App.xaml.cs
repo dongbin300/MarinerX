@@ -15,6 +15,7 @@ namespace MarinerX
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Initialize();
+            BinanceSocketApi.GetBnbMarkPriceUpdatesAsync();
             var trayMenu = new TrayMenu();
         }
 

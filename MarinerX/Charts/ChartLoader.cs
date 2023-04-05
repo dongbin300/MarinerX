@@ -1,4 +1,5 @@
 ﻿using Binance.Net.Enums;
+using Binance.Net.Objects.Models.Spot;
 
 using MarinaX.Utils;
 
@@ -23,6 +24,9 @@ namespace MarinerX.Charts
     internal class ChartLoader
     {
         public static List<ChartPack> Charts { get; set; } = new();
+        public static List<TradePack> Trades { get; set; } = new();
+        public static List<PricePack> Prices { get; set; } = new();
+
 
         /// <summary>
         /// 분봉 초기화
@@ -30,7 +34,7 @@ namespace MarinerX.Charts
         /// <param name="symbol"></param>
         /// <param name="interval"></param>
         /// <param name="worker"></param>
-        public static void Init(string symbol, KlineInterval interval, Worker worker)
+        public static void InitCharts(string symbol, KlineInterval interval, Worker worker)
         {
             try
             {
@@ -104,6 +108,163 @@ namespace MarinerX.Charts
                 chartPack.ConvertCandle();
 
                 Charts.Add(chartPack);
+            }
+            catch (FileNotFoundException)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 분봉 초기화
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="interval"></param>
+        /// <param name="worker"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        public static void InitChartsByDate(string symbol, KlineInterval interval, Worker worker, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var chartPack = new ChartPack(interval);
+
+                switch (interval)
+                {
+                    case KlineInterval.OneMinute:
+                    case KlineInterval.ThreeMinutes:
+                    case KlineInterval.FiveMinutes:
+                    case KlineInterval.FifteenMinutes:
+                    case KlineInterval.ThirtyMinutes:
+                    case KlineInterval.OneHour:
+                    case KlineInterval.TwoHour:
+                    case KlineInterval.FourHour:
+                    case KlineInterval.SixHour:
+                    case KlineInterval.EightHour:
+                    case KlineInterval.TwelveHour:
+                        var dayCount = (int)(endDate - startDate).TotalDays;
+                        var files = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol)).GetFiles("*.csv");
+
+                        worker.For(0, files.Length, 1, (i) =>
+                        {
+                            var fileName = files[i].FullName;
+                            var date = SymbolUtil.GetDate(fileName);
+                            var data = File.ReadAllLines(fileName);
+
+                            foreach (var d in data)
+                            {
+                                var e = d.Split(',');
+                                var quote = new Quote
+                                {
+                                    Date = DateTime.Parse(e[0]),
+                                    Open = decimal.Parse(e[1]),
+                                    High = decimal.Parse(e[2]),
+                                    Low = decimal.Parse(e[3]),
+                                    Close = decimal.Parse(e[4]),
+                                    Volume = decimal.Parse(e[5])
+                                };
+                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                            }
+                        }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
+                        break;
+
+                    case KlineInterval.OneDay:
+                    case KlineInterval.ThreeDay:
+                    case KlineInterval.OneWeek:
+                    case KlineInterval.OneMonth:
+                        var path = PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv");
+                        var data = File.ReadAllLines(path);
+
+                        foreach (var d in data)
+                        {
+                            var e = d.Split(',');
+                            var quote = new Quote
+                            {
+                                Date = DateTime.Parse(e[0]),
+                                Open = decimal.Parse(e[1]),
+                                High = decimal.Parse(e[2]),
+                                Low = decimal.Parse(e[3]),
+                                Close = decimal.Parse(e[4]),
+                                Volume = decimal.Parse(e[5])
+                            };
+                            chartPack.AddChart(new ChartInfo(symbol, quote));
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+                chartPack.ConvertCandle();
+
+                Charts.Add(chartPack);
+            }
+            catch (FileNotFoundException)
+            {
+                throw;
+            }
+        }
+
+        public static void InitTrades(string symbol, Worker worker)
+        {
+            try
+            {
+                var tradePack = new TradePack(symbol);
+
+                var files = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("trade", symbol)).GetFiles("*.csv");
+
+                worker.For(0, files.Length, 1, (i) =>
+                {
+                    var fileName = files[i].FullName;
+                    var data = File.ReadAllLines(fileName);
+
+                    foreach (var d in data)
+                    {
+                        if (d.StartsWith("agg"))
+                        {
+                            continue;
+                        }
+                        var e = d.Split(',');
+                        var trade = new BinanceAggregatedTrade
+                        {
+                            Id = long.Parse(e[0]),
+                            Price = decimal.Parse(e[1]),
+                            Quantity = decimal.Parse(e[2]),
+                            FirstTradeId = long.Parse(e[3]),
+                            LastTradeId = long.Parse(e[4]),
+                            TradeTime = long.Parse(e[5]).TimeStampMillisecondsToDateTime(),
+                            BuyerIsMaker = bool.Parse(e[6])
+                        };
+                        tradePack.AddTrade(trade);
+                    }
+                }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
+
+                Trades.Add(tradePack);
+            }
+            catch (FileNotFoundException)
+            {
+                throw;
+            }
+        }
+
+        public static void InitPrices(string symbol, Worker worker)
+        {
+            try
+            {
+                var pricePack = new PricePack(symbol);
+
+                var files = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("price", symbol)).GetFiles("*.csv");
+
+                worker.For(0, files.Length, 1, (i) =>
+                {
+                    var fileName = files[i].FullName;
+                    var data = File.ReadAllLines(fileName);
+
+                    var prices = data.Select(d => decimal.Parse(d)).ToList();
+                    pricePack.Prices.Add(SymbolUtil.GetDate(fileName), prices);
+                }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
+
+                Prices.Add(pricePack);
             }
             catch (FileNotFoundException)
             {
@@ -195,6 +356,10 @@ namespace MarinerX.Charts
             }
         }
 
+        /// <summary>
+        /// 바이낸스 1분봉 데이터 수집
+        /// </summary>
+        /// <param name="worker"></param>
         public static void GetCandleDataFromBinance(Worker worker)
         {
             try
@@ -244,36 +409,40 @@ namespace MarinerX.Charts
         {
             try
             {
-                var getStartTime = new DateTime(2022, 10, 23);
-                var symbol = "BATUSDT";
-                var csvFileCount = (DateTime.Today - getStartTime).Days + 1;
+                var getStartTime = new DateTime(2022, 8, 21);
+                //var symbols = LocalStorageApi.SymbolNames;
+                var symbols = new List<string> { "BNXUSDT" };
+                var maxCount = 500;
+                var csvFileCount = maxCount * symbols.Count;
                 worker.SetProgressBar(0, csvFileCount);
 
                 int p = 0;
-                var startTime = getStartTime;
-                var count = 3;
-                var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
-
-                if (!Directory.Exists(symbolPath))
+                foreach (var symbol in symbols)
                 {
-                    Directory.CreateDirectory(symbolPath);
-                }
+                    var startTime = getStartTime;
+                    var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
 
-                for (int i = 0; i < count; i++)
-                {
-                    var standardTime = startTime.AddDays(i);
-
-                    if (DateTime.Compare(standardTime, DateTime.Today) > 0)
+                    if (!Directory.Exists(symbolPath))
                     {
-                        break;
+                        Directory.CreateDirectory(symbolPath);
                     }
 
-                    worker.Progress(++p);
-                    worker.ProgressText($"{symbol}, {standardTime:yyyy-MM-dd}");
+                    for (int i = 0; i < maxCount; i++)
+                    {
+                        var standardTime = startTime.AddDays(i);
 
-                    BinanceClientApi.GetCandleDataForOneDay(symbol, standardTime);
+                        if (DateTime.Compare(standardTime, DateTime.Today) > 0)
+                        {
+                            break;
+                        }
 
-                    Thread.Sleep(500);
+                        worker.Progress(++p);
+                        worker.ProgressText($"{symbol}, {standardTime:yyyy-MM-dd}");
+
+                        BinanceClientApi.GetCandleDataForOneDay(symbol, standardTime);
+
+                        Thread.Sleep(500);
+                    }
                 }
             }
             catch (Exception ex)
@@ -282,7 +451,39 @@ namespace MarinerX.Charts
             }
         }
 
+        /// <summary>
+        /// 데이터 수집에 실패한 파일 탐색
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetInvalidDataFileNames()
+        {
+            var result = new List<string>();
+
+            try
+            {
+                var symbols = LocalStorageApi.SymbolNames;
+                foreach (var symbol in symbols)
+                {
+                    var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+                    var files = new DirectoryInfo(symbolPath).GetFiles("*.csv");
+                    var exceptedFiles = files.Except(new List<FileInfo> { files.OrderBy(f => f.Name).First(), files.OrderByDescending(f => f.Name).First() }); // Except start date & end date
+                    var fileSizeAverage = exceptedFiles.Average(f => f.Length);
+                    var invalidFileNames = exceptedFiles.Where(x => Math.Abs(x.Length - fileSizeAverage) > fileSizeAverage * 0.2).Select(x => x.Name).ToList();
+
+                    result.AddRange(invalidFileNames);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            return result;
+        }
+
         public static List<(string, KlineInterval)> GetLoadedSymbols => Charts.Select(x => (x.Symbol, x.Interval)).ToList();
         public static ChartPack GetChartPack(string symbol, KlineInterval interval) => Charts.Find(x => x.Symbol.Equals(symbol) && x.Interval.Equals(interval)) ?? default!;
+        public static TradePack GetTradePack(string symbol) => Trades.Find(x => x.Symbol.Equals(symbol)) ?? default!;
+        public static PricePack GetPricePack(string symbol) => Prices.Find(x => x.Symbol.Equals(symbol)) ?? default!;
     }
 }

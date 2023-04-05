@@ -6,6 +6,7 @@ using MercuryTradingModel.Interfaces;
 using MercuryTradingModel.Trades;
 
 using Newtonsoft.Json;
+using Binance.Net.Objects.Models.Spot;
 
 namespace MercuryTradingModel.Orders
 {
@@ -135,6 +136,26 @@ namespace MercuryTradingModel.Orders
                         var closeEstimatedAsset2 = Price.Value * asset.Position.Value + asset.Balance;
                         return new BackTestTradeInfo(chart.Symbol, chart.DateTime.ToStandardString(), "Sell", $"{Price:#.####}", $"{quantity:#.####}", $"{closeSellFee:#.##}", $"{asset.Balance:#.##}", $"{asset.Position:#.####}", chart.BaseAsset, $"{closeEstimatedAsset2:#.##} USDT", tag);
                     }
+            }
+        }
+
+        public BackTestTradeInfo Run(Asset asset, string symbol)
+        {
+            var quantity = Amount.Value;
+            switch (Side)
+            {
+                default:
+                    return new BackTestTradeInfo(symbol, "-", "Side Error", "", "", "", "", "", "", "", "");
+
+                case PositionSide.Long:
+                    var buyFee = Buy(asset, Price.Value, quantity);
+                    var estimatedAsset = Price.Value * asset.Position.Value + asset.Balance;
+                    return new BackTestTradeInfo(symbol, "-", "Buy", $"{Price:#.####}", $"{quantity:#.####}", $"{buyFee:#.##}", $"{asset.Balance:#.##}", $"{asset.Position:#.####}", symbol.Replace("USDT", ""), $"{estimatedAsset:#.##} USDT", "");
+
+                case PositionSide.Short:
+                    var sellFee = Sell(asset, Price.Value, quantity);
+                    var estimatedAsset2 = Price.Value * asset.Position.Value + asset.Balance;
+                    return new BackTestTradeInfo(symbol, "-", "Sell", $"{Price:#.####}", $"{quantity:#.####}", $"{sellFee:#.##}", $"{asset.Balance:#.##}", $"{asset.Position:#.####}", symbol.Replace("USDT", ""), $"{estimatedAsset2:#.##} USDT", "");
             }
         }
 

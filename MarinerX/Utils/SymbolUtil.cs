@@ -10,14 +10,12 @@ namespace MarinerX.Utils
     {
         public static DateTime GetStartDate(string symbol)
         {
-            var fileNames = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol)).GetFiles("*.csv").OrderBy(x => x.Name);
-            return GetDate(fileNames.First().Name);
+            return GetDate(GetStartDateFileName(symbol));
         }
 
         public static DateTime GetEndDate(string symbol)
         {
-            var fileNames = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol)).GetFiles("*.csv").OrderByDescending(x => x.Name);
-            return GetDate(fileNames.First().Name);
+            return GetDate(GetEndDateFileName(symbol));
         }
 
         public static DateTime GetEndDateOf1D(string symbol)
@@ -29,6 +27,22 @@ namespace MarinerX.Utils
         public static DateTime GetDate(string fileName)
         {
             return DateTime.Parse(fileName.Split('_', '.')[1]);
+        }
+
+        public static string GetStartDateFileName(string symbol)
+        {
+            return new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol))
+                .GetFiles("*.csv")
+                .OrderBy(x => x.Name)
+                .First().Name;
+        }
+
+        public static string GetEndDateFileName(string symbol)
+        {
+            return new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol))
+                .GetFiles("*.csv")
+                .OrderByDescending(x => x.Name)
+                .First().Name;
         }
     }
 }

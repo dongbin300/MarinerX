@@ -2,8 +2,6 @@
 using Binance.Net.Enums;
 using Binance.Net.Objects;
 
-using CryptoExchange.Net.Authentication;
-
 using MarinerX.Accounts;
 using MarinerX.Markets;
 using MarinerX.Utils;
@@ -37,7 +35,7 @@ namespace MarinerX.Apis
 
                 binanceClient = new BinanceClient(new BinanceClientOptions
                 {
-                    ApiCredentials = new ApiCredentials(data[0], data[1])
+                    ApiCredentials = new BinanceApiCredentials(data[0], data[1])
                 });
             }
             catch (Exception ex)
@@ -284,6 +282,38 @@ namespace MarinerX.Apis
                     ))
                 .ToList();
         }
+
+        public static decimal GetFuturesBalance()
+        {
+            try
+            {
+                var result = binanceClient.UsdFuturesApi.Account.GetBalancesAsync();
+                result.Wait();
+                var balance = result.Result.Data;
+                var usdtBalance = balance.First(b => b.Asset.Equals("USDT"));
+                var usdt = usdtBalance.WalletBalance + usdtBalance.CrossUnrealizedPnl;
+                var bnb = balance.First(b => b.Asset.Equals("BNB")).WalletBalance * (decimal)Common.BnbPrice;
+                return usdt + bnb;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public static string StartUserStream()
+        {
+            var listenKey = binanceClient.UsdFuturesApi.Account.StartUserStreamAsync();
+            listenKey.Wait();
+
+            return listenKey.Result.Data;
+        }
+
+        public static void StopUserStream(string listenKey)
+        {
+            var result = binanceClient.UsdFuturesApi.Account.StopUserStreamAsync(listenKey);
+            result.Wait();
+        }
         #endregion
 
         #region Leverage API
@@ -294,9 +324,9 @@ namespace MarinerX.Apis
             var result = binanceClient.UsdFuturesApi.Account.GetBracketsAsync();
             result.Wait();
 
-            foreach(var d in result.Result.Data)
+            foreach (var d in result.Result.Data)
             {
-                results.Add(d.Symbol, d.Brackets.Max(x=>x.InitialLeverage));
+                results.Add(d.Symbol, d.Brackets.Max(x => x.InitialLeverage));
             }
 
             return results;

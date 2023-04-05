@@ -2,6 +2,7 @@
 using Binance.Net.Enums;
 using Binance.Net.Interfaces;
 using Binance.Net.Objects;
+using Binance.Net.Objects.Models;
 using Binance.Net.Objects.Models.Futures.Socket;
 
 using CryptoExchange.Net.Authentication;
@@ -11,6 +12,8 @@ using MarinerX.Charts;
 using MarinerX.Utils;
 
 using MercuryTradingModel.Charts;
+
+using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
@@ -35,7 +38,7 @@ namespace MarinerX.Apis
 
                 binanceClient = new BinanceSocketClient(new BinanceSocketClientOptions
                 {
-                    ApiCredentials = new ApiCredentials(data[0], data[1])
+                    ApiCredentials = new BinanceApiCredentials(data[0], data[1])
                 });
             }
             catch (Exception ex)
@@ -51,9 +54,19 @@ namespace MarinerX.Apis
             var result = await binanceClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage);
         }
 
+        public static async void GetKlineUpdatesAsync2(string symbol, KlineInterval interval)
+        {
+            var result = await binanceClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage2);
+        }
+
         public static async void GetContinuousKlineUpdatesAsync(string symbol, KlineInterval interval)
         {
             var result = await binanceClient.UsdFuturesStreams.SubscribeToContinuousContractKlineUpdatesAsync(symbol, ContractType.Perpetual, interval, ContinuousKlineUpdatesOnMessage);
+        }
+
+        public static async void GetBnbMarkPriceUpdatesAsync()
+        {
+            var result = await binanceClient.UsdFuturesStreams.SubscribeToMarkPriceUpdatesAsync("BNBUSDT", 1000, BnbMarkPriceUpdatesAsyncOnMessage);
         }
 
         public static async void GetAllMarketMiniTickersAsync()
@@ -61,9 +74,39 @@ namespace MarinerX.Apis
             var result = await binanceClient.UsdFuturesStreams.SubscribeToAllMiniTickerUpdatesAsync(AllMarketMiniTickersOnMessage);
         }
 
+        //public static async void SubscribeToUserDataUpdatesAsync()
+        //{
+        //    var listenKey = BinanceClientApi.StartUserStream();
+        //    var result = await binanceClient.UsdFuturesStreams.SubscribeToUserDataUpdatesAsync(listenKey, null, null, AccountUpdateOnMessage, null, actionkey);
+        //}
+
+        //private static void actionkey(DataEvent<BinanceStreamEvent> obj)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //private static void AccountUpdateOnMessage(DataEvent<BinanceFuturesStreamAccountUpdate> obj)
+        //{
+
+        //}
+
+        /// <summary>
+        /// 모든 심볼의 24시간 변화 데이터
+        /// </summary>
+        /// <param name="obj"></param>
         private static void AllMarketMiniTickersOnMessage(DataEvent<IEnumerable<IBinanceMiniTick>> obj)
         {
             var data = obj.Data;
+        }
+
+        /// <summary>
+        /// BNB의 현재 가격
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        private static void BnbMarkPriceUpdatesAsyncOnMessage(DataEvent<BinanceFuturesUsdtStreamMarkPrice> obj)
+        {
+            Common.BnbPrice = (double)obj.Data.MarkPrice;
         }
 
         private static void ContinuousKlineUpdatesOnMessage(DataEvent<BinanceStreamContinuousKlineData> obj)
@@ -86,6 +129,21 @@ namespace MarinerX.Apis
                 Volume = data.Volume,
                 TradeCount = data.TradeCount,
                 TakerBuyBaseVolume = data.TakerBuyBaseVolume
+            });
+        }
+
+        private static void KlineUpdatesOnMessage2(DataEvent<IBinanceStreamKlineData> obj)
+        {
+            var symbol = obj.Data.Symbol;
+            var data = obj.Data.Data;
+            RealtimeChartManager.UpdateRealtimeChart(symbol, new Quote
+            {
+                Date = data.OpenTime,
+                Open = data.OpenPrice,
+                High = data.HighPrice,
+                Low = data.LowPrice,
+                Close = data.ClosePrice,
+                Volume = data.Volume
             });
         }
         #endregion

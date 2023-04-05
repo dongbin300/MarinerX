@@ -7,7 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerX", "MarinerX\Marine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryTradingModel", "MercuryTradingModel\MercuryTradingModel.csproj", "{E58587A6-D743-442F-B105-E9B381D8E883}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryEditor", "MercuryEditor\MercuryEditor.csproj", "{B660937D-8E93-4944-8D0E-D55F50F981BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryEditor", "MercuryEditor\MercuryEditor.csproj", "{B660937D-8E93-4944-8D0E-D55F50F981BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerX.Macro", "MarinerX.Macro\MarinerX.Macro.csproj", "{3CE81D4C-DC0F-43AC-9897-1EB78552A613}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarinerX.Lab", "MarinerX.Lab\MarinerX.Lab.csproj", "{6FE566D0-CCF2-4982-B5BA-4348043A01B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +31,14 @@ Global
 		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B660937D-8E93-4944-8D0E-D55F50F981BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CE81D4C-DC0F-43AC-9897-1EB78552A613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CE81D4C-DC0F-43AC-9897-1EB78552A613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CE81D4C-DC0F-43AC-9897-1EB78552A613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CE81D4C-DC0F-43AC-9897-1EB78552A613}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FE566D0-CCF2-4982-B5BA-4348043A01B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FE566D0-CCF2-4982-B5BA-4348043A01B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FE566D0-CCF2-4982-B5BA-4348043A01B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FE566D0-CCF2-4982-B5BA-4348043A01B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

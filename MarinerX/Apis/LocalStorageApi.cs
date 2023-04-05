@@ -1,4 +1,5 @@
 ﻿using Binance.Net.Enums;
+using Binance.Net.Objects.Models.Spot;
 
 using MarinerX.Markets;
 using MarinerX.Utils;
@@ -28,13 +29,13 @@ namespace MarinerX.Apis
         #region Market API
         public static List<string> GetSymbolNames()
         {
-            var symbolFile = new DirectoryInfo(PathUtil.BinanceFuturesData).GetFiles("symbol_*.txt").FirstOrDefault() ?? default!;
+            var symbolFile = new DirectoryInfo(PathUtil.BinanceFuturesData).GetFiles("symbol_*.txt").OrderByDescending(x=>x.LastAccessTime).FirstOrDefault() ?? default!;
             return File.ReadAllLines(symbolFile.FullName).ToList();
         }
 
         public static List<FuturesSymbol> GetSymbols()
         {
-            var symbolFile = new DirectoryInfo(PathUtil.BinanceFuturesData).GetFiles("symbol_detail_*.csv").FirstOrDefault() ?? default!;
+            var symbolFile = new DirectoryInfo(PathUtil.BinanceFuturesData).GetFiles("symbol_detail_*.csv").OrderDescending().FirstOrDefault() ?? default!;
             var data = File.ReadAllLines(symbolFile.FullName);
 
             var symbols = new List<FuturesSymbol>();
@@ -142,10 +143,46 @@ namespace MarinerX.Apis
                 throw;
             }
         }
+
+        public static List<BinanceAggregatedTrade> GetOneDayTrades(string symbol, DateTime date)
+        {
+            try
+            {
+                var data = File.ReadAllLines(PathUtil.BinanceFuturesData.Down("trade", symbol, $"{symbol}-aggTrades-{date:yyyy-MM-dd}.csv"));
+
+                var trades = new List<BinanceAggregatedTrade>();
+
+                foreach (var d in data)
+                {
+                    var e = d.Split(',');
+                    trades.Add(new BinanceAggregatedTrade
+                    {
+                        Id = long.Parse(e[0]),
+                        Price = decimal.Parse(e[1]),
+                        Quantity = decimal.Parse(e[2]),
+                        FirstTradeId = long.Parse(e[3]),
+                        LastTradeId = long.Parse(e[4]),
+                        TradeTime = long.Parse(e[5]).TimeStampMillisecondsToDateTime(),
+                        BuyerIsMaker = bool.Parse(e[6])
+                    });
+                }
+
+                return trades;
+            }
+            catch (FileNotFoundException)
+            {
+                throw;
+            }
+        }
         #endregion
 
         #region Account API
-
+        public static void GetSeed()
+        {
+            var data = File.ReadAllLines(PathUtil.BinanceFuturesData.Down("SEED.txt"));
+            Common.StartTime = DateTime.Parse(data[0]);
+            Common.Seed = double.Parse(data[1]);
+        }
         #endregion
     }
 }
