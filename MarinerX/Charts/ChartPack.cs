@@ -89,17 +89,20 @@ namespace MarinerX.Charts
             Charts = newChart;
         }
 
-        public void CalculateRsi()
+        public void CalculateCommasIndicators()
         {
             var quotes = Charts.Select(x => x.Quote);
-            var result = quotes.GetRsi().Select(x=>x.Rsi);
+            var rsiResult = quotes.GetRsi().Select(x=>x.Rsi);
+            //var macdResult = quotes.GetMacd().Select(x=>x.Histogram);
             for (int j = 0; j < Charts.Count; j++)
             {
                 var chart = Charts[j];
                 chart.ChartElements.Clear();
 
-                var rsi = result.ElementAt(j) == null ? -1 : (decimal)(result.ElementAt(j) ?? -1);
+                var rsi = rsiResult.ElementAt(j) == null ? -1 : (decimal)(rsiResult.ElementAt(j) ?? -1);
+                //var macd = macdResult.ElementAt(j) == null ? -100000 : (decimal)(macdResult.ElementAt(j) ?? -100000);
                 chart.ChartElements.Add(new ChartElementResult(ChartElementType.rsi, rsi));
+                //chart.ChartElements.Add(new ChartElementResult(ChartElementType.macd_hist, macd));
             }
         }
 

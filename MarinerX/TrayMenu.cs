@@ -7,6 +7,7 @@ using MarinaX.Utils;
 using MarinerX.Apis;
 using MarinerX.Bots;
 using MarinerX.Charts;
+using MarinerX.Deals;
 using MarinerX.Indicators;
 using MarinerX.Markets;
 using MarinerX.Utils;
@@ -919,80 +920,60 @@ namespace MarinerX
         {
             try
             {
-                var symbol = "MATICUSDT";
-                var interval = KlineInterval.FiveMinutes;
-                var startDate = DateTime.Parse("2023-03-01");
-                var endDate = DateTime.Parse("2023-03-07");
-
-                // 차트 로드 및 초기화
-                progressView.Show();
-                new Worker()
+                var result = new List<CommasDealManager>();
+                foreach (var symbol in LocalStorageApi.SymbolNames)
                 {
-                    ProgressBar = progressView.ProgressBar,
-                    Action = CommasRsi,
-                    Arguments = new PeriodChartDataType(symbol, interval, startDate, endDate)
-                }.Start().Wait();
-                progressView.Hide();
-                var charts = ChartLoader.GetChartPack(symbol, interval);
-                charts.CalculateRsi();
+                    try
+                    {
+                        var interval = KlineInterval.FiveMinutes;
+                        var startDate = DateTime.Parse("2022-01-01");
+                        var endDate = DateTime.Parse("2023-03-21");
 
-                // 차트 진행하면서 매매
-                progressView.Show();
-                new Worker()
-                {
-                    ProgressBar = progressView.ProgressBar,
-                    Action = CommasTrade,
-                    Arguments = new PeriodChartDataType(symbol, interval, startDate, endDate)
-                }.Start().Wait();
-                progressView.Hide();
+                        // 차트 로드 및 초기화
+                        ChartLoader.InitChartsByDate(symbol, interval, new Worker(new Views.Controls.TextProgressBar()), startDate, endDate);
+
+                        // 차트 진행하면서 매매
+                        var charts = ChartLoader.GetChartPack(symbol, interval);
+                        charts.CalculateCommasIndicators();
+
+                        for (decimal i = 0.6m; i <= 1m; i += 0.05m)
+                        {
+                            var dealManager = new CommasDealManager
+                            {
+                                TargetRoe = i
+                            };
+                            foreach (var info in charts.Charts)
+                            {
+                                var roe = dealManager.GetCurrentRoe(info);
+                                var rsi = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.rsi);
+
+                                // 포지션이 없고 RSI<30 이면 매수
+                                if (dealManager.CurrentPositionQuantity < 0.0001m && rsi > 0 && rsi < 30)
+                                {
+                                    dealManager.OpenDeal(info);
+                                }
+                                // 포지션이 있고 수익률이 0.5% 이상이 되면 매도
+                                else if (dealManager.CurrentPositionQuantity > 0.0001m && roe >= dealManager.TargetRoe)
+                                {
+                                    dealManager.CloseDeal(info);
+                                }
+                            }
+                            // Set latest chart for UPNL
+                            dealManager.ChartInfo = charts.Charts[^1];
+                            result.Add(dealManager);
+                        }
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        continue;
+                    }
+                }
+
+                var etiPlus = result.Where(x => x.EstimatedTotalIncome > 0).ToList();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void CommasRsi(Worker worker, object? obj)
-        {
-            if (obj is not PeriodChartDataType periodChartDataType)
-            {
-                return;
-            }
-            ChartLoader.InitChartsByDate(periodChartDataType.symbol, periodChartDataType.interval, worker, periodChartDataType.startDate, periodChartDataType.endDate);
-        }
-
-        private void CommasTrade(Worker worker, object? obj)
-        {
-            if (obj is not PeriodChartDataType periodChartDataType)
-            {
-                return;
-            }
-            var charts = ChartLoader.GetChartPack(periodChartDataType.symbol, periodChartDataType.interval);
-            charts.CalculateRsi();
-
-            var asset = new Asset(10000, new MercuryTradingModel.Assets.Position());
-            foreach (var info in charts.Charts)
-            {
-                var price = (info.Quote.Low + info.Quote.High) / 2; // 임시로 저고 중간값을 가격으로 지정
-                var roe = asset.Position.Quantity > 0.0001m ? StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, asset.Position.AveragePrice, price) : 0;
-                var rsi = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.rsi);
-
-                // 포지션이 없고 RSI<30 이면 매수
-                if (asset.Position.Quantity < 0.0001m && rsi > 0 && rsi < 30)
-                {
-                    asset.Position.Long(1, price);
-                    asset.Balance -= 1 * price;
-                }
-                // 포지션이 있고 수익률이 0.5% 이상이 되면 매도
-                else if (asset.Position.Quantity > 0.0001m && roe >= 0.5m)
-                {
-                    asset.Position.Short(1, price);
-                    asset.Balance += 1 * price;
-                }
-
-                // listing how many took a long time, how many got in one deal
-
-                // calculate deals statistics
             }
         }
         #endregion
