@@ -2,21 +2,22 @@
 using MercuryTradingModel.Maths;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MarinerX.Deals
 {
     public class CommasDeal
     {
-        public DateTime OpenTime { get; set; }
-        public DateTime CloseTime { get; set; }
-        public bool IsClosed => CloseTime >= new DateTime(2000, 1, 1);
-        public TimeSpan TakenTime => CloseTime - OpenTime;
-        public decimal BuyPrice { get; set; } = 0;
-        public decimal SellPrice { get; set; } = 0;
-        public decimal BuyQuantity { get; set; } = 0;
-        public decimal SellQuantity { get; set; } = 0;
-        public decimal Income => (SellPrice - BuyPrice) * SellQuantity;
-        public decimal Roe => StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, BuyPrice, SellPrice);
+        public List<CommasOpenTransaction> OpenTransactions { get; set; } = new();
+        public CommasCloseTransaction CloseTransaction { get; set; } = new();
+        public bool IsClosed => CloseTransaction.Time >= new DateTime(2000, 1, 1);
+        public TimeSpan TakenTime => CloseTransaction.Time - OpenTransactions[0].Time;
+        public decimal BuyAveragePrice => OpenTransactions.Count == 0 ? 0 : OpenTransactions.Sum(t => t.Quantity * t.Price) / OpenTransactions.Sum(t => t.Quantity);
+        public decimal BuyQuantity => OpenTransactions.Sum(t => t.Quantity);
+        public decimal Income => (CloseTransaction.Price - BuyAveragePrice) * CloseTransaction.Quantity;
+        public decimal Roe => StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, BuyAveragePrice, CloseTransaction.Price);
+        public int CurrentSafetyOrderCount => OpenTransactions.Count - 1;
 
         public override string ToString()
         {
@@ -25,7 +26,7 @@ namespace MarinerX.Deals
 
         public decimal GetCurrentRoe(ChartInfo info)
         {
-            return StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, BuyPrice, (info.Quote.Low + info.Quote.High) / 2);
+            return StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, BuyAveragePrice, (info.Quote.Low + info.Quote.High) / 2);
         }
     }
 }

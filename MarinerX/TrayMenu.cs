@@ -22,6 +22,7 @@ using MercuryTradingModel.TradingModels;
 using Newtonsoft.Json;
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -921,13 +922,15 @@ namespace MarinerX
             try
             {
                 var result = new List<CommasDealManager>();
-                foreach (var symbol in LocalStorageApi.SymbolNames)
+                //var symbols = LocalStorageApi.SymbolNames;
+                var symbols = new List<string> { "SOLUSDT", "MATICUSDT", "BTCDOMUSDT" };
+                foreach (var symbol in symbols)
                 {
                     try
                     {
                         var interval = KlineInterval.FiveMinutes;
-                        var startDate = DateTime.Parse("2022-01-01");
-                        var endDate = DateTime.Parse("2023-03-21");
+                        var startDate = DateTime.Parse("2023-01-01");
+                        var endDate = DateTime.Parse("2023-03-07");
 
                         // 차트 로드 및 초기화
                         ChartLoader.InitChartsByDate(symbol, interval, new Worker(new Views.Controls.TextProgressBar()), startDate, endDate);
@@ -938,10 +941,7 @@ namespace MarinerX
 
                         for (decimal i = 0.6m; i <= 1m; i += 0.05m)
                         {
-                            var dealManager = new CommasDealManager
-                            {
-                                TargetRoe = i
-                            };
+                            var dealManager = new CommasDealManager(i, 3, 3.0m);
                             foreach (var info in charts.Charts)
                             {
                                 var roe = dealManager.GetCurrentRoe(info);
@@ -952,7 +952,12 @@ namespace MarinerX
                                 {
                                     dealManager.OpenDeal(info);
                                 }
-                                // 포지션이 있고 수익률이 0.5% 이상이 되면 매도
+                                // 포지션이 있고 추가 매수 지점에 도달하면 추가 매수
+                                else if(dealManager.CurrentPositionQuantity > 0.0001m && dealManager.IsAdditionalOpen(info))
+                                {
+                                    dealManager.AdditionalDeal(info);
+                                }
+                                // 포지션이 있고 목표 수익률에 도달하면 매도
                                 else if (dealManager.CurrentPositionQuantity > 0.0001m && roe >= dealManager.TargetRoe)
                                 {
                                     dealManager.CloseDeal(info);
