@@ -7,6 +7,7 @@ using MarinaX.Utils;
 using MarinerX.Apis;
 using MarinerX.Bots;
 using MarinerX.Charts;
+using MarinerX.Commas.Parameters;
 using MarinerX.Deals;
 using MarinerX.Indicators;
 using MarinerX.Markets;
@@ -273,6 +274,7 @@ namespace MarinerX
             menuStrip.Items.Add(menu7);
             var menu8 = new ToolStripMenuItem("3Commas 테스트");
             menu8.DropDownItems.Add(new ToolStripMenuItem("RSI", null, CommasRsiEvent));
+            menu8.DropDownItems.Add(new ToolStripMenuItem("RSI AI", null, CommasRsiAiEvent));
             menuStrip.Items.Add(menu8);
             menuStrip.Items.Add(new ToolStripSeparator());
 
@@ -941,27 +943,10 @@ namespace MarinerX
 
                         for (decimal i = 0.6m; i <= 1m; i += 0.05m)
                         {
-                            var dealManager = new CommasDealManager(i, 3, 3.0m);
+                            var dealManager = new CommasDealManager(i, 100, 100, 10, 2.0m, 1.0m, 1.2m);
                             foreach (var info in charts.Charts)
                             {
-                                var roe = dealManager.GetCurrentRoe(info);
-                                var rsi = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.rsi);
-
-                                // 포지션이 없고 RSI<30 이면 매수
-                                if (dealManager.CurrentPositionQuantity < 0.0001m && rsi > 0 && rsi < 30)
-                                {
-                                    dealManager.OpenDeal(info);
-                                }
-                                // 포지션이 있고 추가 매수 지점에 도달하면 추가 매수
-                                else if(dealManager.CurrentPositionQuantity > 0.0001m && dealManager.IsAdditionalOpen(info))
-                                {
-                                    dealManager.AdditionalDeal(info);
-                                }
-                                // 포지션이 있고 목표 수익률에 도달하면 매도
-                                else if (dealManager.CurrentPositionQuantity > 0.0001m && roe >= dealManager.TargetRoe)
-                                {
-                                    dealManager.CloseDeal(info);
-                                }
+                                dealManager.Evaluate(info);
                             }
                             // Set latest chart for UPNL
                             dealManager.ChartInfo = charts.Charts[^1];
@@ -975,6 +960,80 @@ namespace MarinerX
                 }
 
                 var etiPlus = result.Where(x => x.EstimatedTotalIncome > 0).ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CommasRsiAiEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                var random = new SmartRandom();
+                var result = new List<CommasDealManager>();
+                var symbols = LocalStorageApi.SymbolNames;
+                var interval = KlineInterval.FiveMinutes;
+                var dayCount = 90;
+                var baseOrderSize = 100;
+
+                // 초기 파라미터 값
+                var targetRoe = new NoisedParameter(0.5m, 2.5m, 1.0m);
+                var safetyOrderSize = new NoisedParameter(50, 1000, 100);
+                var maxSafetyOrderCount = new NoisedParameter(0, 20, 10);
+                var deviation = new NoisedParameter(1.0m, 10.0m, 2.0m);
+                var stepScale = new NoisedParameter(1.0m, 3.0m, 1.0m);
+                var volumeScale = new NoisedParameter(1.0m, 3.0m, 1.2m);
+
+                while (true)
+                {
+                    var symbol = random.Next(symbols);
+                    var fileName = random.Next(Directory.GetFiles(PathUtil.BinanceFuturesData.Down("1m", symbol), "*.csv"));
+                    var startDate = SymbolUtil.GetDate(fileName);
+                    var symbolEndDate = SymbolUtil.GetEndDate(symbol);
+                    if ((symbolEndDate - startDate).TotalDays < dayCount)
+                    {
+                        continue;
+                    }
+                    var endDate = startDate.AddDays(dayCount);
+
+                    try
+                    {
+                        // 차트 로드 및 초기화
+                        ChartLoader.InitChartsByDate(symbol, interval, new Worker(new Views.Controls.TextProgressBar()), startDate, endDate);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        continue;
+                    }
+
+                    // 차트 진행하면서 매매
+                    var charts = ChartLoader.GetChartPack(symbol, interval);
+                    charts.CalculateCommasIndicators();
+
+                    // 파라미터 설정
+                    var dealManager = new CommasDealManager(targetRoe.Value, baseOrderSize, safetyOrderSize.Value, maxSafetyOrderCount.Value, deviation.Value, stepScale.Value, volumeScale.Value);
+                    foreach (var info in charts.Charts)
+                    {
+                        dealManager.Evaluate(info);
+                    }
+                    // Set latest chart for UPNL
+                    dealManager.ChartInfo = charts.Charts[^1];
+                    result.Add(dealManager);
+
+                    // 파라미터 적합도 점수 계산 (MAX:2700)
+                    if (dealManager.EstimatedTotalIncome > 0)
+                    {
+                        decimal noise = 0.1m;
+                        targetRoe.MakeNoise(noise);
+                        //targetRoe = (2.5m - 0.5m) * (decimal)Math.Pow(noise, 2)
+                    }
+                    else
+                    {
+
+                    }
+                }
             }
             catch (Exception ex)
             {

@@ -319,16 +319,20 @@ namespace MarinerX.Apis
         #region Leverage API
         public static Dictionary<string, int> GetMaxLeverages()
         {
-            Dictionary<string, int> results = new Dictionary<string, int>();
-
-            var result = binanceClient.UsdFuturesApi.Account.GetBracketsAsync();
-            result.Wait();
-
-            foreach (var d in result.Result.Data)
+            var results = new Dictionary<string, int>();
+            try
             {
-                results.Add(d.Symbol, d.Brackets.Max(x => x.InitialLeverage));
-            }
+                var result = binanceClient.UsdFuturesApi.Account.GetBracketsAsync();
+                result.Wait();
 
+                foreach (var d in result.Result.Data)
+                {
+                    results.Add(d.Symbol, d.Brackets.Max(x => x.InitialLeverage));
+                }
+            }
+            catch
+            {
+            }
             return results;
         }
         #endregion
