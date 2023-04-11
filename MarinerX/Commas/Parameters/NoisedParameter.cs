@@ -1,25 +1,32 @@
-﻿namespace MarinerX.Commas.Parameters
+﻿using MarinerX.Commas.Noises;
+using MarinerX.Utils;
+
+using System;
+
+namespace MarinerX.Commas.Parameters
 {
     public class NoisedParameter
     {
+        public Noise Noise { get; set; }
         public decimal Value { get; set; }
-        public decimal Min { get; set; }
-        public decimal Max { get; set; }
 
-        public NoisedParameter(decimal min, decimal max, decimal value)
+        public NoisedParameter(Noise noise, decimal value)
         {
-            Min = min;
-            Max = max;
+            Noise = noise;
             Value = value;
         }
 
-        /// <summary>
-        /// noise = 0~1 value
-        /// </summary>
-        /// <param name="noise"></param>
-        public void MakeNoise(decimal noise)
+        public void MakeNoise()
         {
+            Value = Noise.GetNoiseValue(Value);
+        }
 
+        public void Adjust(decimal noise)
+        {
+            var random = new SmartRandom();
+            var _noise = Math.Clamp(noise * 0.9m + random.Next(10000) * noise * 0.00002m, 0, 1);
+            var gap = (Noise.EvaluationMax - Noise.EvaluationMin) * _noise * 0.5m;
+            Value = Math.Clamp(Math.Clamp(Value - gap, Noise.EvaluationMin, Noise.EvaluationMax) + random.Next(10000) * 0.00002m, Noise.EvaluationMin, Noise.EvaluationMax);
         }
     }
 }

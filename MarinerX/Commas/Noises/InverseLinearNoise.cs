@@ -9,7 +9,8 @@
         public new decimal GetNoiseValue(decimal value)
         {
             var _value = base.GetNoiseValue(value);
-            return 1 - _value / EvaluationMax;
+            var _evaluation = EvaluationMax - EvaluationMin;
+            return 1 - _value / _evaluation;
         }
     }
 }

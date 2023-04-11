@@ -20,14 +20,14 @@ namespace MarinerX.Deals
         public decimal TargetRoe { get; set; }
         public decimal BaseOrderSize { get; set; }
         public decimal SafetyOrderSize { get; set; }
-        public decimal MaxSafetyOrderCount { get; set; }
+        public int MaxSafetyOrderCount { get; set; }
         public decimal Deviation { get; set; }
         public List<decimal> Deviations { get; private set; } = new();
         public decimal SafetyOrderStepScale { get; set; }
         public decimal SafetyOrderVolumeScale { get; set; }
         public List<decimal> SafetyOrderVolumes { get; private set; } = new();
 
-        public CommasDealManager(decimal targetRoe, decimal baseOrderSize, decimal safetyOrderSize, decimal maxSafetyOrderCount, decimal deviation, decimal stepScale, decimal volumeScale)
+        public CommasDealManager(decimal targetRoe, decimal baseOrderSize, decimal safetyOrderSize, int maxSafetyOrderCount, decimal deviation, decimal stepScale, decimal volumeScale)
         {
             TargetRoe = targetRoe;
             BaseOrderSize = baseOrderSize;

@@ -7,6 +7,7 @@ using MarinaX.Utils;
 using MarinerX.Apis;
 using MarinerX.Bots;
 using MarinerX.Charts;
+using MarinerX.Commas.Noises;
 using MarinerX.Commas.Parameters;
 using MarinerX.Deals;
 using MarinerX.Indicators;
@@ -979,14 +980,15 @@ namespace MarinerX
                 var baseOrderSize = 100;
 
                 // 초기 파라미터 값
-                var targetRoe = new NoisedParameter(0.5m, 2.5m, 1.0m);
-                var safetyOrderSize = new NoisedParameter(50, 1000, 100);
-                var maxSafetyOrderCount = new NoisedParameter(0, 20, 10);
-                var deviation = new NoisedParameter(1.0m, 10.0m, 2.0m);
-                var stepScale = new NoisedParameter(1.0m, 3.0m, 1.0m);
-                var volumeScale = new NoisedParameter(1.0m, 3.0m, 1.2m);
+                decimal preEti = 0;
+                var targetRoe = new NoisedParameter(new QuadraticNoise(0.5m, 2.5m), 1.0m);
+                var safetyOrderSize = new NoisedParameter(new QuadraticNoise(50, 1000), 100);
+                var maxSafetyOrderCount = new NoisedParameter(new QuadraticNoise(1, 20), 10);
+                var deviation = new NoisedParameter(new QuadraticNoise(1.0m, 10.0m), 2.0m);
+                var stepScale = new NoisedParameter(new QuadraticNoise(1.0m, 3.0m), 1.0m);
+                var volumeScale = new NoisedParameter(new QuadraticNoise(1.0m, 3.0m), 1.2m);
 
-                while (true)
+                for (int i = 0; i < 100; i++)
                 {
                     var symbol = random.Next(symbols);
                     var fileName = random.Next(Directory.GetFiles(PathUtil.BinanceFuturesData.Down("1m", symbol), "*.csv"));
@@ -1013,7 +1015,7 @@ namespace MarinerX
                     charts.CalculateCommasIndicators();
 
                     // 파라미터 설정
-                    var dealManager = new CommasDealManager(targetRoe.Value, baseOrderSize, safetyOrderSize.Value, maxSafetyOrderCount.Value, deviation.Value, stepScale.Value, volumeScale.Value);
+                    var dealManager = new CommasDealManager(targetRoe.Value, baseOrderSize, safetyOrderSize.Value, (int)maxSafetyOrderCount.Value, deviation.Value, stepScale.Value, volumeScale.Value);
                     foreach (var info in charts.Charts)
                     {
                         dealManager.Evaluate(info);
@@ -1022,17 +1024,35 @@ namespace MarinerX
                     dealManager.ChartInfo = charts.Charts[^1];
                     result.Add(dealManager);
 
-                    // 파라미터 적합도 점수 계산 (MAX:2700)
-                    if (dealManager.EstimatedTotalIncome > 0)
+                    // 파라미터 적합도 점수 평가 및 조정
+                    var etiDiff = dealManager.EstimatedTotalIncome - preEti;
+                    preEti = dealManager.EstimatedTotalIncome;
+                    decimal _noise = 0;
+                    if (etiDiff > 0) // 이전 모델보다 더 높은 수익 : 낮은 Noise로 파라미터 조정
                     {
-                        decimal noise = 0.1m;
-                        targetRoe.MakeNoise(noise);
-                        //targetRoe = (2.5m - 0.5m) * (decimal)Math.Pow(noise, 2)
+                        var noise = new InverseQuadraticNoise(0, 2000);
+                        _noise = noise.GetNoiseValue(etiDiff) * 0.2m; // Noise = 0 ~ 0.2
+                        targetRoe.Adjust(_noise);
+                        safetyOrderSize.Adjust(_noise);
+                        maxSafetyOrderCount.Adjust(_noise);
+                        deviation.Adjust(_noise);
+                        stepScale.Adjust(_noise);
+                        volumeScale.Adjust(_noise);
                     }
-                    else
+                    else // 더 낮은 수익 : 높은 Noise로 파라미터 조정
                     {
+                        var noise = new InverseQuadraticNoise(-2000, 0);
+                        _noise = noise.GetNoiseValue(etiDiff) * 0.8m + 0.2m; // Noise = 0.2 ~ 1.0
+                        targetRoe.Adjust(_noise);
+                        safetyOrderSize.Adjust(_noise);
+                        maxSafetyOrderCount.Adjust(_noise);
+                        deviation.Adjust(_noise);
+                        stepScale.Adjust(_noise);
+                        volumeScale.Adjust(_noise);
+                    }
 
-                    }
+                    File.AppendAllText(PathUtil.BinanceFuturesData.Down("RSI_AI.txt"),
+                        $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}, {symbol}, {startDate:yyyy-MM-dd}~{endDate:yyyy-MM-dd}, ETI: {dealManager.EstimatedTotalIncome:F4}, Noise: {_noise:F4}, TargetROE: {targetRoe.Value:F4}, SafetyOrderSize: {safetyOrderSize.Value:F4}, MaxSafetyOrderCount: {(int)maxSafetyOrderCount.Value}, Deviation: {deviation.Value:F4}, StepScale: {stepScale.Value:F4}, VolumeScale: {volumeScale.Value:F4}" + Environment.NewLine);
                 }
             }
             catch (Exception ex)

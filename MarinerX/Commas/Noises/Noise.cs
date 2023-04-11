@@ -15,7 +15,7 @@ namespace MarinerX.Commas.Noises
 
         public decimal GetNoiseValue(decimal value)
         {
-            return Math.Clamp(value, EvaluationMin, EvaluationMax);
+            return Math.Clamp(value, EvaluationMin, EvaluationMax) - EvaluationMin;
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace MarinerX.Commas.Noises
 {
-    public class QuadraticNoise : Noise
+    public class InverseQuadraticNoise : Noise
     {
-        public QuadraticNoise(decimal evaluationMin, decimal evaluationMax) : base(evaluationMin, evaluationMax)
+        public InverseQuadraticNoise(decimal evaluationMin, decimal evaluationMax) : base(evaluationMin, evaluationMax)
         {
         }
 
@@ -10,7 +10,7 @@
         {
             var _value = base.GetNoiseValue(value) * base.GetNoiseValue(value);
             var _evaluation = EvaluationMax - EvaluationMin;
-            return _value / (_evaluation * _evaluation);
+            return 1 - _value / (_evaluation * _evaluation);
         }
     }
 }
