@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="Albedo.Views.SymbolControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Albedo.ViewModels"
+             xmlns:converter="clr-namespace:Albedo.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="200" Background="{StaticResource Background}">
+
+    <UserControl.DataContext>
+        <vm:SymbolControlViewModel x:Name="viewModel" />
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <converter:StringToForegroundConverter x:Key="stf"/>
+    </UserControl.Resources>
+
+    <!-- 
+        심볼   가격
+        거래소 등락률
+        -->
+    <Grid Grid.Row="0" MouseLeftButtonDown="Grid_MouseLeftButtonDown" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="12"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Padding="3" FontWeight="Bold" Text="{Binding Symbol}"/>
+        <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Orientation="Horizontal">
+            <Image Margin="3,0,0,0" Height="14" Source="{Binding MarketIcon}"/>
+            <TextBlock Padding="3" Text="{Binding Market}"/>
+        </StackPanel>
+        <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Foreground="{Binding TextColor, Converter={StaticResource stf}}" Text="{Binding Price}"/>
+        <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Foreground="{Binding TextColor, Converter={StaticResource stf}}" Text="{Binding Diff}"/>
+        <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Height="1" Fill="#434346"/>
+    </Grid>
+</UserControl>

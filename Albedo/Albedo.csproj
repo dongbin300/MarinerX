@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>chart2.ico</ApplicationIcon>
+    <AssemblyName>Albedo</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\binance.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="chart2.ico" />
+    <Content Include="Resources\binance.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Apis\" />
+  </ItemGroup>
+
+</Project>

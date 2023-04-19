@@ -16,11 +16,6 @@ namespace MarinerX.Commas.Parameters
             Value = value;
         }
 
-        public void MakeNoise()
-        {
-            Value = Noise.GetNoiseValue(Value);
-        }
-
         public void Adjust(decimal noise)
         {
             var random = new SmartRandom();
