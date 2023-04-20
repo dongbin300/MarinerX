@@ -11,8 +11,15 @@
              MouseLeftButtonDown="UserControl_MouseLeftButtonDown"
              MouseLeftButtonUp="UserControl_MouseLeftButtonUp"
              >
-    <Grid Background="Transparent">
-
+    <Grid Name="MainGrid" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="1"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+        <ContentControl Grid.Row="0" Grid.RowSpan="2" x:Name="CandleChart"/>
+        <GridSplitter ResizeDirection="Rows" Grid.Row="1" Width="{Binding ActualWidth, ElementName=MainGrid}" Height="3" Background="{StaticResource ChartBackground}"/>
+        <ContentControl Grid.Row="2" x:Name="VolumeChart"/>
     </Grid>
 </UserControl>
 

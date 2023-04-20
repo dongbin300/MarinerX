@@ -16,11 +16,24 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Albedo
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
+    /// 
+    /// 인터벌 메뉴
+    /// 과거차트 보기
+    /// 인디케이터
+    /// 차트 수치 표시
+    /// 메뉴 클릭시 하이라이트(현재가 강조 표시 필요) // 코인 메뉴 업데이트 방식 최적화 이후 가능
+    /// 업비트, 빗썸 등등 추가
+    /// 코인 메뉴 그룹화(L1: 거래소별(Market), L2: 타입별(Type; Spot;Index;Futures)
+    /// 코인 즐겨찾기
+    /// 
+    /// 화면 설정(추후)
+    /// 그림 그리기(추후 아마 안할듯)
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -126,6 +139,7 @@ namespace Albedo
                         });
                         klineUpdateResult.Wait();
                         subId = klineUpdateResult.Result.Data.Id;
+                        //pairControl.viewModel.IsSelected = true;
                     };
 
                     pairControl.SetValue(Grid.RowProperty, i);
@@ -137,6 +151,35 @@ namespace Albedo
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (Chart.Content is not ChartControl chartControl)
+            {
+                return;
+            }
+
+            switch (e.Key)
+            {
+                case Key.Left:
+                    if (chartControl.Start > 0)
+                    {
+                        chartControl.Start--;
+                        chartControl.End--;
+                        chartControl.InvalidateVisual();
+                    }
+                    break;
+
+                case Key.Right:
+                    if (chartControl.End + 1 < chartControl.TotalCount)
+                    {
+                        chartControl.Start++;
+                        chartControl.End++;
+                        chartControl.InvalidateVisual();
+                    }
+                    break;
+            }
         }
     }
 }

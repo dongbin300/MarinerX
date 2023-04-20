@@ -67,6 +67,16 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(MarketIcon));
             }
         }
+        private bool isSelected = false;
+        public bool IsSelected
+        {
+            get => isSelected;
+            set
+            {
+                isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
 
         public PairControlViewModel()
         {

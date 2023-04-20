@@ -20,7 +20,17 @@
         심볼   가격
         거래소 등락률
         -->
-    <Grid Grid.Row="0" MouseLeftButtonDown="Grid_MouseLeftButtonDown" Background="Transparent">
+    <Grid Grid.Row="0" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background" Value="Transparent" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource SelectedBackground}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
@@ -38,6 +48,6 @@
         </StackPanel>
         <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Foreground="{Binding TextColor, Converter={StaticResource stf}}" Text="{Binding Price}"/>
         <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Foreground="{Binding TextColor, Converter={StaticResource stf}}" Text="{Binding PriceChangePercent}"/>
-        <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Height="1" Fill="#434346"/>
+        <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Height="1" Fill="{StaticResource Separator}"/>
     </Grid>
 </UserControl>

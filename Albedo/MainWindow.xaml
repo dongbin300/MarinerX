@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Albedo.Views"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
+        PreviewKeyDown="Window_PreviewKeyDown"
         Title="Albedo" Height="400" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -16,7 +17,7 @@
 
         <local:MenuControl Grid.Column="0" Grid.ColumnSpan="2" x:Name="Menu"/>
         <GridSplitter Grid.Column="1" Width="3" Background="{StaticResource Background}"/>
-        <Border Grid.Column="2" Background="#161A1E">
+        <Border Grid.Column="2" Background="{StaticResource ChartBackground}">
             <ContentControl x:Name="Chart"/>
         </Border>
     </Grid>

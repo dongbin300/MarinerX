@@ -1,10 +1,10 @@
 ﻿using Albedo.Utils;
+using Albedo.Views.Contents;
 
 using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,13 +17,11 @@ namespace Albedo.Views
     /// </summary>
     public partial class ChartControl : UserControl
     {
-        public List<Quote> Quotes = new();
+        public CandleContent CandleContent { get; set; } = default!;
+        public VolumeContent VolumeContent { get; set; } = default!;
 
-        private Pen longPen = new(new SolidColorBrush(Color.FromRgb(59, 207, 134)), 1.0);
-        private Pen shortPen = new(new SolidColorBrush(Color.FromRgb(237, 49, 97)), 1.0);
-        private Brush longBrush = new SolidColorBrush(Color.FromRgb(59, 207, 134));
-        private Brush shortBrush = new SolidColorBrush(Color.FromRgb(237, 49, 97));
-        private int candleMargin = 1;
+        public List<Quote> Quotes = new();
+        private int itemMargin = 1;
 
         public int Start = 0;
         public int End = 0;
@@ -44,6 +42,13 @@ namespace Albedo.Views
             Start = 0;
             End = quotes.Count;
             TotalCount = quotes.Count;
+
+            CandleContent = new CandleContent();
+            VolumeContent = new VolumeContent();
+            CandleContent.ItemMargin = itemMargin;
+            VolumeContent.ItemMargin = itemMargin;
+            CandleChart.Content = CandleContent;
+            VolumeChart.Content = VolumeContent;
 
             InvalidateVisual();
         }
@@ -78,28 +83,14 @@ namespace Albedo.Views
 
             base.OnRender(drawingContext);
 
-            var itemWidth = ActualWidth / ViewCount;
-            var max = Quotes.Skip(Start).Take(ViewCount).Max(x => x.High);
-            var min = Quotes.Skip(Start).Take(ViewCount).Min(x => x.Low);
-
-            for (int i = Start; i < End; i++)
-            {
-                var quote = Quotes[i];
-                var viewIndex = i - Start;
-
-                // Draw Candle
-                drawingContext.DrawLine(
-                    quote.Open < quote.Close ? longPen : shortPen,
-                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - min) / (max - min))),
-                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min))));
-                drawingContext.DrawRectangle(
-                    quote.Open < quote.Close ? longBrush : shortBrush,
-                    quote.Open < quote.Close ? longPen : shortPen,
-                    new Rect(
-                    new Point(itemWidth * viewIndex + candleMargin, ActualHeight * (double)(1.0m - (quote.Open - min) / (max - min))),
-                    new Point(itemWidth * (viewIndex + 1) - candleMargin, ActualHeight * (double)(1.0m - (quote.Close - min) / (max - min)))
-                    ));
-            }
+            CandleContent.Quotes = Quotes;
+            CandleContent.Start = Start;
+            CandleContent.End = End;
+            VolumeContent.Quotes = Quotes;
+            VolumeContent.Start = Start;
+            VolumeContent.End = End;
+            CandleContent.InvalidateVisual();
+            VolumeContent.InvalidateVisual();
         }
 
         private void UserControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -131,7 +122,7 @@ namespace Albedo.Views
 
         private void UserControl_MouseMove(object sender, MouseEventArgs e)
         {
-            var itemWidth = ActualWidth / ViewCount;
+            var itemWidth = CandleChart.ActualWidth / ViewCount;
             Vector diff = e.GetPosition(Parent as Window) - CurrentMousePosition;
             if (IsMouseCaptured)
             {
