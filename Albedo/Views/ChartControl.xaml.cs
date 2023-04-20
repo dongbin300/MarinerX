@@ -1,4 +1,6 @@
-﻿using Skender.Stock.Indicators;
+﻿using Albedo.Utils;
+
+using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
@@ -46,6 +48,27 @@ namespace Albedo.Views
             InvalidateVisual();
         }
 
+        public void UpdateQuote(Quote quote)
+        {
+            var lastQuote = Quotes[^1];
+            if (lastQuote.Date.Equals(quote.Date))
+            {
+                lastQuote.High = quote.High;
+                lastQuote.Low = quote.Low;
+                lastQuote.Close = quote.Close;
+                lastQuote.Volume = quote.Volume;
+            }
+            else
+            {
+                Quotes.Add(quote);
+                Start++;
+                End++;
+                TotalCount++;
+            }
+
+            DispatcherService.Invoke(InvalidateVisual);
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (ViewCount <= 0)
@@ -55,11 +78,11 @@ namespace Albedo.Views
 
             base.OnRender(drawingContext);
 
-            var itemWidth = ActualWidth / (ViewCount - 1);
+            var itemWidth = ActualWidth / ViewCount;
             var max = Quotes.Skip(Start).Take(ViewCount).Max(x => x.High);
             var min = Quotes.Skip(Start).Take(ViewCount).Min(x => x.Low);
 
-            for (int i = Start; i < End - 1; i++)
+            for (int i = Start; i < End; i++)
             {
                 var quote = Quotes[i];
                 var viewIndex = i - Start;
@@ -108,28 +131,30 @@ namespace Albedo.Views
 
         private void UserControl_MouseMove(object sender, MouseEventArgs e)
         {
-            var itemWidth = ActualWidth / (ViewCount - 1);
+            var itemWidth = ActualWidth / ViewCount;
             Vector diff = e.GetPosition(Parent as Window) - CurrentMousePosition;
             if (IsMouseCaptured)
             {
-                var moveUnit = (int)(diff.X / itemWidth / 30);
+                var moveUnit = (int)(diff.X / itemWidth / 20);
                 if (diff.X > 0) // Graph Move Left
                 {
-                    if (Start > moveUnit)
+                    if (Start <= moveUnit) // Max Move Case
                     {
-                        Start -= moveUnit;
-                        End -= moveUnit;
-                        InvalidateVisual();
+                        moveUnit = Start;
                     }
+                    Start -= moveUnit;
+                    End -= moveUnit;
+                    InvalidateVisual();
                 }
                 else if (diff.X < 0) // Graph Move Right
                 {
-                    if (End < TotalCount + moveUnit)
+                    if (End >= TotalCount + moveUnit) // Max Move Case
                     {
-                        Start -= moveUnit;
-                        End -= moveUnit;
-                        InvalidateVisual();
+                        moveUnit = End - TotalCount;
                     }
+                    Start -= moveUnit;
+                    End -= moveUnit;
+                    InvalidateVisual();
                 }
             }
         }

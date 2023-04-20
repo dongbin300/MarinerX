@@ -16,14 +16,14 @@ namespace Albedo.ViewModels
         }
         #endregion Notify Property Changed
 
-        private ObservableCollection<Symbol> symbols = new ();
-        public ObservableCollection<Symbol> Symbols
+        private ObservableCollection<Pair> pairs = new ();
+        public ObservableCollection<Pair> Pairs
         {
-            get => symbols;
+            get => pairs;
             set
             {
-                symbols = value;
-                OnPropertyChanged(nameof(Symbols));
+                pairs = value;
+                OnPropertyChanged(nameof(Pairs));
             }
         }
 
@@ -32,17 +32,17 @@ namespace Albedo.ViewModels
 
         }
 
-        public void UpdateSymbolInfo(Symbol symbol)
+        public void UpdatePairInfo(Pair pair)
         {
-            var _symbol = Symbols.Where(s => s.Market.Equals(symbol.Market) && s.Name.Equals(symbol.Name));
-            if (_symbol == null || !_symbol.Any())
+            var _pair = Pairs.Where(s => s.Market.Equals(pair.Market) && s.Symbol.Equals(pair.Symbol));
+            if (_pair == null || !_pair.Any())
             {
-                Symbols.Add(symbol);
+                Pairs.Add(pair);
                 return;
             }
 
-            _symbol.ElementAt(0).Price = symbol.Price;
-            _symbol.ElementAt(0).Diff = symbol.Diff;
+            _pair.ElementAt(0).Price = pair.Price;
+            _pair.ElementAt(0).PriceChangePercent = pair.PriceChangePercent;
         }
     }
 }

@@ -9,17 +9,17 @@ namespace Albedo.Views
     /// <summary>
     /// SymbolControl.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class SymbolControl : UserControl
+    public partial class PairControl : UserControl
     {
-        Symbol symbol = default!;
-        public Action<Symbol> SymbolClick = default!;
+        Pair symbol = default!;
+        public Action<Pair> PairClick = default!;
 
-        public SymbolControl()
+        public PairControl()
         {
             InitializeComponent();
         }
 
-        public void Init(Symbol symbol)
+        public void Init(Pair symbol)
         {
             this.symbol = symbol;
             viewModel.Init(symbol);
@@ -27,7 +27,7 @@ namespace Albedo.Views
 
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            SymbolClick.Invoke(symbol);
+            PairClick.Invoke(symbol);
         }
     }
 }

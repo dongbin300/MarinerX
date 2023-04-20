@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 
 namespace Albedo.ViewModels
 {
-    public class SymbolControlViewModel : INotifyPropertyChanged
+    public class PairControlViewModel : INotifyPropertyChanged
     {
         #region Notify Property Changed
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -46,17 +46,17 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(Price));
             }
         }
-        private string diff = string.Empty;
-        public string Diff
+        private string priceChangePercent = string.Empty;
+        public string PriceChangePercent
         {
-            get => diff;
+            get => priceChangePercent;
             set
             {
-                diff = value;
-                OnPropertyChanged(nameof(Diff));
+                priceChangePercent = value;
+                OnPropertyChanged(nameof(PriceChangePercent));
             }
         }
-        public string TextColor => diff.Length >= 1 && diff[0] != '-' ? "3BCF86" : "ED3161";
+        public string TextColor => priceChangePercent.Length >= 1 && priceChangePercent[0] != '-' ? "3BCF86" : "ED3161";
         private BitmapImage marketIcon = new();
         public BitmapImage MarketIcon
         {
@@ -68,17 +68,17 @@ namespace Albedo.ViewModels
             }
         }
 
-        public SymbolControlViewModel()
+        public PairControlViewModel()
         {
 
         }
 
-        public void Init(Symbol symbol)
+        public void Init(Pair symbol)
         {
-            Symbol = symbol.Name;
+            Symbol = symbol.Symbol;
             Market = symbol.Market;
             Price = symbol.Price.ToString();
-            Diff = Math.Round(symbol.Diff, 2) + "%";
+            PriceChangePercent = Math.Round(symbol.PriceChangePercent, 2) + "%";
 
             MarketIcon = new BitmapImage(new Uri("pack://application:,,,/Albedo;component/Resources/" + Market.ToLower() switch
             {
