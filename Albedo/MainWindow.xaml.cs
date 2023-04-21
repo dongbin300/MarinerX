@@ -1,4 +1,5 @@
-﻿using Albedo.Models;
+﻿using Albedo.Enums;
+using Albedo.Models;
 using Albedo.Utils;
 using Albedo.Views;
 
@@ -27,7 +28,7 @@ namespace Albedo
     /// 과거차트 보기
     /// 인디케이터
     /// 차트 수치 표시
-    /// 메뉴 클릭시 하이라이트(현재가 강조 표시 필요) // 코인 메뉴 업데이트 방식 최적화 이후 가능
+    /// 메뉴 클릭시 하이라이트(현재가 강조 표시 필요)
     /// 업비트, 빗썸 등등 추가
     /// 코인 메뉴 그룹화(L1: 거래소별(Market), L2: 타입별(Type; Spot;Index;Futures)
     /// 코인 즐겨찾기
@@ -84,66 +85,79 @@ namespace Albedo
             var data = obj.Data;
             foreach (var item in data)
             {
-                Menu.viewModel.UpdatePairInfo(new Pair("binance", item.Symbol, item.LastPrice, item.PriceChangePercent));
+                Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Futures, item.Symbol, item.LastPrice, item.PriceChangePercent));
             }
+        }
+
+        public void ClearPairList()
+        {
+            Menu.MainGrid.RowDefinitions.Clear();
+            Menu.MainGrid.Children.Clear();
         }
 
         public void RefreshPairList()
         {
             DispatcherService.Invoke(() =>
             {
-                // [TODO] 코인 메뉴 업데이트 방식 최적화 필요
-                Menu.MainGrid.RowDefinitions.Clear();
-                Menu.MainGrid.Children.Clear();
                 for (int i = 0; i < Menu.viewModel.Pairs.Count; i++)
                 {
-                    Menu.MainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(45) });
                     var pair = Menu.viewModel.Pairs[i];
-
-                    var pairControl = new PairControl();
-                    pairControl.Init(pair);
-
-                    /* 
-                     * 해당 코인 메뉴 클릭
-                     * 최초 클릭 시 클라이언트로 120개 Kline을 가져오고
-                     * 그 이후 소켓클라이언트로 실시간 Kline을 업데이트한다.
-                     */
-                    pairControl.PairClick = (_pair) =>
+                    if (pair.IsRendered)
                     {
-                        var chartControl = new ChartControl();
-                        var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(_pair.Symbol, Binance.Net.Enums.KlineInterval.OneMinute, null, null, 120);
-                        klineResult.Wait();
-                        chartControl.Init(klineResult.Result.Data.Select(x => new Quote
+                        var pairControl = LogicalTreeHelper.FindLogicalNode(Menu.MainGrid, $"{pair.Market}_{pair.MarketType}_{pair.Symbol}") as PairControl;
+                        if (pairControl != null)
                         {
-                            Date = x.OpenTime,
-                            Open = x.OpenPrice,
-                            High = x.HighPrice,
-                            Low = x.LowPrice,
-                            Close = x.ClosePrice,
-                            Volume = x.Volume,
-                        }).ToList());
-                        Chart.Content = chartControl;
+                            pairControl.viewModel.Price = pair.Price;
+                            pairControl.viewModel.PriceChangePercent = pair.PriceChangePercent;
+                        }
+                    }
+                    else
+                    {
+                        pair.IsRendered = true;
+                        Menu.MainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(45) });
+                        var pairControl = new PairControl(pair);
 
-                        binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
-                        var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(_pair.Symbol, Binance.Net.Enums.KlineInterval.OneMinute, (obj) =>
+                        /* 
+                        * 해당 코인 메뉴 클릭
+                        * 최초 클릭 시 클라이언트로 120개 Kline을 가져오고
+                        * 그 이후 소켓클라이언트로 실시간 Kline을 업데이트한다.
+                        */
+                        pairControl.PairClick = (_pair) =>
                         {
-                            chartControl.UpdateQuote(new Quote
+                            var chartControl = new ChartControl();
+                            var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(_pair.Symbol, Binance.Net.Enums.KlineInterval.OneMinute, null, null, 120);
+                            klineResult.Wait();
+                            chartControl.Init(klineResult.Result.Data.Select(x => new Quote
                             {
-                                Date = obj.Data.Data.OpenTime,
-                                Open = obj.Data.Data.OpenPrice,
-                                High = obj.Data.Data.HighPrice,
-                                Low = obj.Data.Data.LowPrice,
-                                Close = obj.Data.Data.ClosePrice,
-                                Volume = obj.Data.Data.Volume
-                            });
-                        });
-                        klineUpdateResult.Wait();
-                        subId = klineUpdateResult.Result.Data.Id;
-                        //pairControl.viewModel.IsSelected = true;
-                    };
+                                Date = x.OpenTime,
+                                Open = x.OpenPrice,
+                                High = x.HighPrice,
+                                Low = x.LowPrice,
+                                Close = x.ClosePrice,
+                                Volume = x.Volume,
+                            }).ToList());
+                            Chart.Content = chartControl;
 
-                    pairControl.SetValue(Grid.RowProperty, i);
-                    Menu.MainGrid.Children.Add(pairControl);
+                            binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
+                            var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(_pair.Symbol, Binance.Net.Enums.KlineInterval.OneMinute, (obj) =>
+                            {
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                });
+                            });
+                            klineUpdateResult.Wait();
+                            subId = klineUpdateResult.Result.Data.Id;
+                            pairControl.viewModel.IsSelected = true;
+                        };
+                        pairControl.SetValue(Grid.RowProperty, i);
+                        Menu.MainGrid.Children.Add(pairControl);
+                    }
                 }
             });
         }

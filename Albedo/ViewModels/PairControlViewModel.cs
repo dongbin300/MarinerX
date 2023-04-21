@@ -1,4 +1,5 @@
-﻿using Albedo.Models;
+﻿using Albedo.Enums;
+using Albedo.Models;
 
 using System;
 using System.ComponentModel;
@@ -26,8 +27,8 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(Symbol));
             }
         }
-        private string market = string.Empty;
-        public string Market
+        private PairMarket market = PairMarket.None;
+        public PairMarket Market
         {
             get => market;
             set
@@ -36,8 +37,18 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(Market));
             }
         }
-        private string price = string.Empty;
-        public string Price
+        private PairMarketType marketType = PairMarketType.None;
+        public PairMarketType MarketType
+        {
+            get => marketType;
+            set
+            {
+                marketType = value;
+                OnPropertyChanged(nameof(MarketType));
+            }
+        }
+        private decimal price = 0;
+        public decimal Price
         {
             get => price;
             set
@@ -46,8 +57,8 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(Price));
             }
         }
-        private string priceChangePercent = string.Empty;
-        public string PriceChangePercent
+        private decimal priceChangePercent = 0;
+        public decimal PriceChangePercent
         {
             get => priceChangePercent;
             set
@@ -56,7 +67,6 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(PriceChangePercent));
             }
         }
-        public string TextColor => priceChangePercent.Length >= 1 && priceChangePercent[0] != '-' ? "3BCF86" : "ED3161";
         private BitmapImage marketIcon = new();
         public BitmapImage MarketIcon
         {
@@ -78,21 +88,21 @@ namespace Albedo.ViewModels
             }
         }
 
-        public PairControlViewModel()
+        public string PriceString => price.ToString();
+        public string PriceChangePercentString => Math.Round(priceChangePercent, 2) + "%";
+        public bool IsBullish => priceChangePercent >= 0;
+
+        public PairControlViewModel(Pair pair)
         {
+            Symbol = pair.Symbol;
+            Market = pair.Market;
+            MarketType = pair.MarketType;
+            Price = pair.Price;
+            PriceChangePercent = pair.PriceChangePercent;
 
-        }
-
-        public void Init(Pair symbol)
-        {
-            Symbol = symbol.Symbol;
-            Market = symbol.Market;
-            Price = symbol.Price.ToString();
-            PriceChangePercent = Math.Round(symbol.PriceChangePercent, 2) + "%";
-
-            MarketIcon = new BitmapImage(new Uri("pack://application:,,,/Albedo;component/Resources/" + Market.ToLower() switch
+            MarketIcon = new BitmapImage(new Uri("pack://application:,,,/Albedo;component/Resources/" + Market switch
             {
-                "binance" => "binance.png",
+                PairMarket.Binance => "binance.png",
                 _ => ""
             }));
         }

@@ -3,23 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:Albedo.ViewModels"
-             xmlns:converter="clr-namespace:Albedo.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="200" Background="{StaticResource Background}">
 
-    <UserControl.DataContext>
-        <vm:PairControlViewModel x:Name="viewModel" />
-    </UserControl.DataContext>
-
-    <UserControl.Resources>
-        <converter:StringToForegroundConverter x:Key="stf"/>
-    </UserControl.Resources>
-
-    <!-- 
-        심볼   가격
-        거래소 등락률
-        -->
     <Grid Grid.Row="0" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
         <Grid.Style>
             <Style TargetType="Grid">
@@ -46,8 +32,34 @@
             <Image Margin="3,0,0,0" Height="14" Source="{Binding MarketIcon}"/>
             <TextBlock Padding="3" Text="{Binding Market}"/>
         </StackPanel>
-        <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Foreground="{Binding TextColor, Converter={StaticResource stf}}" Text="{Binding Price}"/>
-        <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Foreground="{Binding TextColor, Converter={StaticResource stf}}" Text="{Binding PriceChangePercent}"/>
+        <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding PriceString}" FontFamily="Meiryo UI">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBullish}" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Long}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsBullish}" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource Short}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding PriceChangePercentString}" FontFamily="Meiryo UI">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBullish}" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Long}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsBullish}" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource Short}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
         <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Height="1" Fill="{StaticResource Separator}"/>
     </Grid>
 </UserControl>

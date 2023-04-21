@@ -1,4 +1,5 @@
 ﻿using Albedo.Models;
+using Albedo.ViewModels;
 
 using System;
 using System.Windows.Controls;
@@ -11,23 +12,22 @@ namespace Albedo.Views
     /// </summary>
     public partial class PairControl : UserControl
     {
-        Pair symbol = default!;
+        public PairControlViewModel viewModel;
+        Pair pair = default!;
         public Action<Pair> PairClick = default!;
 
-        public PairControl()
+        public PairControl(Pair pair)
         {
             InitializeComponent();
-        }
-
-        public void Init(Pair symbol)
-        {
-            this.symbol = symbol;
-            viewModel.Init(symbol);
+            this.pair = pair;
+            viewModel = new PairControlViewModel(pair);
+            DataContext = viewModel;
+            Name = $"{viewModel.Market}_{viewModel.MarketType}_{viewModel.Symbol}";
         }
 
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            PairClick.Invoke(symbol);
+            PairClick.Invoke(pair);
         }
     }
 }
