@@ -51,6 +51,12 @@
                             <DataTrigger Binding="{Binding IsBullish}" Value="False">
                                 <Setter Property="Foreground" Value="{StaticResource Short}" />
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                <Setter Property="FontWeight" Value="Medium" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
@@ -65,12 +71,18 @@
                             <DataTrigger Binding="{Binding IsBullish}" Value="False">
                                 <Setter Property="Foreground" Value="{StaticResource Short}" />
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                <Setter Property="FontWeight" Value="Medium" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
         </Grid>
         
-        <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Height="1" Fill="{StaticResource Separator}"/>
+        <Rectangle Grid.Row="1" Height="1" Fill="{StaticResource Separator}"/>
     </Grid>
 </UserControl>
