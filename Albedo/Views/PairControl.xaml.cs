@@ -1,7 +1,7 @@
 ﻿using Albedo.Models;
+using Albedo.Utils;
 using Albedo.ViewModels;
 
-using System;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -13,8 +13,7 @@ namespace Albedo.Views
     public partial class PairControl : UserControl
     {
         public PairControlViewModel viewModel;
-        Pair pair = default!;
-        public Action<Pair> PairClick = default!;
+        Pair pair;
 
         public PairControl(Pair pair)
         {
@@ -27,7 +26,7 @@ namespace Albedo.Views
 
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            PairClick.Invoke(pair);
+            Common.PairMenuClick.Invoke(pair);
         }
     }
 }
