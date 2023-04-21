@@ -55,6 +55,7 @@ namespace Albedo.ViewModels
             {
                 price = value;
                 OnPropertyChanged(nameof(Price));
+                OnPropertyChanged(nameof(PriceString));
             }
         }
         private decimal priceChangePercent = 0;
@@ -65,6 +66,8 @@ namespace Albedo.ViewModels
             {
                 priceChangePercent = value;
                 OnPropertyChanged(nameof(PriceChangePercent));
+                OnPropertyChanged(nameof(PriceChangePercentString));
+                OnPropertyChanged(nameof(IsBullish));
             }
         }
         private BitmapImage marketIcon = new();

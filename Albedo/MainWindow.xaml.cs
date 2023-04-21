@@ -153,6 +153,14 @@ namespace Albedo
                             });
                             klineUpdateResult.Wait();
                             subId = klineUpdateResult.Result.Data.Id;
+                            foreach (var element in Menu.MainGrid.Children)
+                            {
+                                if (element is not PairControl pairControl)
+                                {
+                                    continue;
+                                }
+                                pairControl.viewModel.IsSelected = false;
+                            }
                             pairControl.viewModel.IsSelected = true;
                         };
                         pairControl.SetValue(Grid.RowProperty, i);
