@@ -30,7 +30,9 @@ namespace Albedo
     /// 빗썸: 1, 5, 15, 30분, 1, 2, 4, 6, 12시간, 1일, 1주, 1월
     /// 공통: 1, 5, 15, 30분, 1, 4시간, 1일, 1주, 1월
     /// 인디케이터
+    /// -이평, 볼밴, RSI 필수
     /// 과거차트 보기
+    /// 심볼 검색 기능
     /// 차트 수치, 그리드 표시 및 수치 정보 툴팁
     /// 업비트, 빗썸 등등 추가
     /// 코인 메뉴 그룹화(L1: 거래소별(Market), L2: 타입별(Type; Spot;Index;Futures)
@@ -41,6 +43,7 @@ namespace Albedo
     /// 그림 그리기(추후 아마 안할듯)
     /// 
     /// 로깅
+    /// API KEY 입력 UI
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -138,7 +141,7 @@ namespace Albedo
             Common.ChartRefresh = () =>
             {
                 var chartControl = new ChartControl();
-                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, Common.ChartInterval, null, null, 120);
+                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, Common.ChartInterval, null, null, Common.ChartLoadLimit);
                 klineResult.Wait();
                 chartControl.Init(klineResult.Result.Data.Select(x => new Quote
                 {
@@ -149,6 +152,7 @@ namespace Albedo
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList());
+                chartControl.Start = Math.Max(chartControl.End - Common.ChartDefaultViewCount, 0);
                 Chart.Content = chartControl;
 
                 binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
@@ -166,6 +170,26 @@ namespace Albedo
                 });
                 klineUpdateResult.Wait();
                 subId = klineUpdateResult.Result.Data.Id;
+            };
+
+            Common.ChartAdditionalLoad = () =>
+            {
+                if (Chart.Content is not ChartControl chartControl)
+                {
+                    return;
+                }
+
+                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, Common.ChartInterval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                klineResult.Wait();
+                chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
+                {
+                    Date = x.OpenTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList());
             };
         }
 

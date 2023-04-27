@@ -1,10 +1,8 @@
 ﻿using Albedo.Commands;
-using Albedo.Models;
 using Albedo.Utils;
 
 using Binance.Net.Enums;
 
-using System;
 using System.ComponentModel;
 using System.Windows.Input;
 

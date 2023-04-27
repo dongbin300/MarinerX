@@ -75,6 +75,26 @@ namespace Albedo.Views
             DispatcherService.Invoke(InvalidateVisual);
         }
 
+        public void ConcatenateQuotes(List<Quote> quotes)
+        {
+            var preQuoteCount = Quotes.Count;
+            for (int i = quotes.Count - 1; i >= 0; i--)
+            {
+                var quote = quotes[i];
+                var _quote = Quotes.Find(q => q.Date.Equals(quote.Date));
+                if (_quote == null)
+                {
+                    Quotes.Insert(0, quote);
+                }
+            }
+            TotalCount = Quotes.Count;
+            var additionalQuoteCount = Quotes.Count - preQuoteCount;
+            Start += additionalQuoteCount;
+            End += additionalQuoteCount;
+
+            InvalidateVisual();
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (ViewCount <= 0)
@@ -88,6 +108,11 @@ namespace Albedo.Views
             {
                 radioButton.IsChecked = true;
                 break;
+            }
+
+            if (Start <= 0)
+            {
+                Common.ChartAdditionalLoad.Invoke();
             }
 
             CandleContent.Quotes = Quotes;
