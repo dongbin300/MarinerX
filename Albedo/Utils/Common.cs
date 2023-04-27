@@ -16,5 +16,6 @@ namespace Albedo.Utils
         public static Action<Pair> PairMenuClick = default!;
         public static Action ChartRefresh = default!;
         public static Action ChartAdditionalLoad = default!;
+        public static Action SearchKeywordChanged = default!;
     }
 }

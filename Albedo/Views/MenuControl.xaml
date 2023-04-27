@@ -11,7 +11,17 @@
         <vm:MenuControlViewModel x:Name="viewModel" />
     </UserControl.DataContext>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Background="{StaticResource Background}" x:Name="MainGrid"/>
-    </ScrollViewer>
+    <Grid Background="{StaticResource Background}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBox Grid.Row="0" x:Name="SearchTextBox" CharacterCasing="Upper" Text="{Binding KeywordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid x:Name="MainGrid"/>
+        </ScrollViewer>
+    </Grid>
+    
 </UserControl>

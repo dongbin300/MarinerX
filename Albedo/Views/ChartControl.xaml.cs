@@ -1,4 +1,5 @@
-﻿using Albedo.Utils;
+﻿using Albedo.Models;
+using Albedo.Utils;
 using Albedo.Views.Contents;
 
 using Skender.Stock.Indicators;
@@ -22,12 +23,13 @@ namespace Albedo.Views
         public VolumeContent VolumeContent { get; set; } = default!;
 
         public List<Quote> Quotes = new();
+        public List<Models.Indicator> Indicators = new();
         private int itemMargin = 1;
 
         public int Start = 0;
         public int End = 0;
         public int ViewCountMin = 10;
-        public int ViewCountMax = 1000;
+        public int ViewCountMax = 500;
         public int ViewCount => End - Start;
         public int TotalCount = 0;
         public Point CurrentMousePosition;
@@ -51,6 +53,7 @@ namespace Albedo.Views
             CandleChart.Content = CandleContent;
             VolumeChart.Content = VolumeContent;
 
+            CalculateIndicators();
             InvalidateVisual();
         }
 
@@ -92,7 +95,21 @@ namespace Albedo.Views
             Start += additionalQuoteCount;
             End += additionalQuoteCount;
 
+            CalculateIndicators();
             InvalidateVisual();
+        }
+
+        public void CalculateIndicators()
+        {
+            var results = Quotes.GetEma(112);
+            Indicators.Clear();
+            foreach(var result in results)
+            {
+                var indicator = result.Ema == null ?
+                    new Models.Indicator() { Date = result.Date, Value = 0 } :
+                    new Models.Indicator() { Date = result.Date, Value = (decimal)result.Ema.Value };
+                Indicators.Add(indicator);
+            }
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -116,6 +133,7 @@ namespace Albedo.Views
             }
 
             CandleContent.Quotes = Quotes;
+            CandleContent.Indicators = Indicators;
             CandleContent.Start = Start;
             CandleContent.End = End;
             VolumeContent.Quotes = Quotes;

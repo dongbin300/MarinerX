@@ -1,4 +1,5 @@
 ﻿using Albedo.Models;
+using Albedo.Utils;
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -26,10 +27,20 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(Pairs));
             }
         }
+        private string keywordText = string.Empty;
+        public string KeywordText
+        {
+            get => keywordText;
+            set
+            {
+                keywordText = value;
+                OnPropertyChanged(nameof(KeywordText));
+                Common.SearchKeywordChanged();
+            }
+        }
 
         public MenuControlViewModel()
         {
-
         }
 
         public void UpdatePairInfo(Pair pair)

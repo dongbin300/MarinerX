@@ -29,9 +29,9 @@ namespace Albedo
     /// 업비트: 1, 3, 5, 15, 10, 30분, 1, 4시간, 1일, 1주, 1월
     /// 빗썸: 1, 5, 15, 30분, 1, 2, 4, 6, 12시간, 1일, 1주, 1월
     /// 공통: 1, 5, 15, 30분, 1, 4시간, 1일, 1주, 1월
+    /// 
     /// 인디케이터
-    /// -이평, 볼밴, RSI 필수
-    /// 과거차트 보기
+    /// -이평(기간, 종류[단순sma,가중wma,지수ema], 라인색, 굵기), 볼밴, RSI 필수
     /// 심볼 검색 기능
     /// 차트 수치, 그리드 표시 및 수치 정보 툴팁
     /// 업비트, 빗썸 등등 추가
@@ -44,6 +44,7 @@ namespace Albedo
     /// 
     /// 로깅
     /// API KEY 입력 UI
+    /// 기능 정리 및 견적
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -119,6 +120,7 @@ namespace Albedo
 
         void InitAction()
         {
+            // 코인 메뉴 클릭 이벤트
             Common.PairMenuClick = (pair) =>
             {
                 Common.Pair = pair;
@@ -138,6 +140,7 @@ namespace Albedo
                 }
             };
 
+            // 차트 새로고침 이벤트
             Common.ChartRefresh = () =>
             {
                 var chartControl = new ChartControl();
@@ -172,6 +175,7 @@ namespace Albedo
                 subId = klineUpdateResult.Result.Data.Id;
             };
 
+            // 차트 추가 로드 이벤트
             Common.ChartAdditionalLoad = () =>
             {
                 if (Chart.Content is not ChartControl chartControl)
@@ -191,6 +195,25 @@ namespace Albedo
                     Volume = x.Volume,
                 }).ToList());
             };
+
+            // 검색 키워드 변경 이벤트
+            Common.SearchKeywordChanged = () =>
+            {
+                for (int i = 0; i < Menu.MainGrid.Children.Count; i++)
+                {
+                    var pairControl = (PairControl)Menu.MainGrid.Children[i];
+                    if (pairControl.viewModel.Symbol.Contains(Menu.viewModel.KeywordText))
+                    {
+                        Menu.MainGrid.RowDefinitions[i].Height = new GridLength(45);
+                        pairControl.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        Menu.MainGrid.RowDefinitions[i].Height = GridLength.Auto;
+                        pairControl.Visibility = Visibility.Collapsed;
+                    }
+                }
+            };
         }
 
         public void ClearPairList()
@@ -206,7 +229,7 @@ namespace Albedo
                 for (int i = 0; i < Menu.viewModel.Pairs.Count; i++)
                 {
                     var pair = Menu.viewModel.Pairs[i];
-                    if (pair.IsRendered)
+                    if (pair.IsRendered) // 이미 추가된 코인
                     {
                         var pairControl = LogicalTreeHelper.FindLogicalNode(Menu.MainGrid, $"{pair.Market}_{pair.MarketType}_{pair.Symbol}") as PairControl;
                         if (pairControl != null)
@@ -215,13 +238,18 @@ namespace Albedo
                             pairControl.viewModel.PriceChangePercent = pair.PriceChangePercent;
                         }
                     }
-                    else
+                    else // 새로 추가되는 코인
                     {
-                        pair.IsRendered = true;
-                        Menu.MainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(45) });
-                        var pairControl = new PairControl(pair);
-                        pairControl.SetValue(Grid.RowProperty, i);
-                        Menu.MainGrid.Children.Add(pairControl);
+                        // 검색중일 경우 키워드에 포함되는 것만 표시
+                        // 이걸 추가하지 않으면 검색중에 새로 추가되는 코인들이 나타남
+                        if (pair.Symbol.Contains(Menu.viewModel.KeywordText)) 
+                        {
+                            pair.IsRendered = true;
+                            Menu.MainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(45) });
+                            var pairControl = new PairControl(pair);
+                            pairControl.SetValue(Grid.RowProperty, i);
+                            Menu.MainGrid.Children.Add(pairControl);
+                        }
                     }
                 }
             });

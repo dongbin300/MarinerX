@@ -17,6 +17,24 @@
             <Setter Property="FontSize" Value="13" />
         </Style>
 
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Foreground" Value="#F1F1F1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="Meiryo UI" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="BorderBrush" Value="#666" />
+            <Setter Property="BorderThickness" Value="0 0 0 1" />
+            <Setter Property="CaretBrush" Value="#3BCF86" />
+            <Style.Triggers>
+                <Trigger Property="TextBox.IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#3BCF86" />
+                </Trigger>
+                <Trigger Property="TextBox.IsMouseOver" Value="False">
+                    <Setter Property="BorderBrush" Value="#666" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <!--#region ScrollViewer -->
         <Style TargetType="{x:Type ScrollViewer}">
             <Setter Property="Template">
