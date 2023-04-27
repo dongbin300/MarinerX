@@ -48,7 +48,7 @@
             <RowDefinition Height="1"/>
             <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
+        <Grid Name="IntervalGrid" Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="50"/>

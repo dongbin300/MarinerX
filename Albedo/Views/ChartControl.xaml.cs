@@ -5,6 +5,7 @@ using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -82,6 +83,12 @@ namespace Albedo.Views
             }
 
             base.OnRender(drawingContext);
+
+            foreach (var radioButton in IntervalGrid.Children.OfType<RadioButton>().Where(radioButton => radioButton.CommandParameter.Equals(Settings.Default.Interval)))
+            {
+                radioButton.IsChecked = true;
+                break;
+            }
 
             CandleContent.Quotes = Quotes;
             CandleContent.Start = Start;
