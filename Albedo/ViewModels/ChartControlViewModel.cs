@@ -31,6 +31,8 @@ namespace Albedo.ViewModels
                     return;
                 }
 
+                Settings.Default.Interval = obj.ToString();
+                Settings.Default.Save();
                 Common.ChartInterval = obj.ToString() switch
                 {
                     "1분" => KlineInterval.OneMinute,

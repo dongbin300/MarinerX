@@ -122,10 +122,10 @@ namespace Albedo.Views
 
         private void UserControl_MouseMove(object sender, MouseEventArgs e)
         {
-            var itemWidth = CandleChart.ActualWidth / ViewCount;
-            Vector diff = e.GetPosition(Parent as Window) - CurrentMousePosition;
             if (IsMouseCaptured)
             {
+                var itemWidth = CandleChart.ActualWidth / ViewCount;
+                Vector diff = e.GetPosition(null) - CurrentMousePosition;
                 var moveUnit = (int)(diff.X / itemWidth / 20);
                 if (diff.X > 0) // Graph Move Left
                 {
@@ -152,7 +152,7 @@ namespace Albedo.Views
 
         private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            CurrentMousePosition = e.GetPosition(Parent as Window);
+            CurrentMousePosition = e.GetPosition(null);
             CaptureMouse();
         }
 

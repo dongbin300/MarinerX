@@ -4,6 +4,7 @@ using Albedo.Utils;
 using Albedo.Views;
 
 using Binance.Net.Clients;
+using Binance.Net.Enums;
 using Binance.Net.Interfaces;
 using Binance.Net.Objects;
 
@@ -52,6 +53,7 @@ namespace Albedo
         public MainWindow()
         {
             InitializeComponent();
+            InitSettings();
             InitBinanceClient();
             InitAction();
 
@@ -63,6 +65,23 @@ namespace Albedo
         private void Timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             RefreshPairList();
+        }
+
+        void InitSettings()
+        {
+            Common.ChartInterval = Settings.Default.Interval switch
+            {
+                "1분" => KlineInterval.OneMinute,
+                "5분" => KlineInterval.FiveMinutes,
+                "15분" => KlineInterval.FifteenMinutes,
+                "30분" => KlineInterval.ThirtyMinutes,
+                "1시간" => KlineInterval.OneHour,
+                "4시간" => KlineInterval.FourHour,
+                "1일" => KlineInterval.OneDay,
+                "1주" => KlineInterval.OneWeek,
+                "1월" => KlineInterval.OneMonth,
+                _ => KlineInterval.OneMinute,
+            };
         }
 
         void InitBinanceClient()
