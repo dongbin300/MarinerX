@@ -1,7 +1,9 @@
 ﻿using Albedo.Utils;
 using Skender.Stock.Indicators;
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,6 +30,20 @@ namespace Albedo.Views.Contents
 
             var itemWidth = ActualWidth / ViewCount;
             var volumeMax = Quotes.Skip(Start).Take(ViewCount).Max(x => x.Volume);
+
+            // Draw Grid
+            var gridLevel = 2; // 2등분
+            for (int i = 0; i <= gridLevel; i++)
+            {
+                if (i > 0)
+                {
+                    drawingContext.DrawLine(
+                                     DrawingTools.GridPen,
+                                     new Point(0, ActualHeight * ((double)i / gridLevel)),
+                                     new Point(ActualWidth, ActualHeight * ((double)i / gridLevel))
+                                  );
+                }
+            }
 
             for (int i = Start; i < End; i++)
             {

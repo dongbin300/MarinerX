@@ -32,6 +32,35 @@ namespace Albedo.Views.Contents
             var priceMax = Quotes.Skip(Start).Take(ViewCount).Max(x => x.High);
             var priceMin = Quotes.Skip(Start).Take(ViewCount).Min(x => x.Low);
 
+            // Draw Grid
+            var gridLevel = 4; // 4등분
+            for (int i = 0; i <= gridLevel; i++)
+            {
+                if (i > 0)
+                {
+                    drawingContext.DrawLine(
+                                      DrawingTools.GridPen,
+                                      new Point(0, ActualHeight * ((double)i / gridLevel)),
+                                      new Point(ActualWidth, ActualHeight * ((double)i / gridLevel))
+                                   );
+
+                    //drawingContext.DrawLine(
+                    //                  DrawingTools.GridPen,
+                    //                  new Point(ActualWidth * ((double)i / gridLevel), 0),
+                    //                  new Point(ActualWidth * ((double)i / gridLevel), ActualHeight)
+                    //    );
+                }
+
+                //var startTimestamp = Quotes[Start].Date.ToTimestamp();
+                //var endTimestamp = Quotes[End - 1].Date.ToTimestamp();
+                //var gridTime = (startTimestamp + (long)((endTimestamp - startTimestamp) * ((double)(gridLevel - i) / gridLevel))).ToDateTime();
+
+                //drawingContext.DrawText(
+                //    new FormattedText(gridTime.ToString("yyyy-MM-dd HH:mm"), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface("Meiryo UI"), 9, DrawingTools.GridBrush, VisualTreeHelper.GetDpi(this).PixelsPerDip),
+                //new Point(ActualWidth * ((double)i / gridLevel), ActualHeight)
+                //);
+            }
+
             for (int i = Start; i < End; i++)
             {
                 var quote = Quotes[i];

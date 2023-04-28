@@ -15,7 +15,6 @@
     <UserControl.DataContext>
         <vm:ChartControlViewModel x:Name="viewModel"/>
     </UserControl.DataContext>
-    
     <UserControl.Resources>
         <Style TargetType="{x:Type RadioButton}">
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -41,6 +40,7 @@
             </Setter>
         </Style>
     </UserControl.Resources>
+
     <Grid Name="MainGrid" Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
@@ -48,6 +48,7 @@
             <RowDefinition Height="1"/>
             <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
+
         <Grid Name="IntervalGrid" Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
@@ -71,9 +72,26 @@
             <RadioButton Grid.Column="7" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
             <RadioButton Grid.Column="8" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
         </Grid>
-        <ContentControl Grid.Row="1" Grid.RowSpan="2" x:Name="CandleChart"/>
+
+        <Grid Name="CandleChartGrid" Grid.Row="1" Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="75"/>
+            </Grid.ColumnDefinitions>
+            <ContentControl x:Name="CandleChart" Grid.Column="0"/>
+            <ContentControl x:Name="CandleChartAxis" Grid.Column="1"/>
+        </Grid>
+
         <GridSplitter ResizeDirection="Rows" Grid.Row="2" Width="{Binding ActualWidth, ElementName=MainGrid}" Height="3" Background="{StaticResource ChartBackground}"/>
-        <ContentControl Grid.Row="3" x:Name="VolumeChart"/>
+
+        <Grid Name="VolumeChartGrid" Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="75"/>
+            </Grid.ColumnDefinitions>
+            <ContentControl x:Name="VolumeChart" Grid.Column="0"/>
+            <ContentControl x:Name="VolumeChartAxis" Grid.Column="1"/>
+        </Grid>
     </Grid>
 </UserControl>
 

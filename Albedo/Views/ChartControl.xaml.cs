@@ -1,5 +1,4 @@
-﻿using Albedo.Models;
-using Albedo.Utils;
+﻿using Albedo.Utils;
 using Albedo.Views.Contents;
 
 using Skender.Stock.Indicators;
@@ -20,7 +19,9 @@ namespace Albedo.Views
     public partial class ChartControl : UserControl
     {
         public CandleContent CandleContent { get; set; } = default!;
+        public CandleAxisContent CandleAxisContent { get; set; } = default!;
         public VolumeContent VolumeContent { get; set; } = default!;
+        public VolumeAxisContent VolumeAxisContent { get; set; } = default!;
 
         public List<Quote> Quotes = new();
         public List<Models.Indicator> Indicators = new();
@@ -47,11 +48,15 @@ namespace Albedo.Views
             TotalCount = quotes.Count;
 
             CandleContent = new CandleContent();
+            CandleAxisContent = new CandleAxisContent();
             VolumeContent = new VolumeContent();
+            VolumeAxisContent = new VolumeAxisContent();
             CandleContent.ItemMargin = itemMargin;
             VolumeContent.ItemMargin = itemMargin;
             CandleChart.Content = CandleContent;
+            CandleChartAxis.Content = CandleAxisContent;
             VolumeChart.Content = VolumeContent;
+            VolumeChartAxis.Content = VolumeAxisContent;
 
             CalculateIndicators();
             InvalidateVisual();
@@ -127,20 +132,22 @@ namespace Albedo.Views
                 break;
             }
 
-            if (Start <= 0)
+            if (TotalCount > 0 && Start <= 0)
             {
                 Common.ChartAdditionalLoad.Invoke();
             }
 
-            CandleContent.Quotes = Quotes;
+            CandleContent.Quotes = CandleAxisContent.Quotes = Quotes;
             CandleContent.Indicators = Indicators;
-            CandleContent.Start = Start;
-            CandleContent.End = End;
-            VolumeContent.Quotes = Quotes;
-            VolumeContent.Start = Start;
-            VolumeContent.End = End;
+            CandleContent.Start = CandleAxisContent.Start = Start;
+            CandleContent.End = CandleAxisContent.End = End;
+            VolumeContent.Quotes = VolumeAxisContent.Quotes = Quotes;
+            VolumeContent.Start = VolumeAxisContent.Start = Start;
+            VolumeContent.End = VolumeAxisContent.End = End;
             CandleContent.InvalidateVisual();
+            CandleAxisContent.InvalidateVisual();
             VolumeContent.InvalidateVisual();
+            VolumeAxisContent.InvalidateVisual();
         }
 
         private void UserControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
