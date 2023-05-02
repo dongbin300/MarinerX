@@ -30,20 +30,26 @@ namespace Albedo
     /// 빗썸: 1, 5, 15, 30분, 1, 2, 4, 6, 12시간, 1일, 1주, 1월
     /// 공통: 1, 5, 15, 30분, 1, 4시간, 1일, 1주, 1월
     /// 
-    /// 인디케이터
-    /// -이평(기간, 종류[단순sma,가중wma,지수ema], 라인색, 굵기), 볼밴, RSI 필수
+    /// 수
     /// 수치 정보 툴팁
-    /// 업비트, 빗썸 등등 추가
-    /// 코인 메뉴 그룹화(L1: 거래소별(Market), L2: 타입별(Type; Spot;Index;Futures)
+    /// 
+    /// 목
+    /// 바이낸스, 업비트, 빗썸 등등 추가
+    /// 
+    /// 월화
+    /// 코인 메뉴 그룹화(L1: 거래소별(Market), L2: 타입별(Type; Spot;Index;Futures) + 설정 UI 및 버튼 추가(API키 입력, 라이트/다크 모드, 화면설정)
+    /// 
+    /// 수
     /// 코인 즐겨찾기
     /// 
-    /// 라이트/다크 모드(추후)
-    /// 화면 설정(추후)
-    /// 그림 그리기(추후 아마 안할듯)
+    /// 목금
+    /// 인디케이터
+    /// -이평(기간, 종류[단순sma,가중wma,지수ema], 라인색, 굵기), 볼밴, RSI 필수
     /// 
     /// 로깅
-    /// API KEY 입력 UI
-    /// 기능 정리 및 견적
+    /// 기능 정리 및 견적 및 사용 매뉴얼 작성
+    /// 
+    /// 그림 그리기(추후 아마 안할듯)
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -59,7 +65,30 @@ namespace Albedo
             InitBinanceClient();
             InitAction();
 
-            binanceSocketClient.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync(BinanceAllTickerUpdates);
+            binanceSocketClient.SpotStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            {
+                var data = obj.Data;
+                foreach (var item in data)
+                {
+                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Spot, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                }
+            });
+            binanceSocketClient.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            {
+                var data = obj.Data;
+                foreach (var item in data)
+                {
+                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Futures, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                }
+            });
+            binanceSocketClient.CoinFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            {
+                var data = obj.Data;
+                foreach (var item in data)
+                {
+                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.CoinFutures, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                }
+            });
             timer.Elapsed += Timer_Elapsed;
             timer.Start();
         }
@@ -105,15 +134,6 @@ namespace Albedo
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-            }
-        }
-
-        void BinanceAllTickerUpdates(DataEvent<IEnumerable<IBinance24HPrice>> obj)
-        {
-            var data = obj.Data;
-            foreach (var item in data)
-            {
-                Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Futures, item.Symbol, item.LastPrice, item.PriceChangePercent));
             }
         }
 

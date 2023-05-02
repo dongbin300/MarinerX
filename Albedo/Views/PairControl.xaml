@@ -33,7 +33,7 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="90"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Padding="3" FontWeight="Bold" Text="{Binding Symbol}"/>

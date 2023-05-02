@@ -5,6 +5,6 @@
         None,
         Spot,
         Futures,
-
+        CoinFutures
     }
 }
