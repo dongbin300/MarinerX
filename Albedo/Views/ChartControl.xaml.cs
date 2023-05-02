@@ -11,6 +11,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
+using static Albedo.Apis.WinApi;
+
 namespace Albedo.Views
 {
     /// <summary>
@@ -18,6 +20,8 @@ namespace Albedo.Views
     /// </summary>
     public partial class ChartControl : UserControl
     {
+        private System.Timers.Timer chartControlTimer = new System.Timers.Timer(25);
+
         public CandleContent CandleContent { get; set; } = default!;
         public CandleAxisContent CandleAxisContent { get; set; } = default!;
         public VolumeContent VolumeContent { get; set; } = default!;
@@ -25,34 +29,47 @@ namespace Albedo.Views
 
         public List<Quote> Quotes = new();
         public List<Models.Indicator> Indicators = new();
-        private int itemMargin = 1;
+        public int TotalCount => Quotes.Count;
 
-        public int Start = 0;
-        public int End = 0;
+        public double ChartWidth => Quotes.Count * ItemFullWidth;
+        public double ViewStartPosition { get; set; } = 0;
+        public double ViewEndPosition { get; set; } = 0;
+        public double ViewWidth => ViewEndPosition - ViewStartPosition;
+
+        public int ItemFullWidth => Common.ChartItemFullWidth;
+        public double ItemMarginPercent => Common.ChartItemMarginPercent;
+        public double ItemWidth => ItemFullWidth * (1 - ItemMarginPercent);
+        public double ItemMargin => ItemFullWidth * ItemMarginPercent;
+
+        public int StartItemIndex => (int)(Quotes.Count * (ViewStartPosition / ChartWidth));
+        public int EndItemIndex => (int)(Quotes.Count * (ViewEndPosition / ChartWidth));
+        public int ViewItemCount => EndItemIndex - StartItemIndex + 1;
+
+        public double ActualItemFullWidth => ActualWidth / ViewItemCount;
+        public double ActualItemWidth => ActualItemFullWidth * (1 - ItemMarginPercent);
+        public double ActualItemMargin => ActualItemFullWidth * ItemMarginPercent;
+
         public int ViewCountMin = 10;
         public int ViewCountMax = 500;
-        public int ViewCount => End - Start;
-        public int TotalCount = 0;
-        public Point CurrentMousePosition;
+
+        public Point StartMousePosition;
 
         public ChartControl()
         {
             InitializeComponent();
+            chartControlTimer.Elapsed += ChartControlTimer_Elapsed;
         }
 
         public void Init(List<Quote> quotes)
         {
             Quotes = quotes;
-            Start = 0;
-            End = quotes.Count;
-            TotalCount = quotes.Count;
+            ViewStartPosition = ChartWidth - ItemFullWidth * 60;
+            ViewEndPosition = ChartWidth;
 
             CandleContent = new CandleContent();
             CandleAxisContent = new CandleAxisContent();
             VolumeContent = new VolumeContent();
             VolumeAxisContent = new VolumeAxisContent();
-            CandleContent.ItemMargin = itemMargin;
-            VolumeContent.ItemMargin = itemMargin;
             CandleChart.Content = CandleContent;
             CandleChartAxis.Content = CandleAxisContent;
             VolumeChart.Content = VolumeContent;
@@ -75,9 +92,8 @@ namespace Albedo.Views
             else
             {
                 Quotes.Add(quote);
-                Start++;
-                End++;
-                TotalCount++;
+                ViewStartPosition += ItemFullWidth;
+                ViewEndPosition += ItemFullWidth;
             }
 
             DispatcherService.Invoke(InvalidateVisual);
@@ -95,10 +111,9 @@ namespace Albedo.Views
                     Quotes.Insert(0, quote);
                 }
             }
-            TotalCount = Quotes.Count;
             var additionalQuoteCount = Quotes.Count - preQuoteCount;
-            Start += additionalQuoteCount;
-            End += additionalQuoteCount;
+            ViewStartPosition += additionalQuoteCount * ItemFullWidth;
+            ViewEndPosition += additionalQuoteCount * ItemFullWidth;
 
             CalculateIndicators();
             InvalidateVisual();
@@ -108,7 +123,7 @@ namespace Albedo.Views
         {
             var results = Quotes.GetEma(112);
             Indicators.Clear();
-            foreach(var result in results)
+            foreach (var result in results)
             {
                 var indicator = result.Ema == null ?
                     new Models.Indicator() { Date = result.Date, Value = 0 } :
@@ -119,7 +134,7 @@ namespace Albedo.Views
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (ViewCount <= 0)
+            if (ViewItemCount <= 1)
             {
                 return;
             }
@@ -132,18 +147,18 @@ namespace Albedo.Views
                 break;
             }
 
-            if (TotalCount > 0 && Start <= 0)
+            if (TotalCount > 0 && ViewStartPosition <= ItemFullWidth)
             {
                 Common.ChartAdditionalLoad.Invoke();
             }
 
             CandleContent.Quotes = CandleAxisContent.Quotes = Quotes;
             CandleContent.Indicators = Indicators;
-            CandleContent.Start = CandleAxisContent.Start = Start;
-            CandleContent.End = CandleAxisContent.End = End;
+            CandleContent.ViewStartPosition = CandleAxisContent.ViewStartPosition = ViewStartPosition;
+            CandleContent.ViewEndPosition = CandleAxisContent.ViewEndPosition = ViewEndPosition;
             VolumeContent.Quotes = VolumeAxisContent.Quotes = Quotes;
-            VolumeContent.Start = VolumeAxisContent.Start = Start;
-            VolumeContent.End = VolumeAxisContent.End = End;
+            VolumeContent.ViewStartPosition = VolumeAxisContent.ViewStartPosition = ViewStartPosition;
+            VolumeContent.ViewEndPosition = VolumeAxisContent.ViewEndPosition = ViewEndPosition;
             CandleContent.InvalidateVisual();
             CandleAxisContent.InvalidateVisual();
             VolumeContent.InvalidateVisual();
@@ -152,73 +167,70 @@ namespace Albedo.Views
 
         private void UserControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var scaleUnit = Math.Max(1, ViewCount * Math.Abs(e.Delta) / 2000);
+            var unit = 300;
             if (e.Delta > 0) // Zoom-in
             {
-                if (ViewCount <= ViewCountMin)
+                if (ViewItemCount <= ViewCountMin)
                 {
                     return;
                 }
 
-                Start = Math.Min(TotalCount - ViewCountMin, Start + scaleUnit);
-                End = Math.Max(ViewCountMin, End - scaleUnit);
+                ViewStartPosition += unit;
+                ViewEndPosition -= unit;
             }
             else // Zoom-out
             {
-                if (ViewCount >= ViewCountMax)
+                if (ViewItemCount >= ViewCountMax)
                 {
                     return;
                 }
 
-                Start = Math.Max(0, Start - scaleUnit);
-                End = Math.Min(TotalCount, End + scaleUnit);
+                ViewStartPosition = Math.Max(0, ViewStartPosition - unit);
+                ViewEndPosition = Math.Min(ChartWidth, ViewEndPosition + unit);
             }
 
             InvalidateVisual();
         }
 
-        private void UserControl_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (IsMouseCaptured)
-            {
-                var itemWidth = CandleChart.ActualWidth / ViewCount;
-                Vector diff = e.GetPosition(null) - CurrentMousePosition;
-                var moveUnit = (int)(diff.X / itemWidth / 20);
-                if (diff.X > 0) // Graph Move Left
-                {
-                    if (Start <= moveUnit) // Max Move Case
-                    {
-                        moveUnit = Start;
-                    }
-                    Start -= moveUnit;
-                    End -= moveUnit;
-                    InvalidateVisual();
-                }
-                else if (diff.X < 0) // Graph Move Right
-                {
-                    if (End >= TotalCount + moveUnit) // Max Move Case
-                    {
-                        moveUnit = End - TotalCount;
-                    }
-                    Start -= moveUnit;
-                    End -= moveUnit;
-                    InvalidateVisual();
-                }
-            }
-        }
-
         private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            CurrentMousePosition = e.GetPosition(null);
-            CaptureMouse();
+            StartMousePosition = GetCursorPosition();
+            chartControlTimer.Start();
         }
 
         private void UserControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsMouseCaptured)
+            chartControlTimer.Stop();
+        }
+
+        private void ChartControlTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            var currentMousePosition = GetCursorPosition();
+            Vector diff = currentMousePosition - StartMousePosition;
+            StartMousePosition = currentMousePosition;
+            var movePosition = diff.X / ActualItemFullWidth * ItemFullWidth;
+
+            DispatcherService.Invoke(() =>
             {
-                ReleaseMouseCapture();
-            }
+                if (diff.X > 0) // Graph Move Left
+                {
+                    if (ViewStartPosition - movePosition >= 0)
+                    {
+                        ViewStartPosition -= movePosition; // to do
+                        ViewEndPosition -= movePosition;
+                        InvalidateVisual();
+                    }
+                }
+                else if (diff.X < 0) // Graph Move Right
+                {
+                    if (ViewEndPosition - movePosition <= ChartWidth)
+                    {
+                        ViewStartPosition -= movePosition; // to do
+                        ViewEndPosition -= movePosition;
+                        InvalidateVisual();
+                    }
+                }
+            });
         }
     }
 }

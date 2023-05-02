@@ -11,6 +11,9 @@ namespace Albedo.Utils
         public static readonly int ChartLoadLimit = 600;
         public static readonly int ChartDefaultViewCount = 120;
 
+        public static readonly int ChartItemFullWidth = 100;
+        public static readonly double ChartItemMarginPercent = 0.2;
+
         public static Pair Pair = default!;
         public static KlineInterval ChartInterval = KlineInterval.OneMinute;
         public static Action<Pair> PairMenuClick = default!;

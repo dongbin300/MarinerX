@@ -14,23 +14,35 @@ namespace Albedo.Views.Contents
     {
         public List<Quote> Quotes { get; set; } = new();
         public List<Models.Indicator> Indicators { get; set; } = new();
-        public int Start { get; set; } = 0;
-        public int End { get; set; } = 0;
-        public int ViewCount => End - Start;
-        public int ItemMargin { get; set; } = 0;
+        public double ChartWidth => Quotes.Count * ItemFullWidth;
+        public double ViewStartPosition { get; set; } = 0;
+        public double ViewEndPosition { get; set; } = 0;
+        public double ViewWidth => ViewEndPosition - ViewStartPosition;
+
+        public int ItemFullWidth => Common.ChartItemFullWidth;
+        public double ItemMarginPercent => Common.ChartItemMarginPercent;
+        public double ItemWidth => ItemFullWidth * (1 - ItemMarginPercent);
+        public double ItemMargin => ItemFullWidth * ItemMarginPercent;
+
+        public int StartItemIndex => (int)(Quotes.Count * (ViewStartPosition / ChartWidth));
+        public int EndItemIndex => (int)(Quotes.Count * (ViewEndPosition / ChartWidth));
+        public int ViewItemCount => EndItemIndex - StartItemIndex + 1;
+
+        public double ActualItemFullWidth => ActualWidth / ViewItemCount;
+        public double ActualItemWidth => ActualItemFullWidth * (1 - ItemMarginPercent);
+        public double ActualItemMargin => ActualItemFullWidth * ItemMarginPercent;
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (ViewCount <= 0)
+            if (ViewItemCount <= 1)
             {
                 return;
             }
 
             base.OnRender(drawingContext);
 
-            var itemWidth = ActualWidth / ViewCount;
-            var priceMax = Quotes.Skip(Start).Take(ViewCount).Max(x => x.High);
-            var priceMin = Quotes.Skip(Start).Take(ViewCount).Min(x => x.Low);
+            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
+            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
 
             // Draw Grid
             var gridLevel = 4; // 4등분
@@ -61,22 +73,22 @@ namespace Albedo.Views.Contents
                 //);
             }
 
-            for (int i = Start; i < End; i++)
+            for (int i = StartItemIndex; i < EndItemIndex; i++)
             {
                 var quote = Quotes[i];
-                var viewIndex = i - Start;
+                var viewIndex = i - StartItemIndex;
 
                 // Draw Price Candlestick
                 drawingContext.DrawLine(
                     quote.Open < quote.Close ? DrawingTools.LongPen : DrawingTools.ShortPen,
-                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - priceMin) / (priceMax - priceMin))),
-                    new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - priceMin) / (priceMax - priceMin))));
+                    new Point(ActualItemFullWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.High - priceMin) / (priceMax - priceMin))),
+                    new Point(ActualItemFullWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - priceMin) / (priceMax - priceMin))));
                 drawingContext.DrawRectangle(
                     quote.Open < quote.Close ? DrawingTools.LongBrush : DrawingTools.ShortBrush,
                     quote.Open < quote.Close ? DrawingTools.LongPen : DrawingTools.ShortPen,
                     new Rect(
-                    new Point(itemWidth * viewIndex + ItemMargin, ActualHeight * (double)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin))),
-                    new Point(itemWidth * (viewIndex + 1) - ItemMargin, ActualHeight * (double)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin)))
+                    new Point(ActualItemFullWidth * viewIndex + ActualItemMargin / 2, ActualHeight * (double)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin))),
+                    new Point(ActualItemFullWidth * (viewIndex + 1) - ActualItemMargin / 2, ActualHeight * (double)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin)))
                     ));
 
                 // Draw Indicators
@@ -89,8 +101,8 @@ namespace Albedo.Views.Contents
                     {
                         drawingContext.DrawLine(
                             new Pen(new SolidColorBrush(Colors.Yellow), 1),
-                            new Point(itemWidth * (viewIndex - 0.5), ActualHeight * (double)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin))),
-                            new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin)))
+                            new Point(ActualItemFullWidth * (viewIndex - 0.5), ActualHeight * (double)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin))),
+                            new Point(ActualItemFullWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin)))
                             );
                     }
                 }

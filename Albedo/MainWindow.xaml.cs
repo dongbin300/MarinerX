@@ -154,7 +154,7 @@ namespace Albedo
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList());
-                chartControl.Start = Math.Max(chartControl.End - Common.ChartDefaultViewCount, 0);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
                 Chart.Content = chartControl;
 
                 binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
@@ -241,7 +241,7 @@ namespace Albedo
                     {
                         // 검색중일 경우 키워드에 포함되는 것만 표시
                         // 이걸 추가하지 않으면 검색중에 새로 추가되는 코인들이 나타남
-                        if (pair.Symbol.Contains(Menu.viewModel.KeywordText)) 
+                        if (pair.Symbol.Contains(Menu.viewModel.KeywordText))
                         {
                             pair.IsRendered = true;
                             Menu.MainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(45) });
@@ -269,19 +269,19 @@ namespace Albedo
             switch (e.Key)
             {
                 case Key.Left:
-                    if (chartControl.Start > 0)
+                    if (chartControl.ViewStartPosition > chartControl.ItemFullWidth)
                     {
-                        chartControl.Start--;
-                        chartControl.End--;
+                        chartControl.ViewStartPosition -= chartControl.ItemFullWidth;
+                        chartControl.ViewEndPosition -= chartControl.ItemFullWidth;
                         chartControl.InvalidateVisual();
                     }
                     break;
 
                 case Key.Right:
-                    if (chartControl.End + 1 <= chartControl.TotalCount)
+                    if (chartControl.ViewEndPosition + chartControl.ItemFullWidth <= chartControl.ChartWidth)
                     {
-                        chartControl.Start++;
-                        chartControl.End++;
+                        chartControl.ViewStartPosition += chartControl.ItemFullWidth;
+                        chartControl.ViewEndPosition += chartControl.ItemFullWidth;
                         chartControl.InvalidateVisual();
                     }
                     break;
