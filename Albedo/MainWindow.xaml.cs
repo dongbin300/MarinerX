@@ -5,15 +5,11 @@ using Albedo.Views;
 
 using Binance.Net.Clients;
 using Binance.Net.Enums;
-using Binance.Net.Interfaces;
 using Binance.Net.Objects;
-
-using CryptoExchange.Net.Sockets;
 
 using Skender.Stock.Indicators;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -31,7 +27,7 @@ namespace Albedo
     /// 공통: 1, 5, 15, 30분, 1, 4시간, 1일, 1주, 1월
     /// 
     /// 수
-    /// 수치 정보 툴팁
+    /// 선택된 거래소에 따른 pair 필터링, 수치 정보 툴팁
     /// 
     /// 목
     /// 바이낸스, 업비트, 빗썸 등등 추가

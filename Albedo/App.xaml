@@ -35,6 +35,65 @@
             </Style.Triggers>
         </Style>
 
+        <!--#region ComboBox -->
+        <ControlTemplate TargetType="{x:Type ToggleButton}" x:Key="ComboBoxToggleButton">
+            <Grid Margin="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="20" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="Border" Grid.ColumnSpan="2" Background="Transparent" BorderBrush="#666" BorderThickness="0 0 0 0.5" />
+                <Border x:Name="ContentBorder" Grid.Column="0" Margin="1" Background="Transparent" BorderBrush="#999" BorderThickness="0" />
+                <Path x:Name="Arrow" Grid.Column="1" Fill="#F4F4f4" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="ToggleButton.IsMouseOver" Value="true">
+                    <Setter TargetName="Border" Property="Background" Value="#121315" />
+                    <Setter TargetName="ContentBorder" Property="Background" Value="#121315" />
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="true">
+                    <Setter TargetName="Border" Property="Background" Value="#121315" />
+                    <Setter TargetName="ContentBorder" Property="Background" Value="#121315" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="Border" Property="Background" Value="#1B1D20" />
+                    <Setter TargetName="Border" Property="BorderBrush" Value="#AAA" />
+                    <Setter Property="Foreground" Value="#111"/>
+                    <Setter TargetName="Arrow" Property="Fill" Value="Transparent" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate TargetType="{x:Type TextBox}" x:Key="ComboBoxTextBox">
+            <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+        </ControlTemplate>
+
+        <Style TargetType="{x:Type ComboBox}">
+            <Setter Property="Foreground" Value="#F4F4F4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton" Template="{StaticResource ComboBoxToggleButton}" Grid.Column="2" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press">
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="3,3,23,3" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                            <TextBox x:Name="PART_EditableTextBox" Style="{x:Null}" Template="{StaticResource ComboBoxTextBox}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,3,23,3" Focusable="True" Background="Transparent" Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" Background="#121212" BorderThickness="1" BorderBrush="#666"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained">
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--#endregion-->
+        
         <!--#region ScrollViewer -->
         <Style TargetType="{x:Type ScrollViewer}">
             <Setter Property="Template">

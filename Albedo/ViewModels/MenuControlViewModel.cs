@@ -1,4 +1,5 @@
-﻿using Albedo.Models;
+﻿using Albedo.Enums;
+using Albedo.Models;
 using Albedo.Utils;
 
 using System.Collections.ObjectModel;
@@ -27,6 +28,46 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(Pairs));
             }
         }
+        private ObservableCollection<PairMarket> pairMarkets = new();
+        public ObservableCollection<PairMarket> PairMarkets
+        {
+            get => pairMarkets;
+            set
+            {
+                pairMarkets = value;
+                OnPropertyChanged(nameof(PairMarkets));
+            }
+        }
+        private ObservableCollection<PairMarketType> pairMarketTypes = new();
+        public ObservableCollection<PairMarketType> PairMarketTypes
+        {
+            get => pairMarketTypes;
+            set
+            {
+                pairMarketTypes = value;
+                OnPropertyChanged(nameof(PairMarketTypes));
+            }
+        }
+        private int selectedPairMarketIndex = 0;
+        public int SelectedPairMarketIndex
+        {
+            get => selectedPairMarketIndex;
+            set
+            {
+                selectedPairMarketIndex = value;
+                OnPropertyChanged(nameof(SelectedPairMarketIndex));
+            }
+        }
+        private int selectedPairMarketTypeIndex = 0;
+        public int SelectedPairMarketTypeIndex
+        {
+            get => selectedPairMarketTypeIndex;
+            set
+            {
+                selectedPairMarketTypeIndex = value;
+                OnPropertyChanged(nameof(SelectedPairMarketTypeIndex));
+            }
+        }
         private string keywordText = string.Empty;
         public string KeywordText
         {
@@ -41,6 +82,12 @@ namespace Albedo.ViewModels
 
         public MenuControlViewModel()
         {
+            PairMarkets.Add(PairMarket.Binance);
+            PairMarketTypes.Add(PairMarketType.Spot);
+            PairMarketTypes.Add(PairMarketType.Futures);
+            PairMarketTypes.Add(PairMarketType.CoinFutures);
+            SelectedPairMarketIndex = 0;
+            SelectedPairMarketTypeIndex = 0;
         }
 
         public void UpdatePairInfo(Pair pair)
