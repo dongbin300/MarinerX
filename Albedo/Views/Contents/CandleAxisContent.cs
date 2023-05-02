@@ -40,7 +40,7 @@ namespace Albedo.Views.Contents
 
                 drawingContext.DrawText(
                     new FormattedText(gridPrice.ToString(), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface("Meiryo UI"), 9, DrawingTools.GridBrush, VisualTreeHelper.GetDpi(this).PixelsPerDip),
-                new Point(5, ActualHeight * ((double)i / gridLevel) - 5)
+                new Point(5, ActualHeight * ((double)i / gridLevel) - 7)
                 );
             }
 
@@ -50,7 +50,7 @@ namespace Albedo.Views.Contents
                     VisualTreeHelper.GetDpi(this).PixelsPerDip);
             currentPriceTickerText.SetFontWeight(FontWeights.Bold);
             drawingContext.DrawText(currentPriceTickerText,
-                new Point(5, ActualHeight * (double)(1.0m - (Quotes[End - 1].Close - priceMin) / (priceMax - priceMin)) - 7)
+                new Point(5, ActualHeight * (double)(1.0m - (Quotes[End - 1].Close - priceMin) / (priceMax - priceMin)) - 8)
                 );
         }
     }

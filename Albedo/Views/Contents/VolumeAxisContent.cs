@@ -39,17 +39,17 @@ namespace Albedo.Views.Contents
 
                 drawingContext.DrawText(
                     new FormattedText(gridPrice.ToString(), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface("Meiryo UI"), 9, DrawingTools.GridBrush, VisualTreeHelper.GetDpi(this).PixelsPerDip),
-                new Point(5, ActualHeight * ((double)i / gridLevel) - 5)
+                new Point(5, (ActualHeight - 20) * ((double)i / gridLevel) - 7 + 10)
                 );
             }
 
             // Draw Current Volume Ticker
-            var currentVolumeTickerText = new FormattedText(Quotes[End - 1].Close.ToString(), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface("Meiryo UI"), 10,
+            var currentVolumeTickerText = new FormattedText(Quotes[End - 1].Volume.ToString(), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface("Meiryo UI"), 10,
                     Quotes[End - 1].Open < Quotes[End - 1].Close ? DrawingTools.LongBrush : DrawingTools.ShortBrush,
                     VisualTreeHelper.GetDpi(this).PixelsPerDip);
             currentVolumeTickerText.SetFontWeight(FontWeights.Bold);
             drawingContext.DrawText(currentVolumeTickerText,
-                new Point(5, ActualHeight * (double)(1.0m - (Quotes[End - 1].Close) / volumeMax) - 7)
+                new Point(5, (ActualHeight - 20) * (double)(1.0m - Quotes[End - 1].Volume / volumeMax) - 8 + 10)
                 );
         }
     }

@@ -43,13 +43,13 @@
 
     <Grid Name="MainGrid" Background="Transparent">
         <Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
+            <!--<RowDefinition Height="32"/>-->
             <RowDefinition Height="*"/>
             <RowDefinition Height="1"/>
             <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
 
-        <Grid Name="IntervalGrid" Grid.Row="0">
+        <!--<Grid Name="IntervalGrid" Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="50"/>
@@ -71,20 +71,44 @@
             <RadioButton Grid.Column="6" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
             <RadioButton Grid.Column="7" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
             <RadioButton Grid.Column="8" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
-        </Grid>
+        </Grid>-->
 
-        <Grid Name="CandleChartGrid" Grid.Row="1" Grid.RowSpan="2">
+        <Grid Name="CandleChartGrid" Grid.Row="0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="75"/>
             </Grid.ColumnDefinitions>
-            <ContentControl x:Name="CandleChart" Grid.Column="0"/>
-            <ContentControl x:Name="CandleChartAxis" Grid.Column="1"/>
+            <Grid Name="IntervalGrid" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
+                <RadioButton Grid.Row="0" Command="{Binding IntervalClick}" CommandParameter="1분" Content="1분"/>
+                <RadioButton Grid.Row="1" Command="{Binding IntervalClick}" CommandParameter="5분" Content="5분"/>
+                <RadioButton Grid.Row="2" Command="{Binding IntervalClick}" CommandParameter="15분" Content="15분"/>
+                <RadioButton Grid.Row="3" Command="{Binding IntervalClick}" CommandParameter="30분" Content="30분"/>
+                <RadioButton Grid.Row="4" Command="{Binding IntervalClick}" CommandParameter="1시간" Content="1시간"/>
+                <RadioButton Grid.Row="5" Command="{Binding IntervalClick}" CommandParameter="4시간" Content="4시간"/>
+                <RadioButton Grid.Row="6" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
+                <RadioButton Grid.Row="7" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
+                <RadioButton Grid.Row="8" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
+            </Grid>
+            <ContentControl x:Name="CandleChart" Grid.Column="1"/>
+            <ContentControl x:Name="CandleChartAxis" Grid.Column="2"/>
         </Grid>
 
-        <GridSplitter ResizeDirection="Rows" Grid.Row="2" Width="{Binding ActualWidth, ElementName=MainGrid}" Height="3" Background="{StaticResource ChartBackground}"/>
+        <GridSplitter ResizeDirection="Rows" Grid.Row="1" Width="{Binding ActualWidth, ElementName=MainGrid}" Height="3" Background="{StaticResource ChartBackground}"/>
 
-        <Grid Name="VolumeChartGrid" Grid.Row="3">
+        <Grid Name="VolumeChartGrid" Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="75"/>
