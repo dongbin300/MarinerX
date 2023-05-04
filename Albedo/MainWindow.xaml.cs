@@ -13,7 +13,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Albedo
@@ -26,14 +25,11 @@ namespace Albedo
     /// 빗썸: 1, 5, 15, 30분, 1, 2, 4, 6, 12시간, 1일, 1주, 1월
     /// 공통: 1, 5, 15, 30분, 1, 4시간, 1일, 1주, 1월
     /// 
-    /// 수
-    /// 선택된 거래소에 따른 pair 필터링, 수치 정보 툴팁
-    /// 
-    /// 목
-    /// 바이낸스, 업비트, 빗썸 등등 추가
+    /// 금토일
+    /// 수치 정보 툴팁
     /// 
     /// 월화
-    /// 코인 메뉴 그룹화(L1: 거래소별(Market), L2: 타입별(Type; Spot;Index;Futures) + 설정 UI 및 버튼 추가(API키 입력, 라이트/다크 모드, 화면설정)
+    /// 설정 UI 및 버튼 추가(API키 입력, 라이트/다크 모드, 화면설정)
     /// 
     /// 수
     /// 코인 즐겨찾기
@@ -60,31 +56,8 @@ namespace Albedo
             InitSettings();
             InitBinanceClient();
             InitAction();
+            InitBinanceSocketStreams();
 
-            binanceSocketClient.SpotStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
-            {
-                var data = obj.Data;
-                foreach (var item in data)
-                {
-                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Spot, item.Symbol, item.LastPrice, item.PriceChangePercent));
-                }
-            });
-            binanceSocketClient.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
-            {
-                var data = obj.Data;
-                foreach (var item in data)
-                {
-                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Futures, item.Symbol, item.LastPrice, item.PriceChangePercent));
-                }
-            });
-            binanceSocketClient.CoinFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
-            {
-                var data = obj.Data;
-                foreach (var item in data)
-                {
-                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.CoinFutures, item.Symbol, item.LastPrice, item.PriceChangePercent));
-                }
-            });
             timer.Elapsed += Timer_Elapsed;
             timer.Start();
         }
@@ -135,26 +108,6 @@ namespace Albedo
 
         void InitAction()
         {
-            // 코인 메뉴 클릭 이벤트
-            Common.PairMenuClick = (pair) =>
-            {
-                Common.Pair = pair;
-                Common.ChartRefresh();
-                foreach (var element in Menu.MainGrid.Children)
-                {
-                    if (element is not PairControl _pairControl)
-                    {
-                        continue;
-                    }
-                    _pairControl.viewModel.IsSelected = false;
-                }
-                var pairControl = LogicalTreeHelper.FindLogicalNode(Menu.MainGrid, $"{pair.Market}_{pair.MarketType}_{pair.Symbol}") as PairControl;
-                if (pairControl != null)
-                {
-                    pairControl.viewModel.IsSelected = true;
-                }
-            };
-
             // 차트 새로고침 이벤트
             Common.ChartRefresh = () =>
             {
@@ -212,61 +165,89 @@ namespace Albedo
             };
 
             // 검색 키워드 변경 이벤트
-            Common.SearchKeywordChanged = () =>
-            {
-                for (int i = 0; i < Menu.MainGrid.Children.Count; i++)
-                {
-                    var pairControl = (PairControl)Menu.MainGrid.Children[i];
-                    if (pairControl.viewModel.Symbol.Contains(Menu.viewModel.KeywordText))
-                    {
-                        Menu.MainGrid.RowDefinitions[i].Height = new GridLength(45);
-                        pairControl.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        Menu.MainGrid.RowDefinitions[i].Height = GridLength.Auto;
-                        pairControl.Visibility = Visibility.Collapsed;
-                    }
-                }
-            };
+            Common.SearchKeywordChanged = Menu.viewModel.SearchPair;
         }
 
-        public void ClearPairList()
+        public void InitBinanceSocketStreams()
         {
-            Menu.MainGrid.RowDefinitions.Clear();
-            Menu.MainGrid.Children.Clear();
+            binanceSocketClient.SpotStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            {
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Binance && Common.CurrentSelectedPairMarketType.PairMarketType.ToString().ToUpper().StartsWith("SPOT"))
+                {
+                    var data = obj.Data;
+                    foreach (var item in data)
+                    {
+                        if (item.Symbol.ToUpper().EndsWith(Common.CurrentSelectedPairMarketType.PairMarketType.ToString()[4..].ToUpper()))
+                        {
+                            DispatcherService.Invoke(() =>
+                            {
+                                Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Spot, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                            });
+                        }
+                    }
+                }
+            });
+            binanceSocketClient.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            {
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Binance && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Futures)
+                {
+                    var data = obj.Data;
+                    foreach (var item in data)
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Futures, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                        });
+                    }
+                }
+            });
+            binanceSocketClient.CoinFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            {
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Binance && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.CoinFutures)
+                {
+                    var data = obj.Data;
+                    foreach (var item in data)
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.CoinFutures, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                        });
+                    }
+                }
+            });
         }
 
         public void RefreshPairList()
         {
             DispatcherService.Invoke(() =>
             {
-                for (int i = 0; i < Menu.viewModel.Pairs.Count; i++)
+                for (int i = 0; i < Menu.viewModel.PairControls.Count; i++)
                 {
-                    var pair = Menu.viewModel.Pairs[i];
-                    if (pair.IsRendered) // 이미 추가된 코인
+                    var pairControl = Menu.viewModel.PairControls[i];
+                    if (pairControl.Pair.IsRendered) // 이미 추가된 코인
                     {
-                        var pairControl = LogicalTreeHelper.FindLogicalNode(Menu.MainGrid, $"{pair.Market}_{pair.MarketType}_{pair.Symbol}") as PairControl;
-                        if (pairControl != null)
+                        var _pairControl = Menu.viewModel.PairControls.First(p => p.Name.Equals($"{pairControl.Pair.Market}_{pairControl.Pair.MarketType}_{pairControl.Pair.Symbol}"));
+
+                        if (_pairControl != null)
                         {
-                            pairControl.viewModel.Price = pair.Price;
-                            pairControl.viewModel.PriceChangePercent = pair.PriceChangePercent;
+                            _pairControl.Pair.Price = pairControl.Pair.Price;
+                            _pairControl.Pair.PriceChangePercent = pairControl.Pair.PriceChangePercent;
                         }
                     }
                     else // 새로 추가되는 코인
                     {
                         // 검색중일 경우 키워드에 포함되는 것만 표시
                         // 이걸 추가하지 않으면 검색중에 새로 추가되는 코인들이 나타남
-                        if (pair.Symbol.Contains(Menu.viewModel.KeywordText))
+                        if (pairControl.Pair.Symbol.Contains(Menu.viewModel.KeywordText))
                         {
-                            pair.IsRendered = true;
-                            Menu.MainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(45) });
-                            var pairControl = new PairControl(pair);
-                            pairControl.SetValue(Grid.RowProperty, i);
-                            Menu.MainGrid.Children.Add(pairControl);
+                            pairControl.Pair.IsRendered = true;
+                            var newPairControl = new PairControl();
+                            newPairControl.Init(pairControl.Pair);
+                            Menu.viewModel.PairControls.Add(newPairControl);
                         }
                     }
                 }
+                Menu.viewModel.SearchPair();
             });
         }
 

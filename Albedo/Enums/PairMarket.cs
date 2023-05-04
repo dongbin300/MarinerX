@@ -3,6 +3,8 @@
     public enum PairMarket
     {
         None,
-        Binance
+        Binance,
+        Upbit,
+        Bithumb
     }
 }

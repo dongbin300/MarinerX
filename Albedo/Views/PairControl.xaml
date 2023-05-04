@@ -6,14 +6,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="200" Background="{StaticResource Background}">
 
-    <Grid Grid.Row="0" MouseLeftButtonDown="Grid_MouseLeftButtonDown" Background="Transparent">
+    <Grid Grid.Row="0" Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="1"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Row="0" Grid.Column="0">
@@ -21,7 +21,7 @@
                 <Style TargetType="Grid">
                     <Setter Property="Background" Value="Transparent" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <DataTrigger Binding="{Binding Pair.IsSelected}" Value="True">
                             <Setter Property="Background" Value="{StaticResource SelectedBackground}" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -32,49 +32,49 @@
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Padding="3" FontWeight="Bold" Text="{Binding Symbol}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Padding="3" FontWeight="Bold" Text="{Binding Pair.Symbol}"/>
             <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Orientation="Horizontal">
-                <Image Margin="3,0,0,0" Height="14" Source="{Binding MarketIcon}"/>
-                <TextBlock Padding="3" Text="{Binding Market}"/>
+                <Image Margin="3,0,0,0" Height="14" Source="{Binding Pair.MarketIcon}"/>
+                <TextBlock Padding="3" Text="{Binding Pair.Market}"/>
             </StackPanel>
-            <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding PriceString}" FontFamily="Meiryo UI">
+            <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding Pair.PriceString}" FontFamily="Meiryo UI">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsBullish}" Value="True">
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="True">
                                 <Setter Property="Foreground" Value="{StaticResource Long}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsBullish}" Value="False">
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="False">
                                 <Setter Property="Foreground" Value="{StaticResource Short}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="True">
                                 <Setter Property="FontWeight" Value="Bold" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="False">
                                 <Setter Property="FontWeight" Value="Medium" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding PriceChangePercentString}" FontFamily="Meiryo UI">
+            <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding Pair.PriceChangePercentString}" FontFamily="Meiryo UI">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsBullish}" Value="True">
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="True">
                                 <Setter Property="Foreground" Value="{StaticResource Long}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsBullish}" Value="False">
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="False">
                                 <Setter Property="Foreground" Value="{StaticResource Short}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="True">
                                 <Setter Property="FontWeight" Value="Bold" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="False">
                                 <Setter Property="FontWeight" Value="Medium" />
                             </DataTrigger>
                         </Style.Triggers>

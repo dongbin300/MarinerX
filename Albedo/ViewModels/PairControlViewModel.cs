@@ -97,6 +97,11 @@ namespace Albedo.ViewModels
 
         public PairControlViewModel(Pair pair)
         {
+            if (pair.Market == PairMarket.None || pair.MarketType == PairMarketType.None)
+            {
+                return;
+            }
+
             Symbol = pair.Symbol;
             Market = pair.Market;
             MarketType = pair.MarketType;

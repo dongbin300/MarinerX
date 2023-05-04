@@ -18,7 +18,7 @@ namespace Albedo.ViewModels
         }
         #endregion Notify Property Changed
 
-        public ICommand IntervalClick { get; set; }
+        public ICommand? IntervalClick { get; set; }
 
         public ChartControlViewModel()
         {

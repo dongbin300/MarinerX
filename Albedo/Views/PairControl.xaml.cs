@@ -1,9 +1,6 @@
 ﻿using Albedo.Models;
-using Albedo.Utils;
-using Albedo.ViewModels;
 
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace Albedo.Views
 {
@@ -12,21 +9,18 @@ namespace Albedo.Views
     /// </summary>
     public partial class PairControl : UserControl
     {
-        public PairControlViewModel viewModel;
-        Pair pair;
+        public Pair Pair { get; set; }
 
-        public PairControl(Pair pair)
+        public PairControl()
         {
             InitializeComponent();
-            this.pair = pair;
-            viewModel = new PairControlViewModel(pair);
-            DataContext = viewModel;
-            Name = $"{viewModel.Market}_{viewModel.MarketType}_{viewModel.Symbol}";
+            Pair = new Pair(Enums.PairMarket.None, Enums.PairMarketType.None, "", 0, 0);
         }
 
-        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        public void Init(Pair pair)
         {
-            Common.PairMenuClick.Invoke(pair);
+            Pair = pair;
+            Name = $"{Pair.Market}_{Pair.MarketType}_{Pair.Symbol}";
         }
     }
 }

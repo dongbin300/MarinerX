@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <None Remove="Resources\binance.png" />
+    <None Remove="Resources\bithumb.png" />
+    <None Remove="Resources\upbit.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +20,16 @@
     <Content Include="Resources\binance.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\bithumb.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\upbit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
   </ItemGroup>
 
   <ItemGroup>
