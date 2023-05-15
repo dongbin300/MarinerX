@@ -14,7 +14,7 @@ namespace Albedo.Views
         public PairControl()
         {
             InitializeComponent();
-            Pair = new Pair(Enums.PairMarket.None, Enums.PairMarketType.None, "", 0, 0);
+            Pair = new Pair(Enums.PairMarket.None, Enums.PairMarketType.None, Enums.PairQuoteAsset.None, "", 0, 0);
         }
 
         public void Init(Pair pair)

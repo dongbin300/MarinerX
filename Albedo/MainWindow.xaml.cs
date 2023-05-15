@@ -123,7 +123,7 @@ namespace Albedo
                 {
                     DispatcherService.Invoke(() =>
                     {
-                        Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Upbit, PairMarketType.Spot, UpbitSymbolMapper.GetKoreanName(coin.market), coin.trade_price, coin.signed_change_rate * 100));
+                        Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Upbit, PairMarketType.Spot, Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset, UpbitSymbolMapper.GetKoreanName(coin.market), coin.trade_price, coin.signed_change_rate * 100));
                     });
                 }
             }
@@ -305,7 +305,11 @@ namespace Albedo
                             {
                                 DispatcherService.Invoke(() =>
                                 {
-                                    Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Spot, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                                    Menu.viewModel.UpdatePairInfo(new Pair(
+                                        Common.CurrentSelectedPairMarket.PairMarket,
+                                        Common.CurrentSelectedPairMarketType.PairMarketType,
+                                        Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
+                                        item.Symbol, item.LastPrice, item.PriceChangePercent));
                                 });
                             }
                         }
@@ -320,7 +324,11 @@ namespace Albedo
                         {
                             DispatcherService.Invoke(() =>
                             {
-                                Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.Futures, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                                Menu.viewModel.UpdatePairInfo(new Pair(
+                                    Common.CurrentSelectedPairMarket.PairMarket,
+                                    Common.CurrentSelectedPairMarketType.PairMarketType,
+                                    Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset, 
+                                    item.Symbol, item.LastPrice, item.PriceChangePercent));
                             });
                         }
                     }
@@ -334,7 +342,11 @@ namespace Albedo
                         {
                             DispatcherService.Invoke(() =>
                             {
-                                Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Binance, PairMarketType.CoinFutures, item.Symbol, item.LastPrice, item.PriceChangePercent));
+                                Menu.viewModel.UpdatePairInfo(new Pair(
+                                    Common.CurrentSelectedPairMarket.PairMarket,
+                                    Common.CurrentSelectedPairMarketType.PairMarketType,
+                                    Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
+                                    item.Symbol, item.LastPrice, item.PriceChangePercent));
                             });
                         }
                     }
