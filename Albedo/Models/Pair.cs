@@ -1,4 +1,5 @@
 ﻿using Albedo.Enums;
+using Albedo.Utils;
 
 using System;
 using System.Windows.Media.Imaging;
@@ -16,7 +17,7 @@ namespace Albedo.Models
         public bool IsRendered { get; set; }
         public BitmapImage MarketIcon { get; set; } = default!;
         public bool IsSelected { get; set; }
-        public string PriceString => Price.ToString();
+        public string PriceString => NumberUtil.ToRoundedValue(Price).ToString("0.############################");
         public string PriceChangePercentString => Math.Round(PriceChangePercent, 2) + "%";
         public bool IsBullish => PriceChangePercent >= 0;
 
