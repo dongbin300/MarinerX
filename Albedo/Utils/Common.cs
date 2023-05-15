@@ -15,8 +15,11 @@ namespace Albedo.Utils
         public static readonly int ChartItemFullWidth = 100;
         public static readonly double ChartItemMarginPercent = 0.2;
 
+        public static PairMarket SupportedMarket = PairMarket.Binance | PairMarket.Upbit | PairMarket.Bithumb;
+
         public static PairMarketModel CurrentSelectedPairMarket = new(PairMarket.None, "", "");
         public static PairMarketTypeModel CurrentSelectedPairMarketType = new(PairMarketType.None, "");
+        public static PairQuoteAssetModel CurrentSelectedPairQuoteAsset = new(PairQuoteAsset.None, "");
 
         public static Pair Pair = default!;
         public static KlineInterval ChartInterval = KlineInterval.OneMinute;

@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:Albedo.ViewModels"
              xmlns:view="clr-namespace:Albedo.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="240">
+             d:DesignHeight="400" d:DesignWidth="320">
     
     <UserControl.DataContext>
         <vm:MenuControlViewModel x:Name="viewModel" />
@@ -24,6 +24,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <ComboBox Grid.Column="0" x:Name="MarketComboBox" ItemsSource="{Binding PairMarkets}" SelectedIndex="{Binding SelectedPairMarketIndex}" Style="{StaticResource IconComboBox}">
                 <i:Interaction.Triggers>
@@ -36,6 +37,13 @@
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding PairMarketTypeSelectionChanged}" CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ComboBox}}}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+            <ComboBox Grid.Column="2" x:Name="QuoteAssetComboBox" ItemsSource="{Binding PairQuoteAssets}" SelectedIndex="{Binding SelectedPairQuoteAssetIndex}" DisplayMemberPath="Text" SelectedValuePath="PairQuoteAsset">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding PairQuoteAssetSelectionChanged}" CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ComboBox}}}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ComboBox>

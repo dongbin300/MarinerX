@@ -61,6 +61,16 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(PairMarketTypes));
             }
         }
+        private ObservableCollection<PairQuoteAssetModel> pairQuoteAssets = new();
+        public ObservableCollection<PairQuoteAssetModel> PairQuoteAssets
+        {
+            get => pairQuoteAssets;
+            set
+            {
+                pairQuoteAssets = value;
+                OnPropertyChanged(nameof(PairQuoteAssets));
+            }
+        }
         private int selectedPairMarketIndex = 0;
         public int SelectedPairMarketIndex
         {
@@ -81,6 +91,16 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(SelectedPairMarketTypeIndex));
             }
         }
+        private int selectedPairQuoteAssetIndex = 0;
+        public int SelectedPairQuoteAssetIndex
+        {
+            get => selectedPairQuoteAssetIndex;
+            set
+            {
+                selectedPairQuoteAssetIndex = value;
+                OnPropertyChanged(nameof(SelectedPairQuoteAssetIndex));
+            }
+        }
         private string keywordText = string.Empty;
         public string KeywordText
         {
@@ -95,47 +115,22 @@ namespace Albedo.ViewModels
 
         public ICommand? PairMarketSelectionChanged { get; set; }
         public ICommand? PairMarketTypeSelectionChanged { get; set; }
+        public ICommand? PairQuoteAssetSelectionChanged { get; set; }
         public ICommand? PairSelectionChanged { get; set; }
 
         public MenuControlViewModel()
         {
-            // 거래소 및 타입 초기화
-            PairMarkets.Add(new PairMarketModel(PairMarket.Binance, "바이낸스", "Resources/binance.png"));
-            PairMarkets.Add(new PairMarketModel(PairMarket.Upbit, "업비트", "Resources/upbit.png"));
-            PairMarkets.Add(new PairMarketModel(PairMarket.Bithumb, "빗썸", "Resources/bithumb.png"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Spot, "현물"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotUsdt, "현물(USDT)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotTusd, "현물(TUSD)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotBusd, "현물(BUSD)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotBnb, "현물(BNB)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotBtc, "현물(BTC)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotEth, "현물(ETH)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotDai, "현물(DAI)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotUsdc, "현물(USDC)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotVai, "현물(VAI)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotXrp, "현물(XRP)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotTrx, "현물(TRX)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotDoge, "현물(DOGE)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotDot, "현물(DOT)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotAud, "현물(AUD)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotBidr, "현물(BIDR)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotBrl, "현물(BRL)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotEur, "현물(EUR)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotGbp, "현물(GBP)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotRub, "현물(RUB)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotTry, "현물(TRY)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotUah, "현물(UAH)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotZar, "현물(ZAR)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotIdrt, "현물(IDRT)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotNgn, "현물(NGN)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotPln, "현물(PLN)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotRon, "현물(RON)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.SpotArs, "현물(ARS)"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Futures, "선물"));
-            PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.CoinFutures, "코인 선물"));
-            SelectedPairMarketIndex = 0;
-            SelectedPairMarketTypeIndex = 1;
+            InitEvent();
+            InitMarket();
+            InitMarketType();
+            InitQuoteAsset();
+        }
 
+        /// <summary>
+        /// 이벤트 초기화
+        /// </summary>
+        private void InitEvent()
+        {
             // 거래소 변경 이벤트
             PairMarketSelectionChanged = new DelegateCommand((obj) =>
             {
@@ -146,6 +141,7 @@ namespace Albedo.ViewModels
 
                 Common.CurrentSelectedPairMarket = market;
                 PairControls.Clear();
+                InitMarketType();
             });
 
             // 타입 변경 이벤트
@@ -157,6 +153,19 @@ namespace Albedo.ViewModels
                 }
 
                 Common.CurrentSelectedPairMarketType = marketType;
+                PairControls.Clear();
+                InitQuoteAsset();
+            });
+
+            // 거래자산 변경 이벤트
+            PairQuoteAssetSelectionChanged = new DelegateCommand((obj) =>
+            {
+                if (obj is not PairQuoteAssetModel quoteAsset)
+                {
+                    return;
+                }
+
+                Common.CurrentSelectedPairQuoteAsset = quoteAsset;
                 PairControls.Clear();
             });
 
@@ -171,10 +180,140 @@ namespace Albedo.ViewModels
                 Common.Pair = pairControl.Pair;
                 Common.ChartRefresh();
             });
+        }
 
-            // 최초 호출
-            PairMarketSelectionChanged?.Execute(pairMarkets[0]);
-            PairMarketTypeSelectionChanged?.Execute(PairMarketTypes[1]);
+        /// <summary>
+        /// 거래소 초기화
+        /// </summary>
+        private void InitMarket()
+        {
+            PairMarkets.Clear();
+            if (Common.SupportedMarket.HasFlag(PairMarket.Binance))
+            {
+                PairMarkets.Add(new PairMarketModel(PairMarket.Binance, "바이낸스", "Resources/binance.png"));
+            }
+            if (Common.SupportedMarket.HasFlag(PairMarket.Upbit))
+            {
+                PairMarkets.Add(new PairMarketModel(PairMarket.Upbit, "업비트", "Resources/upbit.png"));
+            }
+            if (Common.SupportedMarket.HasFlag(PairMarket.Bithumb))
+            {
+                PairMarkets.Add(new PairMarketModel(PairMarket.Bithumb, "빗썸", "Resources/bithumb.png"));
+            }
+            if (PairMarkets.Count > 0)
+            {
+                SelectedPairMarketIndex = 0;
+                PairMarketSelectionChanged?.Execute(PairMarkets[SelectedPairMarketIndex]);
+            }
+            else
+            {
+                SelectedPairMarketIndex = -1;
+            }
+        }
+
+        /// <summary>
+        /// 거래소 타입 초기화
+        /// </summary>
+        private void InitMarketType()
+        {
+            PairMarketTypes.Clear();
+            switch (Common.CurrentSelectedPairMarket.PairMarket)
+            {
+                case PairMarket.Binance:
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Spot, "현물"));
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Futures, "선물"));
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.CoinFutures, "코인 선물"));
+                    break;
+
+                case PairMarket.Upbit:
+                case PairMarket.Bithumb:
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Spot, "현물"));
+                    break;
+            }
+            if (PairMarketTypes.Count > 0)
+            {
+                SelectedPairMarketTypeIndex = 0;
+                PairMarketTypeSelectionChanged?.Execute(PairMarketTypes[SelectedPairMarketTypeIndex]);
+            }
+            else
+            {
+                SelectedPairMarketTypeIndex = -1;
+            }
+        }
+
+        /// <summary>
+        /// 거래자산 초기화
+        /// </summary>
+        private void InitQuoteAsset()
+        {
+            PairQuoteAssets.Clear();
+            switch (Common.CurrentSelectedPairMarket.PairMarket)
+            {
+                case PairMarket.Binance:
+                    switch (Common.CurrentSelectedPairMarketType.PairMarketType)
+                    {
+                        case PairMarketType.Spot:
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USDT, "USDT"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.TUSD, "TUSD"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BUSD, "BUSD"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BNB, "BNB"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.ETH, "ETH"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.DAI, "DAI"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USDC, "USDC"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.VAI, "VAI"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.XRP, "XRP"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.TRX, "TRX"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.DOGE, "DOGE"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.DOT, "DOT"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.AUD, "AUD"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BIDR, "BIDR"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BRL, "BRL"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.EUR, "EUR"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.GBP, "GBP"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.RUB, "RUB"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.TRY, "TRY"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.UAH, "UAH"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.ZAR, "ZAR"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.IDRT, "IDRT"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.NGN, "NGN"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.PLN, "PLN"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.RON, "RON"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.ARS, "ARS"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USD, "USD"));
+                            break;
+
+                        case PairMarketType.Futures:
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USDT, "USDT"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BUSD, "BUSD"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
+                            break;
+
+                        case PairMarketType.CoinFutures:
+                            break;
+                    }
+                    break;
+
+                case PairMarket.Upbit:
+                    PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.KRW, "KRW"));
+                    PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
+                    PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USDT, "USDT"));
+                    break;
+
+                case PairMarket.Bithumb:
+                    PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.KRW, "KRW"));
+                    PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
+                    break;
+            }
+            if (PairQuoteAssets.Count > 0)
+            {
+                SelectedPairQuoteAssetIndex = 0;
+                PairQuoteAssetSelectionChanged?.Execute(pairQuoteAssets[SelectedPairQuoteAssetIndex]);
+            }
+            else
+            {
+                SelectedPairQuoteAssetIndex = -1;
+            }
         }
 
         /// <summary>
@@ -184,12 +323,11 @@ namespace Albedo.ViewModels
         {
             if (string.IsNullOrEmpty(keywordText))
             {
-                ResultPairControls = PairControls;
+                ResultPairControls = new ObservableCollection<PairControl>(PairControls);
                 return;
             }
 
-            var pairs = PairControls.Where(p => p.Pair.Symbol.Contains(keywordText));
-            ResultPairControls = new ObservableCollection<PairControl>(pairs);
+            ResultPairControls = new ObservableCollection<PairControl>(PairControls.Where(p => p.Pair.Symbol.Contains(keywordText)));
         }
 
         /// <summary>
@@ -198,7 +336,9 @@ namespace Albedo.ViewModels
         /// <param name="pair"></param>
         public void UpdatePairInfo(Pair pair)
         {
-            var _pair = PairControls.Where(p => p.Pair.Market.Equals(pair.Market) && p.Pair.Symbol.Equals(pair.Symbol));
+            var pairName = $"{pair.Market}_{pair.MarketType}_{pair.Symbol}";
+            var _pair = PairControls.Where(p => p.Name.Equals(pairName));
+
             if (_pair == null || !_pair.Any())
             {
                 var pairControl = new PairControl();

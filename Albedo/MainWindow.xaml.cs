@@ -7,6 +7,8 @@ using Binance.Net.Clients;
 using Binance.Net.Enums;
 using Binance.Net.Objects;
 
+using Bithumb.Net.Clients;
+
 using Skender.Stock.Indicators;
 
 using System;
@@ -14,6 +16,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+
+using Upbit.Net.Clients;
 
 namespace Albedo
 {
@@ -24,6 +28,10 @@ namespace Albedo
     /// 업비트: 1, 3, 5, 15, 10, 30분, 1, 4시간, 1일, 1주, 1월
     /// 빗썸: 1, 5, 15, 30분, 1, 2, 4, 6, 12시간, 1일, 1주, 1월
     /// 공통: 1, 5, 15, 30분, 1, 4시간, 1일, 1주, 1월
+    /// 
+    /// 콤보박스 정렬
+    /// 업비트 - KRW, BTC, USDT(한글 심볼)
+    /// 빗썸 - KRW, BTC, 심볼을 한글로 매핑하는 도구
     /// 
     /// 금토일
     /// 수치 정보 툴팁
@@ -48,6 +56,9 @@ namespace Albedo
         int subId = 0;
         BinanceClient binanceClient = new();
         BinanceSocketClient binanceSocketClient = new();
+        BithumbClient bithumbClient = new();
+        BithumbSocketClient bithumbSocketClient = new();
+        UpbitClient upbitClient = new();
         System.Timers.Timer timer = new System.Timers.Timer(1000);
 
         public MainWindow()
@@ -55,11 +66,25 @@ namespace Albedo
             InitializeComponent();
             InitSettings();
             InitBinanceClient();
+            InitBithumbClient();
+            InitUpbitClient();
             InitAction();
             InitBinanceSocketStreams();
 
             timer.Elapsed += Timer_Elapsed;
             timer.Start();
+
+            //var r0 = upbitClient.QuotationMarketList.GetMarketListAsync();
+            //r0.Wait();
+            //var r01 = r0.Result;
+
+            //var r1 = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.KRW);
+            //r1.Wait();
+            //var r11 = r1.Result;
+
+            //var r2 = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.BTC);
+            //r2.Wait();
+            //var r21 = r2.Result;
         }
 
         private void Timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
@@ -99,6 +124,37 @@ namespace Albedo
                 {
                     ApiCredentials = new BinanceApiCredentials(data[0], data[1])
                 });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        void InitBithumbClient()
+        {
+            try
+            {
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "bithumb_api.txt");
+                var data = File.ReadAllLines(path);
+
+                bithumbClient = new BithumbClient(data[0], data[1]);
+                bithumbSocketClient = new BithumbSocketClient();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        void InitUpbitClient()
+        {
+            try
+            {
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "upbit_api.txt");
+                var data = File.ReadAllLines(path);
+
+                upbitClient = new UpbitClient(data[0], data[1]);
             }
             catch (Exception ex)
             {
@@ -170,14 +226,14 @@ namespace Albedo
 
         public void InitBinanceSocketStreams()
         {
-            binanceSocketClient.SpotStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+            binanceSocketClient.SpotApi.ExchangeData.SubscribeToAllTickerUpdatesAsync((obj) =>
             {
-                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Binance && Common.CurrentSelectedPairMarketType.PairMarketType.ToString().ToUpper().StartsWith("SPOT"))
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Binance && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Spot)
                 {
                     var data = obj.Data;
                     foreach (var item in data)
                     {
-                        if (item.Symbol.ToUpper().EndsWith(Common.CurrentSelectedPairMarketType.PairMarketType.ToString()[4..].ToUpper()))
+                        if (BinanceSymbolMapper.GetPairQuoteAsset(item.Symbol) == Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset)
                         {
                             DispatcherService.Invoke(() =>
                             {
@@ -221,32 +277,32 @@ namespace Albedo
         {
             DispatcherService.Invoke(() =>
             {
-                for (int i = 0; i < Menu.viewModel.PairControls.Count; i++)
-                {
-                    var pairControl = Menu.viewModel.PairControls[i];
-                    if (pairControl.Pair.IsRendered) // 이미 추가된 코인
-                    {
-                        var _pairControl = Menu.viewModel.PairControls.First(p => p.Name.Equals($"{pairControl.Pair.Market}_{pairControl.Pair.MarketType}_{pairControl.Pair.Symbol}"));
+                //for (int i = 0; i < Menu.viewModel.PairControls.Count; i++)
+                //{
+                //    var pairControl = Menu.viewModel.PairControls[i];
+                //    if (pairControl.Pair.IsRendered) // 이미 추가된 코인
+                //    {
+                //        var _pairControl = Menu.viewModel.PairControls.First(p => p.Name.Equals($"{pairControl.Pair.Market}_{pairControl.Pair.MarketType}_{pairControl.Pair.Symbol}"));
 
-                        if (_pairControl != null)
-                        {
-                            _pairControl.Pair.Price = pairControl.Pair.Price;
-                            _pairControl.Pair.PriceChangePercent = pairControl.Pair.PriceChangePercent;
-                        }
-                    }
-                    else // 새로 추가되는 코인
-                    {
-                        // 검색중일 경우 키워드에 포함되는 것만 표시
-                        // 이걸 추가하지 않으면 검색중에 새로 추가되는 코인들이 나타남
-                        if (pairControl.Pair.Symbol.Contains(Menu.viewModel.KeywordText))
-                        {
-                            pairControl.Pair.IsRendered = true;
-                            var newPairControl = new PairControl();
-                            newPairControl.Init(pairControl.Pair);
-                            Menu.viewModel.PairControls.Add(newPairControl);
-                        }
-                    }
-                }
+                //        if (_pairControl != null)
+                //        {
+                //            _pairControl.Pair.Price = pairControl.Pair.Price;
+                //            _pairControl.Pair.PriceChangePercent = pairControl.Pair.PriceChangePercent;
+                //        }
+                //    }
+                //    else // 새로 추가되는 코인
+                //    {
+                //        // 검색중일 경우 키워드에 포함되는 것만 표시
+                //        // 이걸 추가하지 않으면 검색중에 새로 추가되는 코인들이 나타남
+                //        if (pairControl.Pair.Symbol.Contains(Menu.viewModel.KeywordText))
+                //        {
+                //            pairControl.Pair.IsRendered = true;
+                //            var newPairControl = new PairControl();
+                //            newPairControl.Init(pairControl.Pair);
+                //            Menu.viewModel.PairControls.Add(newPairControl);
+                //        }
+                //    }
+                //}
                 Menu.viewModel.SearchPair();
             });
         }
