@@ -8,6 +8,7 @@ namespace Albedo.Models
     public class Pair
     {
         public PairMarket Market { get; set; }
+        public string MarketKorean { get; set; } = string.Empty;
         public PairMarketType MarketType { get; set; }
         public string Symbol { get; set; } = string.Empty;
         public decimal Price { get; set; }
@@ -32,9 +33,19 @@ namespace Albedo.Models
             Price = price;
             PriceChangePercent = priceChangePercent;
 
+            MarketKorean = Market switch
+            {
+                PairMarket.Binance => "바이낸스",
+                PairMarket.Upbit => "업비트",
+                PairMarket.Bithumb => "빗썸",
+                _ => ""
+            };
+
             MarketIcon = new BitmapImage(new Uri("pack://application:,,,/Albedo;component/Resources/" + Market switch
             {
                 PairMarket.Binance => "binance.png",
+                PairMarket.Upbit => "upbit.png",
+                PairMarket.Bithumb => "bithumb.png",
                 _ => ""
             }));
         }
