@@ -5,11 +5,12 @@ using Binance.Net.Enums;
 
 using System;
 
-namespace Albedo.Utils
+namespace Albedo
 {
     public class Common
     {
         public static readonly int ChartLoadLimit = 600;
+        public static readonly int ChartUpbitLoadLimit = 200;
         public static readonly int ChartDefaultViewCount = 120;
 
         public static readonly int ChartItemFullWidth = 100;
@@ -26,5 +27,6 @@ namespace Albedo.Utils
         public static Action ChartRefresh = default!;
         public static Action ChartAdditionalLoad = default!;
         public static Action SearchKeywordChanged = default!;
+        public static Action RefreshAllTickers = default!;
     }
 }

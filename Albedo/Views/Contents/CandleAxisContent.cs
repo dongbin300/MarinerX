@@ -40,10 +40,11 @@ namespace Albedo.Views.Contents
 
             // Draw Grid
             var gridLevel = 4; // 4등분
-            var decimalDigitsCount = NumberUtil.GetDecimalDigitsCount(Quotes[StartItemIndex].Close); // 코인 가격의 소수 자릿수
+            //var decimalDigitsCount = NumberUtil.GetDecimalDigitsCount(Quotes[StartItemIndex].Close); // 코인 가격의 소수 자릿수
             for (int i = 0; i <= gridLevel; i++)
             {
-                var gridPrice = Math.Round(priceMin + (priceMax - priceMin) * ((decimal)(gridLevel - i) / gridLevel), decimalDigitsCount);
+                //var gridPrice = Math.Round(priceMin + (priceMax - priceMin) * ((decimal)(gridLevel - i) / gridLevel), decimalDigitsCount);
+                var gridPrice = NumberUtil.ToRoundedValue(priceMin + (priceMax - priceMin) * ((decimal)(gridLevel - i) / gridLevel));
 
                 drawingContext.DrawText(
                     new FormattedText(gridPrice.ToString(), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, new Typeface("Meiryo UI"), 9, DrawingTools.GridBrush, VisualTreeHelper.GetDpi(this).PixelsPerDip),

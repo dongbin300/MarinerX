@@ -1,6 +1,8 @@
 ﻿using Albedo.Utils;
 using Albedo.Views.Contents;
 
+using Bithumb.Net.Enums;
+
 using Skender.Stock.Indicators;
 
 using System;
@@ -94,6 +96,54 @@ namespace Albedo.Views
                 Quotes.Add(quote);
                 ViewStartPosition += ItemFullWidth;
                 ViewEndPosition += ItemFullWidth;
+            }
+
+            DispatcherService.Invoke(InvalidateVisual);
+        }
+
+        /// <summary>
+        /// Update quote whenever an order is placed (for Bithumb)
+        /// </summary>
+        /// <param name="price"></param>
+        public void UpdateQuote(BithumbInterval interval, decimal price, decimal volume)
+        {
+            var now = DateTime.Now;
+            var lastQuote = Quotes[^1];
+            var intervalSeconds = interval switch
+            {
+                BithumbInterval.OneMinute => 60,
+                BithumbInterval.ThreeMinutes => 180,
+                BithumbInterval.FiveMinutes => 300,
+                BithumbInterval.TenMinutes => 600,
+                BithumbInterval.ThirtyMinutes => 1800,
+                BithumbInterval.OneHour => 3600,
+                BithumbInterval.SixHours => 21600,
+                BithumbInterval.TwelveHours => 43200,
+                BithumbInterval.OneDay => 86400,
+                _ => 60
+            };
+
+            if ((now - lastQuote.Date).TotalSeconds >= intervalSeconds) // New quote
+            {
+                var quote = new Quote
+                {
+                    Date = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0),
+                    Open = price,
+                    High = price,
+                    Low = price,
+                    Close = price,
+                    Volume = volume
+                };
+                Quotes.Add(quote);
+                ViewStartPosition += ItemFullWidth;
+                ViewEndPosition += ItemFullWidth;
+            }
+            else // Accumulate in last quote
+            {
+                lastQuote.High = Math.Max(lastQuote.High, price);
+                lastQuote.Low = Math.Min(lastQuote.Low, price);
+                lastQuote.Close = price;
+                lastQuote.Volume += volume;
             }
 
             DispatcherService.Invoke(InvalidateVisual);

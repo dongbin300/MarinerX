@@ -167,6 +167,7 @@ namespace Albedo.ViewModels
 
                 Common.CurrentSelectedPairQuoteAsset = quoteAsset;
                 PairControls.Clear();
+                Common.RefreshAllTickers?.Invoke();
             });
 
             // 코인 선택 변경 이벤트

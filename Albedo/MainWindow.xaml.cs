@@ -1,4 +1,6 @@
 ﻿using Albedo.Enums;
+using Albedo.Extensions;
+using Albedo.Managers;
 using Albedo.Mappers;
 using Albedo.Models;
 using Albedo.Utils;
@@ -9,12 +11,10 @@ using Binance.Net.Enums;
 using Binance.Net.Objects;
 
 using Bithumb.Net.Clients;
-
-using Skender.Stock.Indicators;
+using Bithumb.Net.Enums;
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -26,21 +26,12 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
-    /// 콤보박스 정렬
-    /// 업비트 - KRW, BTC, USDT(한글 심볼)
-    /// 빗썸 - KRW, BTC, 심볼을 한글로 매핑하는 도구
-    /// 차트 복구
+    /// WPF 성능 좋은 그림그리는 도구
+    /// 거래소별 인터벌 구분
     /// 
-    /// 금토일
     /// 수치 정보 툴팁
-    /// 
-    /// 월화
     /// 설정 UI 및 버튼 추가(API키 입력, 라이트/다크 모드, 화면설정)
-    /// 
-    /// 수
     /// 코인 즐겨찾기
-    /// 
-    /// 목금
     /// 인디케이터
     /// -이평(기간, 종류[단순sma,가중wma,지수ema], 라인색, 굵기), 볼밴, RSI 필수
     /// 
@@ -48,8 +39,6 @@ namespace Albedo
     /// 
     /// 로깅
     /// 기능 정리 및 견적 및 사용 매뉴얼 작성
-    /// 
-    /// 그림 그리기(추후 아마 안할듯)
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -61,6 +50,7 @@ namespace Albedo
         UpbitClient upbitClient = new();
         System.Timers.Timer timer = new(1000);
         System.Timers.Timer upbitTimer = new(3000);
+        System.Timers.Timer upbitCandleTimer = new(1000);
 
         public MainWindow()
         {
@@ -80,21 +70,15 @@ namespace Albedo
 
                 timer.Elapsed += Timer_Elapsed;
                 upbitTimer.Elapsed += UpbitTimer_Elapsed;
+                upbitCandleTimer.Elapsed += UpbitCandleTimer_Elapsed;
                 timer.Start();
                 upbitTimer.Start();
+                upbitCandleTimer.Start();
             }
             catch (Exception ex)
             {
                 Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
-
-            //var r1 = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.KRW);
-            //r1.Wait();
-            //var r11 = r1.Result;
-
-            //var r2 = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.BTC);
-            //r2.Wait();
-            //var r21 = r2.Result;
         }
 
         #region Window Event
@@ -184,6 +168,31 @@ namespace Albedo
                 Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
         }
+
+        private void UpbitCandleTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                if (Common.CurrentSelectedPairMarket.PairMarket != PairMarket.Upbit)
+                {
+                    return;
+                }
+
+                DispatcherService.Invoke(() =>
+                {
+                    if (Chart.Content is not ChartControl chartControl)
+                    {
+                        return;
+                    }
+
+                    ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
+        }
         #endregion
 
         void InitSettings()
@@ -246,13 +255,13 @@ namespace Albedo
 
                 bithumbClient = new BithumbClient(data[0], data[1]);
                 bithumbSocketClient = new BithumbSocketClient();
-                var krwSymbols = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.KRW);
+                var krwSymbols = bithumbClient.Public.GetAllTickersAsync(BithumbPaymentCurrency.KRW);
                 krwSymbols.Wait();
                 foreach (var krwSymbol in krwSymbols.Result.data?.coins ?? default!)
                 {
                     BithumbSymbolMapper.Add(krwSymbol.currency + "_KRW");
                 }
-                var btcSymbols = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.BTC);
+                var btcSymbols = bithumbClient.Public.GetAllTickersAsync(BithumbPaymentCurrency.BTC);
                 btcSymbols.Wait();
                 foreach (var btcSymbol in btcSymbols.Result.data?.coins ?? default!)
                 {
@@ -293,36 +302,41 @@ namespace Albedo
                 // 차트 새로고침 이벤트
                 Common.ChartRefresh = () =>
                 {
-                    var chartControl = new ChartControl();
-                    var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, Common.ChartInterval, null, null, Common.ChartLoadLimit);
-                    klineResult.Wait();
-                    chartControl.Init(klineResult.Result.Data.Select(x => new Quote
+                    switch (Common.CurrentSelectedPairMarket.PairMarket)
                     {
-                        Date = x.OpenTime,
-                        Open = x.OpenPrice,
-                        High = x.HighPrice,
-                        Low = x.LowPrice,
-                        Close = x.ClosePrice,
-                        Volume = x.Volume,
-                    }).ToList());
-                    chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
-                    Chart.Content = chartControl;
+                        case PairMarket.Binance: // 바이낸스
+                            switch (Common.CurrentSelectedPairMarketType.PairMarketType)
+                            {
+                                case PairMarketType.Spot: // 현물
+                                    (var spotChartControl, var spotSubId) = ChartMan.RefreshBinanceSpotChart(binanceClient, binanceSocketClient, subId);
+                                    subId = spotSubId;
+                                    Chart.Content = spotChartControl;
+                                    break;
 
-                    binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
-                    var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, Common.ChartInterval, (obj) =>
-                    {
-                        chartControl.UpdateQuote(new Quote
-                        {
-                            Date = obj.Data.Data.OpenTime,
-                            Open = obj.Data.Data.OpenPrice,
-                            High = obj.Data.Data.HighPrice,
-                            Low = obj.Data.Data.LowPrice,
-                            Close = obj.Data.Data.ClosePrice,
-                            Volume = obj.Data.Data.Volume
-                        });
-                    });
-                    klineUpdateResult.Wait();
-                    subId = klineUpdateResult.Result.Data.Id;
+                                case PairMarketType.Futures: // 선물
+                                    (var futuresChartControl, var futuresSubId) = ChartMan.RefreshBinanceFuturesChart(binanceClient, binanceSocketClient, subId);
+                                    subId = futuresSubId;
+                                    Chart.Content = futuresChartControl;
+                                    break;
+
+                                case PairMarketType.CoinFutures: // 코인선물
+                                    (var coinFuturesChartControl, var coinFuturesSubId) = ChartMan.RefreshBinanceCoinFuturesChart(binanceClient, binanceSocketClient, subId);
+                                    subId = coinFuturesSubId;
+                                    Chart.Content = coinFuturesChartControl;
+                                    break;
+                            }
+                            break;
+
+                        case PairMarket.Upbit: // 업비트
+                            var upbitChartControl = ChartMan.RefreshUpbitSpotChart(upbitClient);
+                            Chart.Content = upbitChartControl;
+                            break;
+
+                        case PairMarket.Bithumb: // 빗썸
+                            var bithumbChartControl = ChartMan.RefreshBithumbSpotChart(bithumbClient, bithumbSocketClient);
+                            Chart.Content = bithumbChartControl;
+                            break;
+                    }
                 };
 
                 // 차트 추가 로드 이벤트
@@ -333,21 +347,59 @@ namespace Albedo
                         return;
                     }
 
-                    var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, Common.ChartInterval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
-                    klineResult.Wait();
-                    chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
+                    switch (Common.CurrentSelectedPairMarket.PairMarket)
                     {
-                        Date = x.OpenTime,
-                        Open = x.OpenPrice,
-                        High = x.HighPrice,
-                        Low = x.LowPrice,
-                        Close = x.ClosePrice,
-                        Volume = x.Volume,
-                    }).ToList());
+                        case PairMarket.Binance: // 바이낸스
+                            switch (Common.CurrentSelectedPairMarketType.PairMarketType)
+                            {
+                                case PairMarketType.Spot: // 현물
+                                    ChartMan.LoadAdditionalBinanceSpotChart(binanceClient, chartControl);
+                                    break;
+
+                                case PairMarketType.Futures: // 선물
+                                    ChartMan.LoadAdditionalBinanceFuturesChart(binanceClient, chartControl);
+                                    break;
+
+                                case PairMarketType.CoinFutures: // 코인선물
+                                    ChartMan.LoadAdditionalBinanceCoinFuturesChart(binanceClient, chartControl);
+                                    break;
+                            }
+                            break;
+
+                        case PairMarket.Upbit: // 업비트
+                            ChartMan.LoadAdditionalUpbitSpotChart(upbitClient, chartControl);
+                            break;
+
+                        case PairMarket.Bithumb: // 빗썸
+                            // 빗썸은 차트 추가 로드를 지원하지 않는다.
+                            break;
+                    }
                 };
 
                 // 검색 키워드 변경 이벤트
                 Common.SearchKeywordChanged = Menu.viewModel.SearchPair;
+
+                // 전체 현재가 최초 로드 이벤트
+                Common.RefreshAllTickers = () =>
+                {
+                    if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bithumb && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Spot)
+                    {
+                        var paymentCurrency = Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset.ToBithumbPaymentCurrency();
+                        var tickers = bithumbClient.Public.GetAllTickersAsync(paymentCurrency);
+                        tickers.Wait();
+                        foreach (var coin in tickers.Result.data?.coins ?? default!)
+                        {
+                            DispatcherService.Invoke(() =>
+                            {
+                                Menu.viewModel.UpdatePairInfo(new Pair(
+                                    Common.CurrentSelectedPairMarket.PairMarket,
+                                    Common.CurrentSelectedPairMarketType.PairMarketType,
+                                    Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
+                                    $"{coin.currency}_{paymentCurrency}", coin.closing_price, coin.fluctate_rate_24H));
+                            });
+                        }
+                    }
+                };
             }
             catch (Exception ex)
             {
@@ -427,7 +479,7 @@ namespace Albedo
         {
             try
             {
-                bithumbSocketClient.Streams.SubscribeToTickerAsync(BithumbSymbolMapper.Symbols, Bithumb.Net.Enums.BithumbSocketTickInterval.OneDay, (obj) =>
+                bithumbSocketClient.Streams.SubscribeToTickerAsync(BithumbSymbolMapper.Symbols, BithumbSocketTickInterval.OneDay, (obj) =>
                 {
                     if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bithumb)
                     {

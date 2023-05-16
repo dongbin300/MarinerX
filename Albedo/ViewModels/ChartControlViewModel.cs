@@ -34,11 +34,10 @@ namespace Albedo.ViewModels
                 Common.ChartInterval = obj.ToString() switch
                 {
                     "1분" => KlineInterval.OneMinute,
+                    "3분" => KlineInterval.ThreeMinutes,
                     "5분" => KlineInterval.FiveMinutes,
-                    "15분" => KlineInterval.FifteenMinutes,
                     "30분" => KlineInterval.ThirtyMinutes,
                     "1시간" => KlineInterval.OneHour,
-                    "4시간" => KlineInterval.FourHour,
                     "1일" => KlineInterval.OneDay,
                     "1주" => KlineInterval.OneWeek,
                     "1월" => KlineInterval.OneMonth,

@@ -15,5 +15,10 @@ namespace Albedo.Extensions
             dt = dt.AddSeconds(value).ToLocalTime();
             return dt;
         }
+
+        public static DateTime KstToUtc(this DateTime kstDateTime)
+        {
+            return TimeZoneInfo.ConvertTimeToUtc(kstDateTime, TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time"));
+        }
     }
 }

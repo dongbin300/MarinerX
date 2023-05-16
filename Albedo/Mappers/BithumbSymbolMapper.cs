@@ -6,6 +6,9 @@ namespace Albedo.Mappers
 {
     public class BithumbSymbolMapper
     {
+        /// <summary>
+        /// 빗썸은 한글 코인명을 지원하지 않아서 따로 매핑을 한다.
+        /// </summary>
         static Dictionary<string, string> values = new()
         {
             // KRW 코인
