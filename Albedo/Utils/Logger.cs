@@ -7,7 +7,7 @@ namespace Albedo.Utils
     {
         public static void Log(string className, string? methodName, string message)
         {
-            File.AppendAllText($"Logs/{DateTime.Today:yyyyMMdd}", $"[{className}.{methodName}] {message}" + Environment.NewLine);
+            File.AppendAllText($"Logs/{DateTime.Today:yyyyMMdd}.log", $"[{className}.{methodName}] {message}" + Environment.NewLine);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Albedo.Views
         public void Init(Pair pair)
         {
             Pair = pair;
-            Name = $"{Pair.Market}_{Pair.MarketType}_{Pair.Symbol}";
+            Tag = $"{Pair.Market}_{Pair.MarketType}_{Pair.Symbol}";
         }
     }
 }

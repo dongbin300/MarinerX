@@ -1,4 +1,5 @@
 ﻿using Albedo.Enums;
+using Albedo.Mappers;
 using Albedo.Models;
 using Albedo.Utils;
 using Albedo.Views;
@@ -28,6 +29,7 @@ namespace Albedo
     /// 콤보박스 정렬
     /// 업비트 - KRW, BTC, USDT(한글 심볼)
     /// 빗썸 - KRW, BTC, 심볼을 한글로 매핑하는 도구
+    /// 차트 복구
     /// 
     /// 금토일
     /// 수치 정보 툴팁
@@ -41,6 +43,8 @@ namespace Albedo
     /// 목금
     /// 인디케이터
     /// -이평(기간, 종류[단순sma,가중wma,지수ema], 라인색, 굵기), 볼밴, RSI 필수
+    /// 
+    /// 코인 정렬 기능(상승/하락률, 가나다순)
     /// 
     /// 로깅
     /// 기능 정리 및 견적 및 사용 매뉴얼 작성
@@ -64,11 +68,15 @@ namespace Albedo
             {
                 InitializeComponent();
                 InitSettings();
+
                 InitBinanceClient();
                 InitBithumbClient();
                 InitUpbitClient();
+
                 InitAction();
+
                 InitBinanceSocketStreams();
+                InitBithumbSocketStreams();
 
                 timer.Elapsed += Timer_Elapsed;
                 upbitTimer.Elapsed += UpbitTimer_Elapsed;
@@ -89,6 +97,50 @@ namespace Albedo
             //var r21 = r2.Result;
         }
 
+        #region Window Event
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            try
+            {
+                if (Chart.Content is not ChartControl chartControl)
+                {
+                    return;
+                }
+
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        if (chartControl.ViewStartPosition > chartControl.ItemFullWidth)
+                        {
+                            chartControl.ViewStartPosition -= chartControl.ItemFullWidth;
+                            chartControl.ViewEndPosition -= chartControl.ItemFullWidth;
+                            chartControl.InvalidateVisual();
+                        }
+                        break;
+
+                    case Key.Right:
+                        if (chartControl.ViewEndPosition + chartControl.ItemFullWidth <= chartControl.ChartWidth)
+                        {
+                            chartControl.ViewStartPosition += chartControl.ItemFullWidth;
+                            chartControl.ViewEndPosition += chartControl.ItemFullWidth;
+                            chartControl.InvalidateVisual();
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
+        }
+        #endregion
+
+        #region Timer Event
         private void Timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             try
@@ -112,10 +164,10 @@ namespace Albedo
 
                 var symbols = Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset switch
                 {
-                    PairQuoteAsset.KRW => UpbitSymbolMapper.MarketKrws,
-                    PairQuoteAsset.BTC => UpbitSymbolMapper.MarketBtcs,
-                    PairQuoteAsset.USDT => UpbitSymbolMapper.MarketUsdts,
-                    _ => UpbitSymbolMapper.MarketIds,
+                    PairQuoteAsset.KRW => UpbitSymbolMapper.KrwSymbols,
+                    PairQuoteAsset.BTC => UpbitSymbolMapper.BtcSymbols,
+                    PairQuoteAsset.USDT => UpbitSymbolMapper.UsdtSymbols,
+                    _ => UpbitSymbolMapper.Symbols,
                 };
                 var tickerResult = upbitClient.QuotationTickers.GetTickersAsync(symbols);
                 tickerResult.Wait();
@@ -123,7 +175,7 @@ namespace Albedo
                 {
                     DispatcherService.Invoke(() =>
                     {
-                        Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Upbit, PairMarketType.Spot, Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset, UpbitSymbolMapper.GetKoreanName(coin.market), coin.trade_price, coin.signed_change_rate * 100));
+                        Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Upbit, PairMarketType.Spot, Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset, coin.market, coin.trade_price, coin.signed_change_rate * 100));
                     });
                 }
             }
@@ -132,6 +184,7 @@ namespace Albedo
                 Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
         }
+        #endregion
 
         void InitSettings()
         {
@@ -193,6 +246,18 @@ namespace Albedo
 
                 bithumbClient = new BithumbClient(data[0], data[1]);
                 bithumbSocketClient = new BithumbSocketClient();
+                var krwSymbols = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.KRW);
+                krwSymbols.Wait();
+                foreach (var krwSymbol in krwSymbols.Result.data?.coins ?? default!)
+                {
+                    BithumbSymbolMapper.Add(krwSymbol.currency + "_KRW");
+                }
+                var btcSymbols = bithumbClient.Public.GetAllTickersAsync(Bithumb.Net.Enums.BithumbPaymentCurrency.BTC);
+                btcSymbols.Wait();
+                foreach (var btcSymbol in btcSymbols.Result.data?.coins ?? default!)
+                {
+                    BithumbSymbolMapper.Add(btcSymbol.currency + "_BTC");
+                }
             }
             catch (Exception ex)
             {
@@ -290,7 +355,7 @@ namespace Albedo
             }
         }
 
-        public void InitBinanceSocketStreams()
+        void InitBinanceSocketStreams()
         {
             try
             {
@@ -327,7 +392,7 @@ namespace Albedo
                                 Menu.viewModel.UpdatePairInfo(new Pair(
                                     Common.CurrentSelectedPairMarket.PairMarket,
                                     Common.CurrentSelectedPairMarketType.PairMarketType,
-                                    Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset, 
+                                    Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
                                     item.Symbol, item.LastPrice, item.PriceChangePercent));
                             });
                         }
@@ -358,40 +423,29 @@ namespace Albedo
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        void InitBithumbSocketStreams()
         {
             try
             {
-                if (Chart.Content is not ChartControl chartControl)
+                bithumbSocketClient.Streams.SubscribeToTickerAsync(BithumbSymbolMapper.Symbols, Bithumb.Net.Enums.BithumbSocketTickInterval.OneDay, (obj) =>
                 {
-                    return;
-                }
+                    if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bithumb)
+                    {
+                        var data = obj.content;
 
-                switch (e.Key)
-                {
-                    case Key.Left:
-                        if (chartControl.ViewStartPosition > chartControl.ItemFullWidth)
+                        if (Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset == BithumbSymbolMapper.GetPairQuoteAsset(data.symbol))
                         {
-                            chartControl.ViewStartPosition -= chartControl.ItemFullWidth;
-                            chartControl.ViewEndPosition -= chartControl.ItemFullWidth;
-                            chartControl.InvalidateVisual();
+                            DispatcherService.Invoke(() =>
+                            {
+                                Menu.viewModel.UpdatePairInfo(new Pair(
+                                   Common.CurrentSelectedPairMarket.PairMarket,
+                                   Common.CurrentSelectedPairMarketType.PairMarketType,
+                                   Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
+                                   data.symbol, data.closePrice, data.chgRate));
+                            });
                         }
-                        break;
-
-                    case Key.Right:
-                        if (chartControl.ViewEndPosition + chartControl.ItemFullWidth <= chartControl.ChartWidth)
-                        {
-                            chartControl.ViewStartPosition += chartControl.ItemFullWidth;
-                            chartControl.ViewEndPosition += chartControl.ItemFullWidth;
-                            chartControl.InvalidateVisual();
-                        }
-                        break;
-                }
+                    }
+                });
             }
             catch (Exception ex)
             {

@@ -336,8 +336,8 @@ namespace Albedo.ViewModels
         /// <param name="pair"></param>
         public void UpdatePairInfo(Pair pair)
         {
-            var pairName = $"{pair.Market}_{pair.MarketType}_{pair.Symbol}";
-            var _pair = PairControls.Where(p => p.Name.Equals(pairName));
+            var pairTag = $"{pair.Market}_{pair.MarketType}_{pair.Symbol}";
+            var _pair = PairControls.Where(p => p.Tag.Equals(pairTag));
 
             if (_pair == null || !_pair.Any())
             {

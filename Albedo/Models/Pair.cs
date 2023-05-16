@@ -1,4 +1,5 @@
 ﻿using Albedo.Enums;
+using Albedo.Mappers;
 using Albedo.Utils;
 
 using System;
@@ -13,6 +14,7 @@ namespace Albedo.Models
         public PairMarketType MarketType { get; set; }
         public PairQuoteAsset QuoteAsset { get; set; }
         public string Symbol { get; set; } = string.Empty;
+        public string SymbolKorean { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public decimal PriceChangePercent { get; set; }
         public bool IsRendered { get; set; }
@@ -42,6 +44,14 @@ namespace Albedo.Models
                 PairMarket.Upbit => "업비트",
                 PairMarket.Bithumb => "빗썸",
                 _ => ""
+            };
+
+            SymbolKorean = Market switch
+            {
+                PairMarket.Binance => Symbol,
+                PairMarket.Upbit => UpbitSymbolMapper.GetKoreanName(symbol),
+                PairMarket.Bithumb => BithumbSymbolMapper.GetKoreanName(symbol),
+                _ => Symbol
             };
 
             MarketIcon = new BitmapImage(new Uri("pack://application:,,,/Albedo;component/Resources/" + Market switch

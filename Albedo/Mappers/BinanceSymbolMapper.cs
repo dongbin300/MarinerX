@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Albedo.Utils
+namespace Albedo.Mappers
 {
     public class BinanceSymbolMapper
     {
