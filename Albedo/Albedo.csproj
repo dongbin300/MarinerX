@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>chart2.ico</ApplicationIcon>
     <AssemblyName>Albedo</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,7 @@
   <ItemGroup>
     <PackageReference Include="Bithumb.Net" Version="1.0.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+    <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.3" />
     <PackageReference Include="Upbit.Net" Version="1.0.0" />
   </ItemGroup>
 

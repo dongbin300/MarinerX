@@ -5,16 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Albedo.Test"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="900">
     <Window.DataContext>
         <local:MainWindowViewModel x:Name="ViewModel" />
     </Window.DataContext>
 
-    <ListBox ItemsSource="{Binding Pairs}">
-        <ListBox.ItemTemplate>
-            <DataTemplate>
-                <local:PairControl Width="400" />
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
+    <local:ChartControl x:Name="chartControl"/>
 </Window>

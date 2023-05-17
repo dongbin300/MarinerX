@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Albedo.ViewModels"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Background="Transparent"
@@ -88,9 +89,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="75"/>
                 </Grid.ColumnDefinitions>
-
-                <ContentControl x:Name="CandleChart" Grid.Column="0"/>
-                <ContentControl x:Name="CandleChartAxis" Grid.Column="1"/>
+                <skia:SKElement x:Name="CandleChart" Grid.Column="0" PaintSurface="CandleChart_PaintSurface"/>
+                <skia:SKElement x:Name="CandleChartAxis" Grid.Column="1" PaintSurface="CandleChartAxis_PaintSurface"/>
             </Grid>
 
             <GridSplitter ResizeDirection="Rows" Grid.Row="1" Width="{Binding ActualWidth, ElementName=MainGrid}" Height="3" Background="{StaticResource ChartBackground}"/>
@@ -100,8 +100,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="75"/>
                 </Grid.ColumnDefinitions>
-                <ContentControl x:Name="VolumeChart" Grid.Column="0"/>
-                <ContentControl x:Name="VolumeChartAxis" Grid.Column="1"/>
+                <skia:SKElement x:Name="VolumeChart" Grid.Column="0" PaintSurface="VolumeChart_PaintSurface"/>
+                <skia:SKElement x:Name="VolumeChartAxis" Grid.Column="1" PaintSurface="VolumeChartAxis_PaintSurface"/>
             </Grid>
         </Grid>
     </Grid>

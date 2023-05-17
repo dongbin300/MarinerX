@@ -40,14 +40,17 @@ namespace Albedo.Managers
                 binanceSocketClient.UnsubscribeAsync(subId);
                 var klineUpdateResult = binanceSocketClient.SpotApi.ExchangeData.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, Common.ChartInterval, (obj) =>
                 {
-                    chartControl.UpdateQuote(new Quote
+                    DispatcherService.Invoke(() =>
                     {
-                        Date = obj.Data.Data.OpenTime,
-                        Open = obj.Data.Data.OpenPrice,
-                        High = obj.Data.Data.HighPrice,
-                        Low = obj.Data.Data.LowPrice,
-                        Close = obj.Data.Data.ClosePrice,
-                        Volume = obj.Data.Data.Volume
+                        chartControl.UpdateQuote(new Quote
+                        {
+                            Date = obj.Data.Data.OpenTime,
+                            Open = obj.Data.Data.OpenPrice,
+                            High = obj.Data.Data.HighPrice,
+                            Low = obj.Data.Data.LowPrice,
+                            Close = obj.Data.Data.ClosePrice,
+                            Volume = obj.Data.Data.Volume
+                        });
                     });
                 });
                 klineUpdateResult.Wait();
@@ -83,14 +86,17 @@ namespace Albedo.Managers
                 binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
                 var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, Common.ChartInterval, (obj) =>
                 {
-                    chartControl.UpdateQuote(new Quote
+                    DispatcherService.Invoke(() =>
                     {
-                        Date = obj.Data.Data.OpenTime,
-                        Open = obj.Data.Data.OpenPrice,
-                        High = obj.Data.Data.HighPrice,
-                        Low = obj.Data.Data.LowPrice,
-                        Close = obj.Data.Data.ClosePrice,
-                        Volume = obj.Data.Data.Volume
+                        chartControl.UpdateQuote(new Quote
+                        {
+                            Date = obj.Data.Data.OpenTime,
+                            Open = obj.Data.Data.OpenPrice,
+                            High = obj.Data.Data.HighPrice,
+                            Low = obj.Data.Data.LowPrice,
+                            Close = obj.Data.Data.ClosePrice,
+                            Volume = obj.Data.Data.Volume
+                        });
                     });
                 });
                 klineUpdateResult.Wait();
@@ -126,14 +132,17 @@ namespace Albedo.Managers
                 binanceSocketClient.CoinFuturesStreams.UnsubscribeAsync(subId);
                 var klineUpdateResult = binanceSocketClient.CoinFuturesStreams.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, Common.ChartInterval, (obj) =>
                 {
-                    chartControl.UpdateQuote(new Quote
+                    DispatcherService.Invoke(() =>
                     {
-                        Date = obj.Data.Data.OpenTime,
-                        Open = obj.Data.Data.OpenPrice,
-                        High = obj.Data.Data.HighPrice,
-                        Low = obj.Data.Data.LowPrice,
-                        Close = obj.Data.Data.ClosePrice,
-                        Volume = obj.Data.Data.Volume
+                        chartControl.UpdateQuote(new Quote
+                        {
+                            Date = obj.Data.Data.OpenTime,
+                            Open = obj.Data.Data.OpenPrice,
+                            High = obj.Data.Data.HighPrice,
+                            Low = obj.Data.Data.LowPrice,
+                            Close = obj.Data.Data.ClosePrice,
+                            Volume = obj.Data.Data.Volume
+                        });
                     });
                 });
                 klineUpdateResult.Wait();
@@ -272,10 +281,13 @@ namespace Albedo.Managers
                         return;
                     }
 
-                    foreach (var transaction in obj.content.list)
+                    DispatcherService.Invoke(() =>
                     {
-                        chartControl.UpdateQuote(interval, transaction.contPrice, transaction.contQty);
-                    }
+                        foreach (var transaction in obj.content.list)
+                        {
+                            chartControl.UpdateQuote(interval, transaction.contPrice, transaction.contQty);
+                        }
+                    });
                 });
 
                 return chartControl;

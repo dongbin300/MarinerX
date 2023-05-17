@@ -20,7 +20,7 @@ namespace Albedo.Models
         public bool IsRendered { get; set; }
         public BitmapImage MarketIcon { get; set; } = default!;
         public bool IsSelected { get; set; }
-        public string PriceString => NumberUtil.ToRoundedValue(Price).ToString("0.############################") + " " + QuoteAsset;
+        public string PriceString => NumberUtil.ToRoundedValueString(Price) + " " + QuoteAsset;
         public string PriceChangePercentString => Math.Round(PriceChangePercent, 2) + "%";
         public bool IsBullish => PriceChangePercent >= 0;
 

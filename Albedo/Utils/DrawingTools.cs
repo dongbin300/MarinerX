@@ -1,20 +1,15 @@
-﻿using System.Windows.Media;
+﻿using SkiaSharp;
 
 namespace Albedo.Utils
 {
     public class DrawingTools
     {
-        public static Pen GridPen = new(new SolidColorBrush(Color.FromRgb(45, 45, 45)), 1.0);
-        public static Brush GridBrush = new SolidColorBrush(Color.FromRgb(65, 65, 65));
+        public static SKFont GridTextFont = new SKFont(SKTypeface.FromFamilyName("Meiryo UI"), 9);
+        public static SKFont CurrentTickerFont = new SKFont(SKTypeface.FromFamilyName("Meiryo UI", SKFontStyle.Bold), 10);
 
-        public static Pen LongPen = new(new SolidColorBrush(Color.FromRgb(59, 207, 134)), 1.0);
-        public static Pen ShortPen = new(new SolidColorBrush(Color.FromRgb(237, 49, 97)), 1.0);
-        public static Brush LongBrush = new SolidColorBrush(Color.FromRgb(59, 207, 134));
-        public static Brush ShortBrush = new SolidColorBrush(Color.FromRgb(237, 49, 97));
-
-        //public static Pen LongPen = new(new SolidColorBrush(Colors.White), 1.0);
-        //public static Pen ShortPen = new(new SolidColorBrush(Colors.White), 1.0);
-        //public static Brush LongBrush = new SolidColorBrush(Colors.White);
-        //public static Brush ShortBrush = new SolidColorBrush(Colors.White);
+        public static SKPaint GridPaint = new() { Color = new SKColor(45, 45, 45) };
+        public static SKPaint GridFontPaint = new() { Color = new SKColor(65, 65, 65) };
+        public static SKPaint LongPaint = new() { Color = new SKColor(59, 207, 134) };
+        public static SKPaint ShortPaint = new() { Color = new SKColor(237, 49, 97) };
     }
 }

@@ -15,5 +15,10 @@ namespace Albedo.Utils
         {
             return Math.Round(value, BitConverter.GetBytes(decimal.GetBits(value)[3])[2]);
         }
+
+        public static string ToRoundedValueString(decimal value)
+        {
+            return ToRoundedValue(value).ToString("0.############################");
+        }
     }
 }

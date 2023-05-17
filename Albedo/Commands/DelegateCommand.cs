@@ -5,7 +5,7 @@ namespace Albedo.Commands
 {
     public class DelegateCommand : ICommand
     {
-        public event EventHandler? CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged = null;
         private readonly Action<object?> execute;
 
         public DelegateCommand(Action<object?> execute)

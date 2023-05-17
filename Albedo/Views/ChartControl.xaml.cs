@@ -1,9 +1,10 @@
 ﻿using Albedo.Utils;
-using Albedo.Views.Contents;
 
 using Bithumb.Net.Enums;
 
 using Skender.Stock.Indicators;
+
+using SkiaSharp;
 
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 using static Albedo.Apis.WinApi;
 
@@ -24,32 +24,27 @@ namespace Albedo.Views
     {
         private System.Timers.Timer chartControlTimer = new System.Timers.Timer(25);
 
-        public CandleContent CandleContent { get; set; } = default!;
-        public CandleAxisContent CandleAxisContent { get; set; } = default!;
-        public VolumeContent VolumeContent { get; set; } = default!;
-        public VolumeAxisContent VolumeAxisContent { get; set; } = default!;
-
         public List<Quote> Quotes = new();
         public List<Models.Indicator> Indicators = new();
         public int TotalCount => Quotes.Count;
 
-        public double ChartWidth => Quotes.Count * ItemFullWidth;
-        public double ViewStartPosition { get; set; } = 0;
-        public double ViewEndPosition { get; set; } = 0;
-        public double ViewWidth => ViewEndPosition - ViewStartPosition;
+        public float ChartWidth => Quotes.Count * ItemFullWidth;
+        public float ViewStartPosition { get; set; } = 0;
+        public float ViewEndPosition { get; set; } = 0;
+        public float ViewWidth => ViewEndPosition - ViewStartPosition;
 
         public int ItemFullWidth => Common.ChartItemFullWidth;
-        public double ItemMarginPercent => Common.ChartItemMarginPercent;
-        public double ItemWidth => ItemFullWidth * (1 - ItemMarginPercent);
-        public double ItemMargin => ItemFullWidth * ItemMarginPercent;
+        public float ItemMarginPercent => Common.ChartItemMarginPercent;
+        public float ItemWidth => ItemFullWidth * (1 - ItemMarginPercent);
+        public float ItemMargin => ItemFullWidth * ItemMarginPercent;
 
         public int StartItemIndex => (int)(Quotes.Count * (ViewStartPosition / ChartWidth));
         public int EndItemIndex => (int)(Quotes.Count * (ViewEndPosition / ChartWidth));
         public int ViewItemCount => EndItemIndex - StartItemIndex + 1;
 
-        public double ActualItemFullWidth => ActualWidth / ViewItemCount;
-        public double ActualItemWidth => ActualItemFullWidth * (1 - ItemMarginPercent);
-        public double ActualItemMargin => ActualItemFullWidth * ItemMarginPercent;
+        public float ActualItemFullWidth => (float)ActualWidth / ViewItemCount;
+        public float ActualItemWidth => ActualItemFullWidth * (1 - ItemMarginPercent);
+        public float ActualItemMargin => ActualItemFullWidth * ItemMarginPercent;
 
         public int ViewCountMin = 10;
         public int ViewCountMax = 500;
@@ -68,19 +63,11 @@ namespace Albedo.Views
             ViewStartPosition = ChartWidth - ItemFullWidth * 60;
             ViewEndPosition = ChartWidth;
 
-            CandleContent = new CandleContent();
-            CandleAxisContent = new CandleAxisContent();
-            VolumeContent = new VolumeContent();
-            VolumeAxisContent = new VolumeAxisContent();
-            CandleChart.Content = CandleContent;
-            CandleChartAxis.Content = CandleAxisContent;
-            VolumeChart.Content = VolumeContent;
-            VolumeChartAxis.Content = VolumeAxisContent;
-
             CalculateIndicators();
-            InvalidateVisual();
+            Render();
         }
 
+        #region Quote
         public void UpdateQuote(Quote quote)
         {
             var lastQuote = Quotes[^1];
@@ -98,7 +85,7 @@ namespace Albedo.Views
                 ViewEndPosition += ItemFullWidth;
             }
 
-            DispatcherService.Invoke(InvalidateVisual);
+            Render();
         }
 
         /// <summary>
@@ -146,7 +133,7 @@ namespace Albedo.Views
                 lastQuote.Volume += volume;
             }
 
-            DispatcherService.Invoke(InvalidateVisual);
+            Render();
         }
 
         public void ConcatenateQuotes(List<Quote> quotes)
@@ -166,9 +153,11 @@ namespace Albedo.Views
             ViewEndPosition += additionalQuoteCount * ItemFullWidth;
 
             CalculateIndicators();
-            InvalidateVisual();
+            Render();
         }
+        #endregion
 
+        #region Indicator
         public void CalculateIndicators()
         {
             var results = Quotes.GetEma(112);
@@ -181,43 +170,14 @@ namespace Albedo.Views
                 Indicators.Add(indicator);
             }
         }
+        #endregion
 
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            if (ViewItemCount <= 1)
-            {
-                return;
-            }
+        #region User Event
 
-            base.OnRender(drawingContext);
-
-            foreach (var radioButton in IntervalGrid.Children.OfType<RadioButton>().Where(radioButton => radioButton.CommandParameter.Equals(Settings.Default.Interval)))
-            {
-                radioButton.IsChecked = true;
-                break;
-            }
-
-            if (TotalCount > 0 && ViewStartPosition <= ItemFullWidth)
-            {
-                Common.ChartAdditionalLoad.Invoke();
-            }
-
-            CandleContent.Quotes = CandleAxisContent.Quotes = Quotes;
-            CandleContent.Indicators = Indicators;
-            CandleContent.ViewStartPosition = CandleAxisContent.ViewStartPosition = ViewStartPosition;
-            CandleContent.ViewEndPosition = CandleAxisContent.ViewEndPosition = ViewEndPosition;
-            VolumeContent.Quotes = VolumeAxisContent.Quotes = Quotes;
-            VolumeContent.ViewStartPosition = VolumeAxisContent.ViewStartPosition = ViewStartPosition;
-            VolumeContent.ViewEndPosition = VolumeAxisContent.ViewEndPosition = ViewEndPosition;
-            CandleContent.InvalidateVisual();
-            CandleAxisContent.InvalidateVisual();
-            VolumeContent.InvalidateVisual();
-            VolumeAxisContent.InvalidateVisual();
-        }
-
+        #region Zoom
         private void UserControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var unit = 300;
+            var unit = (ViewEndPosition - ViewStartPosition) * 0.1f;
             if (e.Delta > 0) // Zoom-in
             {
                 if (ViewItemCount <= ViewCountMin)
@@ -239,9 +199,11 @@ namespace Albedo.Views
                 ViewEndPosition = Math.Min(ChartWidth, ViewEndPosition + unit);
             }
 
-            InvalidateVisual();
+            Render();
         }
+        #endregion
 
+        #region Scroll
         private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             StartMousePosition = GetCursorPosition();
@@ -258,29 +220,260 @@ namespace Albedo.Views
             var currentMousePosition = GetCursorPosition();
             Vector diff = currentMousePosition - StartMousePosition;
             StartMousePosition = currentMousePosition;
-            var movePosition = diff.X / ActualItemFullWidth * ItemFullWidth;
+            var movePosition = (float)diff.X / ActualItemFullWidth * ItemFullWidth;
 
             DispatcherService.Invoke(() =>
             {
                 if (diff.X > 0) // Graph Move Left
                 {
-                    if (ViewStartPosition - movePosition >= 0)
+                    if (ViewStartPosition - movePosition < 0) // Reach left-end
                     {
-                        ViewStartPosition -= movePosition; // to do
-                        ViewEndPosition -= movePosition;
-                        InvalidateVisual();
+                        movePosition = ViewStartPosition;
                     }
+                    ViewStartPosition -= movePosition;
+                    ViewEndPosition -= movePosition;
+                    Render();
                 }
                 else if (diff.X < 0) // Graph Move Right
                 {
-                    if (ViewEndPosition - movePosition <= ChartWidth)
+                    if (ViewStartPosition - movePosition > ChartWidth) // Reach right-end
                     {
-                        ViewStartPosition -= movePosition; // to do
-                        ViewEndPosition -= movePosition;
-                        InvalidateVisual();
+                        movePosition = ChartWidth - ViewEndPosition;
                     }
+                    ViewStartPosition -= movePosition;
+                    ViewEndPosition -= movePosition;
+                    Render();
                 }
             });
         }
+        #endregion
+
+        #endregion
+
+        #region Main Render
+        public void Render()
+        {
+            foreach (var radioButton in IntervalGrid.Children.OfType<RadioButton>().Where(radioButton => radioButton.CommandParameter.Equals(Settings.Default.Interval)))
+            {
+                radioButton.IsChecked = true;
+                break;
+            }
+
+            if (TotalCount > 0 && ViewStartPosition <= ItemFullWidth)
+            {
+                Common.ChartAdditionalLoad.Invoke();
+            }
+
+            CandleChart.InvalidateVisual();
+            CandleChartAxis.InvalidateVisual();
+            VolumeChart.InvalidateVisual();
+            VolumeChartAxis.InvalidateVisual();
+        }
+        #endregion
+
+        #region Chart Content Render
+        private void CandleChart_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
+        {
+            if (ViewItemCount <= 1)
+            {
+                return;
+            }
+
+            var actualWidth = (float)CandleChart.ActualWidth;
+            var actualHeight = (float)CandleChart.ActualHeight;
+            var actualItemFullWidth = actualWidth / ViewItemCount;
+
+            var canvas = e.Surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+
+            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
+            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+
+            // Draw Grid
+            var gridLevel = 4; // 4등분
+            for (int i = 0; i <= gridLevel; i++)
+            {
+                if (i > 0)
+                {
+                    canvas.DrawLine(
+                                      new SKPoint(0, actualHeight * ((float)i / gridLevel)),
+                                      new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel)),
+                                      DrawingTools.GridPaint
+                                   );
+                }
+            }
+
+            for (int i = StartItemIndex; i < EndItemIndex; i++)
+            {
+                var quote = Quotes[i];
+                var viewIndex = i - StartItemIndex;
+
+                // Draw Price Candlestick
+                canvas.DrawLine(
+                    new SKPoint(
+                        actualItemFullWidth * (viewIndex + 0.5f),
+                        actualHeight * (float)(1.0m - (quote.High - priceMin) / (priceMax - priceMin))),
+                    new SKPoint(
+                        actualItemFullWidth * (viewIndex + 0.5f),
+                        actualHeight * (float)(1.0m - (quote.Low - priceMin) / (priceMax - priceMin))),
+                    quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint);
+                canvas.DrawRect(
+                    new SKRect(
+                        actualItemFullWidth * viewIndex + (float)ActualItemMargin / 2,
+                        actualHeight * (float)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin)),
+                        actualItemFullWidth * (viewIndex + 1) - (float)ActualItemMargin / 2,
+                        actualHeight * (float)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin))
+                        ),
+                    quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
+                    );
+
+                // Draw Indicators
+                if (i < Indicators.Count && i >= 1)
+                {
+                    var preIndicator = Indicators[i - 1];
+                    var indicator = Indicators[i];
+
+                    if (preIndicator != null && indicator != null && preIndicator.Value != 0 && indicator.Value != 0)
+                    {
+                        canvas.DrawLine(
+                            new SKPoint(
+                                (float)ActualItemFullWidth * (viewIndex - 0.5f),
+                                (float)ActualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin))),
+                            new SKPoint(
+                                (float)ActualItemFullWidth * (viewIndex + 0.5f),
+                                (float)ActualHeight * (float)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin))),
+                            new SKPaint() { Color = SKColors.Yellow }
+                            );
+                    }
+                }
+            }
+        }
+
+        private void CandleChartAxis_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
+        {
+            if (ViewItemCount <= 1)
+            {
+                return;
+            }
+
+            var actualHeight = (float)CandleChartAxis.ActualHeight;
+
+            var canvas = e.Surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+
+            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
+            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+
+            // Draw Grid
+            var gridLevel = 4; // 4등분
+            for (int i = 0; i <= gridLevel; i++)
+            {
+                var gridPriceString = NumberUtil.ToRoundedValueString(priceMin + (priceMax - priceMin) * ((decimal)(gridLevel - i) / gridLevel));
+
+                canvas.DrawText(
+                    gridPriceString,
+                    5,
+                    actualHeight * ((float)i / gridLevel) - 7,
+                    DrawingTools.GridTextFont,
+                    DrawingTools.GridFontPaint);
+            }
+
+            // Draw Current Price Ticker
+            canvas.DrawText(
+                Quotes[EndItemIndex - 1].Close.ToString(),
+                5,
+                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)) - 8,
+                DrawingTools.CurrentTickerFont,
+                Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
+                );
+        }
+
+        private void VolumeChart_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
+        {
+            if (ViewItemCount <= 1)
+            {
+                return;
+            }
+
+            var actualWidth = (float)VolumeChart.ActualWidth;
+            var actualHeight = (float)VolumeChart.ActualHeight;
+            var actualItemFullWidth = actualWidth / ViewItemCount;
+
+            var canvas = e.Surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+
+            var volumeMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.Volume);
+
+            // Draw Grid
+            var gridLevel = 2; // 2등분
+            for (int i = 0; i <= gridLevel; i++)
+            {
+                if (i > 0)
+                {
+                    canvas.DrawLine(
+                        new SKPoint(0, actualHeight * ((float)i / gridLevel)),
+                        new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel)),
+                        DrawingTools.GridPaint
+                        );
+                }
+            }
+
+            for (int i = StartItemIndex; i < EndItemIndex; i++)
+            {
+                var quote = Quotes[i];
+                var viewIndex = i - StartItemIndex;
+
+                // Draw Volume Histogram
+                canvas.DrawRect(
+                    new SKRect(
+                        actualItemFullWidth * viewIndex + ActualItemMargin / 2,
+                        actualHeight * (float)(1.0m - quote.Volume / volumeMax),
+                        actualItemFullWidth * (viewIndex + 1) - ActualItemMargin / 2,
+                        actualHeight
+                        ),
+                    quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
+                    );
+            }
+        }
+
+        private void VolumeChartAxis_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
+        {
+            if (ViewItemCount <= 1)
+            {
+                return;
+            }
+
+            var actualHeight = (float)VolumeChartAxis.ActualHeight;
+
+            var canvas = e.Surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+
+            var volumeMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.Volume);
+
+            // Draw Grid
+            var gridLevel = 2; // 2등분
+            for (int i = 0; i <= gridLevel; i++)
+            {
+                var gridPriceString = Math.Round(volumeMax * ((decimal)(gridLevel - i) / gridLevel), 0).ToString();
+
+                canvas.DrawText(
+                    gridPriceString,
+                    5,
+                    (actualHeight - 20) * ((float)i / gridLevel) - 7 + 10,
+                    DrawingTools.GridTextFont,
+                    DrawingTools.GridFontPaint
+                    );
+            }
+
+            // Draw Current Volume Ticker
+            canvas.DrawText(
+                Quotes[EndItemIndex - 1].Volume.ToString(),
+                5,
+                (actualHeight - 20) * (float)(1.0m - Quotes[EndItemIndex - 1].Volume / volumeMax) - 8 + 10,
+                DrawingTools.CurrentTickerFont,
+                Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
+                );
+        }
+        #endregion
     }
 }

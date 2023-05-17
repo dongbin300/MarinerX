@@ -103,7 +103,7 @@ namespace Albedo
                         {
                             chartControl.ViewStartPosition -= chartControl.ItemFullWidth;
                             chartControl.ViewEndPosition -= chartControl.ItemFullWidth;
-                            chartControl.InvalidateVisual();
+                            chartControl.Render();
                         }
                         break;
 
@@ -112,7 +112,7 @@ namespace Albedo
                         {
                             chartControl.ViewStartPosition += chartControl.ItemFullWidth;
                             chartControl.ViewEndPosition += chartControl.ItemFullWidth;
-                            chartControl.InvalidateVisual();
+                            chartControl.Render();
                         }
                         break;
                 }
