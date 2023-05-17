@@ -236,9 +236,9 @@ namespace Albedo.Views
                 }
                 else if (diff.X < 0) // Graph Move Right
                 {
-                    if (ViewStartPosition - movePosition > ChartWidth) // Reach right-end
+                    if (ViewEndPosition - movePosition > ChartWidth) // Reach right-end
                     {
-                        movePosition = ChartWidth - ViewEndPosition;
+                        movePosition = ViewEndPosition - ChartWidth;
                     }
                     ViewStartPosition -= movePosition;
                     ViewEndPosition -= movePosition;
