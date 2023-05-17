@@ -1,5 +1,5 @@
 ﻿using Albedo.Commands;
-using Albedo.Utils;
+using Albedo.Enums;
 
 using Binance.Net.Enums;
 
@@ -33,15 +33,17 @@ namespace Albedo.ViewModels
                 Settings.Default.Save();
                 Common.ChartInterval = obj.ToString() switch
                 {
-                    "1분" => KlineInterval.OneMinute,
-                    "3분" => KlineInterval.ThreeMinutes,
-                    "5분" => KlineInterval.FiveMinutes,
-                    "30분" => KlineInterval.ThirtyMinutes,
-                    "1시간" => KlineInterval.OneHour,
-                    "1일" => KlineInterval.OneDay,
-                    "1주" => KlineInterval.OneWeek,
-                    "1월" => KlineInterval.OneMonth,
-                    _ => KlineInterval.OneMinute
+                    "1분" => CandleInterval.OneMinute,
+                    "3분" => CandleInterval.ThreeMinutes,
+                    "5분" => CandleInterval.FiveMinutes,
+                    "10분" => CandleInterval.TenMinutes,
+                    "15분" => CandleInterval.FifteenMinutes,
+                    "30분" => CandleInterval.ThirtyMinutes,
+                    "1시간" => CandleInterval.OneHour,
+                    "1일" => CandleInterval.OneDay,
+                    "1주" => CandleInterval.OneWeek,
+                    "1월" => CandleInterval.OneMonth,
+                    _ => CandleInterval.OneMinute
                 };
 
                 Common.ChartRefresh.Invoke();

@@ -5,7 +5,9 @@ namespace Albedo.Commands
 {
     public class DelegateCommand : ICommand
     {
+#pragma warning disable CS0414
         public event EventHandler? CanExecuteChanged = null;
+#pragma warning restore CS0414
         private readonly Action<object?> execute;
 
         public DelegateCommand(Action<object?> execute)

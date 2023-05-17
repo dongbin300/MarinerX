@@ -1,8 +1,6 @@
 ﻿using Albedo.Enums;
 using Albedo.Models;
 
-using Binance.Net.Enums;
-
 using System;
 
 namespace Albedo
@@ -23,7 +21,7 @@ namespace Albedo
         public static PairQuoteAssetModel CurrentSelectedPairQuoteAsset = new(PairQuoteAsset.None, "");
 
         public static Pair Pair = default!;
-        public static KlineInterval ChartInterval = KlineInterval.OneMinute;
+        public static CandleInterval ChartInterval = CandleInterval.OneMinute;
         public static Action ChartRefresh = default!;
         public static Action ChartAdditionalLoad = default!;
         public static Action SearchKeywordChanged = default!;

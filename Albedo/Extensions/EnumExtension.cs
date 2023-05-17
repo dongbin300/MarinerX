@@ -16,23 +16,37 @@ namespace Albedo.Extensions
             _ => BithumbPaymentCurrency.KRW
         };
 
-        public static UpbitMinuteInterval ToUpbitMinuteInterval(this KlineInterval interval) => interval switch
+        public static KlineInterval ToBinanceInterval(this CandleInterval interval) => interval switch
         {
-            KlineInterval.OneMinute => UpbitMinuteInterval.OneMinute,
-            KlineInterval.ThreeMinutes => UpbitMinuteInterval.ThreeMinutes,
-            KlineInterval.FiveMinutes => UpbitMinuteInterval.FiveMinutes,
-            KlineInterval.ThirtyMinutes => UpbitMinuteInterval.ThirtyMinutes,
-            KlineInterval.OneHour => UpbitMinuteInterval.SixtyMinutes,
+            CandleInterval.OneMinute => KlineInterval.OneMinute,
+            CandleInterval.ThreeMinutes => KlineInterval.ThreeMinutes,
+            CandleInterval.FiveMinutes => KlineInterval.FiveMinutes,
+            CandleInterval.FifteenMinutes => KlineInterval.FifteenMinutes,
+            CandleInterval.ThirtyMinutes => KlineInterval.ThirtyMinutes,
+            CandleInterval.OneHour => KlineInterval.OneHour,
+            CandleInterval.OneDay => KlineInterval.OneDay,
+            CandleInterval.OneWeek => KlineInterval.OneWeek,
+            CandleInterval.OneMonth => KlineInterval.OneMonth,
+            _ => KlineInterval.OneMinute
+        };
+
+        public static UpbitMinuteInterval ToUpbitMinuteInterval(this CandleInterval interval) => interval switch
+        {
+            CandleInterval.OneMinute => UpbitMinuteInterval.OneMinute,
+            CandleInterval.ThreeMinutes => UpbitMinuteInterval.ThreeMinutes,
+            CandleInterval.FiveMinutes => UpbitMinuteInterval.FiveMinutes,
+            CandleInterval.ThirtyMinutes => UpbitMinuteInterval.ThirtyMinutes,
+            CandleInterval.OneHour => UpbitMinuteInterval.SixtyMinutes,
             _ => UpbitMinuteInterval.OneMinute
         };
 
-        public static BithumbInterval ToBithumbInterval(this KlineInterval interval) => interval switch
+        public static BithumbInterval ToBithumbInterval(this CandleInterval interval) => interval switch
         {
-            KlineInterval.OneMinute => BithumbInterval.OneMinute,
-            KlineInterval.ThreeMinutes => BithumbInterval.ThreeMinutes,
-            KlineInterval.FiveMinutes => BithumbInterval.FiveMinutes,
-            KlineInterval.ThirtyMinutes => BithumbInterval.ThirtyMinutes,
-            KlineInterval.OneHour => BithumbInterval.OneHour,
+            CandleInterval.OneMinute => BithumbInterval.OneMinute,
+            CandleInterval.ThreeMinutes => BithumbInterval.ThreeMinutes,
+            CandleInterval.FiveMinutes => BithumbInterval.FiveMinutes,
+            CandleInterval.ThirtyMinutes => BithumbInterval.ThirtyMinutes,
+            CandleInterval.OneHour => BithumbInterval.OneHour,
             _ => BithumbInterval.OneMinute
         };
     }
