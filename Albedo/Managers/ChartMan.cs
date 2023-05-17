@@ -29,7 +29,7 @@ namespace Albedo.Managers
                 var interval = Common.ChartInterval.ToBinanceInterval();
                 var klineResult = binanceClient.SpotApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, null, Common.ChartLoadLimit);
                 klineResult.Wait();
-                chartControl.Init(klineResult.Result.Data.Select(x => new Quote
+                var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
                     Open = x.OpenPrice,
@@ -37,7 +37,12 @@ namespace Albedo.Managers
                     Low = x.LowPrice,
                     Close = x.ClosePrice,
                     Volume = x.Volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes); // TODO: 1d -> 1w, 1M 도 구현해야함
+                }
+                chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.UnsubscribeAsync(subId);
@@ -57,7 +62,7 @@ namespace Albedo.Managers
                     });
                 });
                 klineUpdateResult.Wait();
-                subId = klineUpdateResult.Result.Data.Id;
+                subId = klineUpdateResult.Result.Data.Id; // TODO: Merge 잘되긴하는데 소켓통신에서 에러남
 
                 return (chartControl, subId);
             }
@@ -266,7 +271,6 @@ namespace Albedo.Managers
                 // 빗썸은 캔들의 개수를 무조건 3001개 가져오고, 따로 설정할 수도 없고, 그 이전의 캔들도 가져올 수가 없다.
                 // 그러므로, 빗썸의 차트 추가 로드는 무효화된다.
 
-                // 1주, 1월 캔들은 지원하지 않는다 (TODO)
                 var candleResult = bithumbClient.Candlestick.GetCandlesticksAsync(symbol, paymentCurrency, interval);
                 candleResult.Wait();
                 chartControl.Init(candleResult.Result.data.Select(x => new Quote

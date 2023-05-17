@@ -7,7 +7,6 @@ using Albedo.Utils;
 using Albedo.Views;
 
 using Binance.Net.Clients;
-using Binance.Net.Enums;
 using Binance.Net.Objects;
 
 using Bithumb.Net.Clients;
@@ -26,7 +25,6 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
-    /// WPF 성능 좋은 그림그리는 도구
     /// 거래소별 인터벌 구분
     /// 
     /// 수치 정보 툴팁

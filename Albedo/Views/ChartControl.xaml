@@ -59,6 +59,8 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <!--
                 바이낸스: 1초, 1, 3, 5, 15, 30분, 1, 2, 4, 6, 8, 12시간, 1, 3일, 1주, 1월
@@ -69,11 +71,13 @@
             <RadioButton Grid.Row="0" Command="{Binding IntervalClick}" CommandParameter="1분" Content="1분"/>
             <RadioButton Grid.Row="1" Command="{Binding IntervalClick}" CommandParameter="3분" Content="3분"/>
             <RadioButton Grid.Row="2" Command="{Binding IntervalClick}" CommandParameter="5분" Content="5분"/>
-            <RadioButton Grid.Row="3" Command="{Binding IntervalClick}" CommandParameter="30분" Content="30분"/>
-            <RadioButton Grid.Row="4" Command="{Binding IntervalClick}" CommandParameter="1시간" Content="1시간"/>
-            <RadioButton Grid.Row="5" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
-            <RadioButton Grid.Row="6" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
-            <RadioButton Grid.Row="7" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
+            <RadioButton Grid.Row="3" Command="{Binding IntervalClick}" CommandParameter="10분" Content="10분"/>
+            <RadioButton Grid.Row="4" Command="{Binding IntervalClick}" CommandParameter="15분" Content="15분"/>
+            <RadioButton Grid.Row="5" Command="{Binding IntervalClick}" CommandParameter="30분" Content="30분"/>
+            <RadioButton Grid.Row="6" Command="{Binding IntervalClick}" CommandParameter="1시간" Content="1시간"/>
+            <RadioButton Grid.Row="7" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
+            <RadioButton Grid.Row="8" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
+            <RadioButton Grid.Row="9" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
         </Grid>
 
         <Grid Name="ChartGrid" Grid.Column="1">
