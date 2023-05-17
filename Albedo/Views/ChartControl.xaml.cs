@@ -22,7 +22,7 @@ namespace Albedo.Views
     /// </summary>
     public partial class ChartControl : UserControl
     {
-        private System.Timers.Timer chartControlTimer = new System.Timers.Timer(25);
+        private System.Timers.Timer chartControlTimer = new System.Timers.Timer(5);
 
         public List<Quote> Quotes = new();
         public List<Models.Indicator> Indicators = new();
@@ -219,8 +219,14 @@ namespace Albedo.Views
         {
             var currentMousePosition = GetCursorPosition();
             Vector diff = currentMousePosition - StartMousePosition;
+
+            if (diff.X == 0)
+            {
+                return;
+            }
+
             StartMousePosition = currentMousePosition;
-            var movePosition = (float)diff.X / ActualItemFullWidth * ItemFullWidth;
+            var movePosition = (float)diff.X / ActualItemFullWidth * ItemFullWidth * 1.3f;
 
             DispatcherService.Invoke(() =>
             {
