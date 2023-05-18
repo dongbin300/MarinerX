@@ -14,21 +14,44 @@ namespace Albedo.Extensions
             var newQuotes = new List<Quote>();
             var newQuote = new Quote();
             var isFirst = true;
+            MergeIntervalType intervalType = MergeIntervalType.Minutes;
 
-            var num = toInterval switch
+            var num = 1;
+            switch (toInterval)
             {
-                CandleInterval.ThreeMinutes => 3,
-                CandleInterval.FiveMinutes => 5,
-                CandleInterval.TenMinutes => 10,
-                CandleInterval.FifteenMinutes => 15,
-                CandleInterval.ThirtyMinutes => 30,
-                _ => 1
-            };
+                case CandleInterval.OneWeek:
+                    intervalType = MergeIntervalType.Week;
+                    break;
+
+                case CandleInterval.OneMonth:
+                    intervalType = MergeIntervalType.Month;
+                    break;
+
+                default:
+                    num = toInterval switch
+                    {
+                        CandleInterval.ThreeMinutes => 3,
+                        CandleInterval.FiveMinutes => 5,
+                        CandleInterval.TenMinutes => 10,
+                        CandleInterval.FifteenMinutes => 15,
+                        CandleInterval.ThirtyMinutes => 30,
+                        _ => 1
+                    };
+                    break;
+            }
 
             for (int i = 0; i < quotes.Count; i++)
             {
                 var quote = quotes[i];
-                if (quote.Date.Minute % num == 0 || i == quotes.Count - 1)
+                var separationCondition = intervalType switch
+                {
+                    MergeIntervalType.Minutes => quote.Date.Minute % num == 0,
+                    MergeIntervalType.Week => quote.Date.DayOfWeek == DayOfWeek.Sunday,
+                    MergeIntervalType.Month => quote.Date.Day == 1,
+                    _ => false
+                };
+
+                if (separationCondition || i == quotes.Count - 1)
                 {
                     if (isFirst)
                     {

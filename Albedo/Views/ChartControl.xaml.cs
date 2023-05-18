@@ -1,4 +1,5 @@
-﻿using Albedo.Utils;
+﻿using Albedo.Enums;
+using Albedo.Utils;
 
 using Bithumb.Net.Enums;
 
@@ -89,24 +90,86 @@ namespace Albedo.Views
         }
 
         /// <summary>
+        /// Merge quote in real time
+        /// </summary>
+        /// <param name="quote"></param>
+        /// <param name="fromInterval"></param>
+        /// <param name="toInterval"></param>
+        public void UpdateQuote(Quote quote, CandleInterval toInterval)
+        {
+            var backtrackCount = 0;
+            switch (toInterval)
+            {
+                case CandleInterval.OneWeek:
+                    backtrackCount = (int)quote.Date.DayOfWeek;
+                    break;
+
+                case CandleInterval.OneMonth:
+                    backtrackCount = quote.Date.Day - 1;
+                    break;
+
+                default:
+                    backtrackCount = toInterval switch
+                    {
+                        CandleInterval.ThreeMinutes => quote.Date.Minute % 3, // 1m * 3
+                        CandleInterval.FiveMinutes => quote.Date.Minute % 5, // 1m * 5
+                        CandleInterval.TenMinutes => quote.Date.Minute % 2, // 5m * 2
+                        CandleInterval.FifteenMinutes => quote.Date.Minute % 3, // 5m * 3
+                        CandleInterval.ThirtyMinutes => quote.Date.Minute % 6, // 5m * 6 | 10m * 3 | 15m * 2
+                        _ => 0
+                    };
+                    break;
+            }
+
+            var lastQuote = Quotes[^1];
+            if (backtrackCount == 0)
+            {
+                if (lastQuote.Date.Equals(quote.Date)) // Update quote
+                {
+                    lastQuote.High = quote.High;
+                    lastQuote.Low = quote.Low;
+                    lastQuote.Close = quote.Close;
+                    lastQuote.Volume = quote.Volume;
+                }
+                else // New quote
+                {
+                    Quotes.Add(quote);
+                    ViewStartPosition += ItemFullWidth;
+                    ViewEndPosition += ItemFullWidth;
+                }
+            }
+            else // Merge with past quotes
+            {
+                var backtrackQuotes = Quotes.TakeLast(backtrackCount);
+                lastQuote.High = Math.Max(backtrackQuotes.Max(x => x.High), quote.High);
+                lastQuote.Low = Math.Min(backtrackQuotes.Min(x => x.Low), quote.Low);
+                lastQuote.Close = quote.Close;
+                lastQuote.Volume = backtrackQuotes.Sum(x => x.Volume) + quote.Volume;
+            }
+
+            Render();
+        }
+
+        /// <summary>
         /// Update quote whenever an order is placed (for Bithumb)
         /// </summary>
         /// <param name="price"></param>
-        public void UpdateQuote(BithumbInterval interval, decimal price, decimal volume)
+        public void UpdateQuote(CandleInterval interval, decimal price, decimal volume)
         {
             var now = DateTime.Now;
             var lastQuote = Quotes[^1];
             var intervalSeconds = interval switch
             {
-                BithumbInterval.OneMinute => 60,
-                BithumbInterval.ThreeMinutes => 180,
-                BithumbInterval.FiveMinutes => 300,
-                BithumbInterval.TenMinutes => 600,
-                BithumbInterval.ThirtyMinutes => 1800,
-                BithumbInterval.OneHour => 3600,
-                BithumbInterval.SixHours => 21600,
-                BithumbInterval.TwelveHours => 43200,
-                BithumbInterval.OneDay => 86400,
+                CandleInterval.OneMinute => 60,
+                CandleInterval.ThreeMinutes => 180,
+                CandleInterval.FiveMinutes => 300,
+                CandleInterval.TenMinutes => 600,
+                CandleInterval.FifteenMinutes => 900,
+                CandleInterval.ThirtyMinutes => 1800,
+                CandleInterval.OneHour => 3600,
+                CandleInterval.OneDay => 86400,
+                CandleInterval.OneWeek => 604800,
+                CandleInterval.OneMonth => 2592000,
                 _ => 60
             };
 
@@ -388,7 +451,7 @@ namespace Albedo.Views
             canvas.DrawText(
                 Quotes[EndItemIndex - 1].Close.ToString(),
                 5,
-                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)) - 8,
+                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)),
                 DrawingTools.CurrentTickerFont,
                 Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                 );

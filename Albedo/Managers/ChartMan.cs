@@ -4,7 +4,6 @@ using Albedo.Utils;
 using Albedo.Views;
 
 using Binance.Net.Clients;
-using Binance.Net.Enums;
 
 using Bithumb.Net.Clients;
 
@@ -26,8 +25,9 @@ namespace Albedo.Managers
             {
                 var chartControl = new ChartControl();
 
+                var symbol = Common.Pair.Symbol;
                 var interval = Common.ChartInterval.ToBinanceInterval();
-                var klineResult = binanceClient.SpotApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, null, Common.ChartLoadLimit);
+                var klineResult = binanceClient.SpotApi.ExchangeData.GetKlinesAsync(symbol, interval, null, null, Common.ChartLoadLimit);
                 klineResult.Wait();
                 var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
@@ -40,29 +40,46 @@ namespace Albedo.Managers
                 }).ToList();
                 if (Common.ChartInterval == CandleInterval.TenMinutes)
                 {
-                    quotes = quotes.Merge(CandleInterval.TenMinutes); // TODO: 1d -> 1w, 1M 도 구현해야함
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
                 }
                 chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.UnsubscribeAsync(subId);
-                var klineUpdateResult = binanceSocketClient.SpotApi.ExchangeData.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, interval, (obj) =>
+                var klineUpdateResult = binanceSocketClient.SpotApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
-                        chartControl.UpdateQuote(new Quote
+                        switch (Common.ChartInterval)
                         {
-                            Date = obj.Data.Data.OpenTime,
-                            Open = obj.Data.Data.OpenPrice,
-                            High = obj.Data.Data.HighPrice,
-                            Low = obj.Data.Data.LowPrice,
-                            Close = obj.Data.Data.ClosePrice,
-                            Volume = obj.Data.Data.Volume
-                        });
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                });
+                                break;
+                        }
                     });
                 });
                 klineUpdateResult.Wait();
-                subId = klineUpdateResult.Result.Data.Id; // TODO: Merge 잘되긴하는데 소켓통신에서 에러남
+                subId = klineUpdateResult.Result.Data.Id;
 
                 return (chartControl, subId);
             }
@@ -79,10 +96,11 @@ namespace Albedo.Managers
             {
                 var chartControl = new ChartControl();
 
+                var symbol = Common.Pair.Symbol;
                 var interval = Common.ChartInterval.ToBinanceInterval();
-                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, null, Common.ChartLoadLimit);
+                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, null, null, Common.ChartLoadLimit);
                 klineResult.Wait();
-                chartControl.Init(klineResult.Result.Data.Select(x => new Quote
+                var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
                     Open = x.OpenPrice,
@@ -90,23 +108,45 @@ namespace Albedo.Managers
                     Low = x.LowPrice,
                     Close = x.ClosePrice,
                     Volume = x.Volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
-                var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, interval, (obj) =>
+                var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
-                        chartControl.UpdateQuote(new Quote
+                        switch (Common.ChartInterval)
                         {
-                            Date = obj.Data.Data.OpenTime,
-                            Open = obj.Data.Data.OpenPrice,
-                            High = obj.Data.Data.HighPrice,
-                            Low = obj.Data.Data.LowPrice,
-                            Close = obj.Data.Data.ClosePrice,
-                            Volume = obj.Data.Data.Volume
-                        });
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                });
+                                break;
+                        }
                     });
                 });
                 klineUpdateResult.Wait();
@@ -127,10 +167,11 @@ namespace Albedo.Managers
             {
                 var chartControl = new ChartControl();
 
+                var symbol = Common.Pair.Symbol;
                 var interval = Common.ChartInterval.ToBinanceInterval();
-                var klineResult = binanceClient.CoinFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, null, Common.ChartLoadLimit);
+                var klineResult = binanceClient.CoinFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, null, null, Common.ChartLoadLimit);
                 klineResult.Wait();
-                chartControl.Init(klineResult.Result.Data.Select(x => new Quote
+                var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
                     Open = x.OpenPrice,
@@ -138,23 +179,45 @@ namespace Albedo.Managers
                     Low = x.LowPrice,
                     Close = x.ClosePrice,
                     Volume = x.Volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.CoinFuturesStreams.UnsubscribeAsync(subId);
-                var klineUpdateResult = binanceSocketClient.CoinFuturesStreams.SubscribeToKlineUpdatesAsync(Common.Pair.Symbol, interval, (obj) =>
+                var klineUpdateResult = binanceSocketClient.CoinFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
-                        chartControl.UpdateQuote(new Quote
+                        switch (Common.ChartInterval)
                         {
-                            Date = obj.Data.Data.OpenTime,
-                            Open = obj.Data.Data.OpenPrice,
-                            High = obj.Data.Data.HighPrice,
-                            Low = obj.Data.Data.LowPrice,
-                            Close = obj.Data.Data.ClosePrice,
-                            Volume = obj.Data.Data.Volume
-                        });
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = obj.Data.Data.OpenTime,
+                                    Open = obj.Data.Data.OpenPrice,
+                                    High = obj.Data.Data.HighPrice,
+                                    Low = obj.Data.Data.LowPrice,
+                                    Close = obj.Data.Data.ClosePrice,
+                                    Volume = obj.Data.Data.Volume
+                                });
+                                break;
+                        }
                     });
                 });
                 klineUpdateResult.Wait();
@@ -270,10 +333,9 @@ namespace Albedo.Managers
                 var interval = Common.ChartInterval.ToBithumbInterval();
                 // 빗썸은 캔들의 개수를 무조건 3001개 가져오고, 따로 설정할 수도 없고, 그 이전의 캔들도 가져올 수가 없다.
                 // 그러므로, 빗썸의 차트 추가 로드는 무효화된다.
-
                 var candleResult = bithumbClient.Candlestick.GetCandlesticksAsync(symbol, paymentCurrency, interval);
                 candleResult.Wait();
-                chartControl.Init(candleResult.Result.data.Select(x => new Quote
+                var quotes = candleResult.Result.data.Select(x => new Quote
                 {
                     Date = x.dateTime,
                     Open = x.open,
@@ -281,7 +343,12 @@ namespace Albedo.Managers
                     Low = x.low,
                     Close = x.close,
                     Volume = x.volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.FifteenMinutes || Common.ChartInterval == CandleInterval.OneWeek || Common.ChartInterval == CandleInterval.OneMonth)
+                {
+                    quotes = quotes.Merge(Common.ChartInterval);
+                }
+                chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Common.ChartDefaultViewCount * chartControl.ItemFullWidth, 0);
 
                 bithumbSocketClient.Streams.SubscribeToTransactionAsync(symbol, (obj) =>
@@ -295,7 +362,7 @@ namespace Albedo.Managers
                     {
                         foreach (var transaction in obj.content.list)
                         {
-                            chartControl.UpdateQuote(interval, transaction.contPrice, transaction.contQty);
+                            chartControl.UpdateQuote(Common.ChartInterval, transaction.contPrice, transaction.contQty);
                         }
                     });
                 });
@@ -313,8 +380,9 @@ namespace Albedo.Managers
         {
             try
             {
+                var symbol = Common.Pair.Symbol;
                 var interval = Common.ChartInterval.ToBinanceInterval();
-                var klineResult = binanceClient.SpotApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                var klineResult = binanceClient.SpotApi.ExchangeData.GetKlinesAsync(symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
                 klineResult.Wait();
                 chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
                 {
@@ -336,8 +404,9 @@ namespace Albedo.Managers
         {
             try
             {
+                var symbol = Common.Pair.Symbol;
                 var interval = Common.ChartInterval.ToBinanceInterval();
-                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
                 klineResult.Wait();
                 chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
                 {
@@ -359,8 +428,9 @@ namespace Albedo.Managers
         {
             try
             {
+                var symbol = Common.Pair.Symbol;
                 var interval = Common.ChartInterval.ToBinanceInterval();
-                var klineResult = binanceClient.CoinFuturesApi.ExchangeData.GetKlinesAsync(Common.Pair.Symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                var klineResult = binanceClient.CoinFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
                 klineResult.Wait();
                 chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
                 {
@@ -382,6 +452,7 @@ namespace Albedo.Managers
         {
             try
             {
+                var symbol = Common.Pair.Symbol;
                 switch (Common.ChartInterval)
                 {
                     case CandleInterval.OneMinute:
@@ -389,7 +460,7 @@ namespace Albedo.Managers
                     case CandleInterval.FifteenMinutes:
                     case CandleInterval.ThirtyMinutes:
                     case CandleInterval.OneHour:
-                        var minuteCandleResult = upbitClient.QuotationCandles.GetMinutesCandlesAsync(Common.Pair.Symbol, Common.ChartInterval.ToUpbitMinuteInterval(), chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
+                        var minuteCandleResult = upbitClient.QuotationCandles.GetMinutesCandlesAsync(symbol, Common.ChartInterval.ToUpbitMinuteInterval(), chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
                         minuteCandleResult.Wait();
                         var minuteQuotes = minuteCandleResult.Result.Select(x => new Quote
                         {
@@ -405,7 +476,7 @@ namespace Albedo.Managers
                         break;
 
                     case CandleInterval.OneDay:
-                        var dayCandleResult = upbitClient.QuotationCandles.GetDaysCandlesAsync(Common.Pair.Symbol, chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
+                        var dayCandleResult = upbitClient.QuotationCandles.GetDaysCandlesAsync(symbol, chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
                         dayCandleResult.Wait();
                         var dayQuotes = dayCandleResult.Result.Select(x => new Quote
                         {
@@ -421,7 +492,7 @@ namespace Albedo.Managers
                         break;
 
                     case CandleInterval.OneWeek:
-                        var weekCandleResult = upbitClient.QuotationCandles.GetWeeksCandlesAsync(Common.Pair.Symbol, chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
+                        var weekCandleResult = upbitClient.QuotationCandles.GetWeeksCandlesAsync(symbol, chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
                         weekCandleResult.Wait();
                         var weekQuotes = weekCandleResult.Result.Select(x => new Quote
                         {
@@ -437,7 +508,7 @@ namespace Albedo.Managers
                         break;
 
                     case CandleInterval.OneMonth:
-                        var monthCandleResult = upbitClient.QuotationCandles.GetMonthsCandlesAsync(Common.Pair.Symbol, chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
+                        var monthCandleResult = upbitClient.QuotationCandles.GetMonthsCandlesAsync(symbol, chartControl.Quotes[0].Date.KstToUtc(), Common.ChartUpbitLoadLimit);
                         monthCandleResult.Wait();
                         var monthQuotes = monthCandleResult.Result.Select(x => new Quote
                         {

@@ -44,7 +44,8 @@ namespace Albedo
         BinanceClient binanceClient = new();
         BinanceSocketClient binanceSocketClient = new();
         BithumbClient bithumbClient = new();
-        BithumbSocketClient bithumbSocketClient = new();
+        BithumbSocketClient bithumbSocketClient = new(); // for ticker
+        BithumbSocketClient bithumbSocketClient2 = new(); // for transaction
         UpbitClient upbitClient = new();
         System.Timers.Timer timer = new(1000);
         System.Timers.Timer upbitTimer = new(3000);
@@ -332,7 +333,7 @@ namespace Albedo
                             break;
 
                         case PairMarket.Bithumb: // 빗썸
-                            var bithumbChartControl = ChartMan.RefreshBithumbSpotChart(bithumbClient, bithumbSocketClient);
+                            var bithumbChartControl = ChartMan.RefreshBithumbSpotChart(bithumbClient, bithumbSocketClient2);
                             Chart.Content = bithumbChartControl;
                             break;
                     }
