@@ -18,7 +18,7 @@ namespace Albedo.Utils
 
         public static string ToRoundedValueString(decimal value)
         {
-            return ToRoundedValue(value).ToString("0.############################");
+            return ToRoundedValue(value).ToString("#,0.############################");
         }
     }
 }
