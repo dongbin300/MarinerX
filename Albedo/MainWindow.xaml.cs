@@ -25,7 +25,6 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
-    /// 한글 검색 안됨
     /// 지표 Y축 위치 버그
     /// 
     /// 수치 정보 툴팁

@@ -328,7 +328,7 @@ namespace Albedo.ViewModels
                 return;
             }
 
-            ResultPairControls = new ObservableCollection<PairControl>(PairControls.Where(p => p.Pair.Symbol.Contains(keywordText)));
+            ResultPairControls = new ObservableCollection<PairControl>(PairControls.Where(p => p.Pair.SymbolKorean.Contains(keywordText)));
         }
 
         /// <summary>
