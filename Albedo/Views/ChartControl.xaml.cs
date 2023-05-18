@@ -1,8 +1,6 @@
 ﻿using Albedo.Enums;
 using Albedo.Utils;
 
-using Bithumb.Net.Enums;
-
 using Skender.Stock.Indicators;
 
 using SkiaSharp;
@@ -48,7 +46,7 @@ namespace Albedo.Views
         public float ActualItemMargin => ActualItemFullWidth * ItemMarginPercent;
 
         public int ViewCountMin = 10;
-        public int ViewCountMax = 500;
+        public int ViewCountMax = 2000;
 
         public Point StartMousePosition;
 
@@ -351,6 +349,7 @@ namespace Albedo.Views
             var actualWidth = (float)CandleChart.ActualWidth;
             var actualHeight = (float)CandleChart.ActualHeight;
             var actualItemFullWidth = actualWidth / ViewItemCount;
+            var actualItemMargin = actualItemFullWidth * ItemMarginPercent;
 
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
@@ -388,9 +387,9 @@ namespace Albedo.Views
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
-                        actualItemFullWidth * viewIndex + (float)ActualItemMargin / 2,
+                        actualItemFullWidth * viewIndex + actualItemMargin / 2,
                         actualHeight * (float)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin)),
-                        actualItemFullWidth * (viewIndex + 1) - (float)ActualItemMargin / 2,
+                        actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
                         actualHeight * (float)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin))
                         ),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
@@ -406,11 +405,11 @@ namespace Albedo.Views
                     {
                         canvas.DrawLine(
                             new SKPoint(
-                                (float)ActualItemFullWidth * (viewIndex - 0.5f),
-                                (float)ActualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin))),
+                                actualItemFullWidth * (viewIndex - 0.5f),
+                                actualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin))),
                             new SKPoint(
-                                (float)ActualItemFullWidth * (viewIndex + 0.5f),
-                                (float)ActualHeight * (float)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin))),
+                                actualItemFullWidth * (viewIndex + 0.5f),
+                                actualHeight * (float)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin))),
                             new SKPaint() { Color = SKColors.Yellow }
                             );
                     }
