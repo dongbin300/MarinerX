@@ -25,7 +25,8 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
-    /// 거래소별 인터벌 구분
+    /// 한글 검색 안됨
+    /// 지표 Y축 위치 버그
     /// 
     /// 수치 정보 툴팁
     /// 설정 UI 및 버튼 추가(API키 입력, 라이트/다크 모드, 화면설정)

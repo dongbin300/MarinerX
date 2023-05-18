@@ -19,6 +19,7 @@ namespace Albedo.Managers
 {
     public class ChartMan
     {
+        #region Refresh Chart (Binance Refresh+Update / Upbit Refresh / Bithumb Refresh+Update)
         public static (ChartControl, int) RefreshBinanceSpotChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
@@ -375,7 +376,9 @@ namespace Albedo.Managers
                 return default!;
             }
         }
+        #endregion
 
+        #region Additional Chart (Binance, Upbit)
         public static void LoadAdditionalBinanceSpotChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
@@ -384,7 +387,7 @@ namespace Albedo.Managers
                 var interval = Common.ChartInterval.ToBinanceInterval();
                 var klineResult = binanceClient.SpotApi.ExchangeData.GetKlinesAsync(symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
                 klineResult.Wait();
-                chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
+                var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
                     Open = x.OpenPrice,
@@ -392,7 +395,12 @@ namespace Albedo.Managers
                     Low = x.LowPrice,
                     Close = x.ClosePrice,
                     Volume = x.Volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
             }
             catch (Exception ex)
             {
@@ -408,7 +416,7 @@ namespace Albedo.Managers
                 var interval = Common.ChartInterval.ToBinanceInterval();
                 var klineResult = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
                 klineResult.Wait();
-                chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
+                var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
                     Open = x.OpenPrice,
@@ -416,7 +424,12 @@ namespace Albedo.Managers
                     Low = x.LowPrice,
                     Close = x.ClosePrice,
                     Volume = x.Volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
             }
             catch (Exception ex)
             {
@@ -432,7 +445,7 @@ namespace Albedo.Managers
                 var interval = Common.ChartInterval.ToBinanceInterval();
                 var klineResult = binanceClient.CoinFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
                 klineResult.Wait();
-                chartControl.ConcatenateQuotes(klineResult.Result.Data.Select(x => new Quote
+                var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
                     Open = x.OpenPrice,
@@ -440,7 +453,12 @@ namespace Albedo.Managers
                     Low = x.LowPrice,
                     Close = x.ClosePrice,
                     Volume = x.Volume,
-                }).ToList());
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
             }
             catch (Exception ex)
             {
@@ -532,7 +550,9 @@ namespace Albedo.Managers
                 Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
         }
+        #endregion
 
+        #region Update chart (Upbit)
         public static void UpdateUpbitSpotChart(UpbitClient upbitClient, ChartControl chartControl)
         {
             var symbol = Common.Pair.Symbol;
@@ -603,5 +623,6 @@ namespace Albedo.Managers
                     break;
             }
         }
+        #endregion
     }
 }
