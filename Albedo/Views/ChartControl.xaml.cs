@@ -399,12 +399,12 @@ namespace Albedo.Views
                 }
             }
 
-            // Draw Candle Info Text
+            // Draw Candle Info Text (TODO: 색깔로 수치 표시)
             var pointingQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 1] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
             var preQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 2] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth) - 1];
             var changeText = pointingQuote.Close >= preQuote.Close ? $"+{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}" : $"{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}";
-            var candleInfoText1 = $"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss} \x1F4B1 {NumberUtil.ToRoundedValueString(pointingQuote.Volume)} {changeText}";
-            var candleInfoText2 = $"\x21E4 {NumberUtil.ToRoundedValueString(pointingQuote.Open)} \x2191 {NumberUtil.ToRoundedValueString(pointingQuote.High)} \x2193 {NumberUtil.ToRoundedValueString(pointingQuote.Low)} \x21E5 {NumberUtil.ToRoundedValueString(pointingQuote.Close)} {changeText}";
+            var candleInfoText1 = $"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss}  \x0024 {NumberUtil.ToRoundedValueString(pointingQuote.Volume)}";
+            var candleInfoText2 = $"\x21E4 {NumberUtil.ToRoundedValueString(pointingQuote.Open)}  \x2191 {NumberUtil.ToRoundedValueString(pointingQuote.High)}  \x2193 {NumberUtil.ToRoundedValueString(pointingQuote.Low)}  \x21E5 {NumberUtil.ToRoundedValueString(pointingQuote.Close)}  {changeText}";
             canvas.DrawText(candleInfoText1, 10, 10, DrawingTools.CandleInfoFont, DrawingTools.CandleInfoPaint);
             canvas.DrawText(candleInfoText2, 10, 22, DrawingTools.CandleInfoFont, DrawingTools.CandleInfoPaint);
 
