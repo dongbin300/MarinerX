@@ -49,6 +49,7 @@ namespace Albedo.Views
         public int ViewCountMax = 2000;
 
         public Point StartMousePosition;
+        public float CurrentMouseX;
 
         public ChartControl()
         {
@@ -315,6 +316,33 @@ namespace Albedo.Views
         }
         #endregion
 
+        #region View Info
+        private void UserControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                var cursorPosition = GetCursorPosition();
+                var x = (float)cursorPosition.X - (float)CandleChart.PointToScreen(new Point(0, 0)).X;
+
+                if (x < 0 || x >= CandleChart.ActualWidth - CandleChart.ActualWidth / ViewItemCount)
+                {
+                    if (CurrentMouseX != -1358)
+                    {
+                        CurrentMouseX = -1358;
+                        Render();
+                    }
+                    return;
+                }
+
+                CurrentMouseX = x;
+                Render();
+            }
+            catch
+            {
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Main Render
@@ -347,7 +375,7 @@ namespace Albedo.Views
             }
 
             var actualWidth = (float)CandleChart.ActualWidth;
-            var actualHeight = (float)CandleChart.ActualHeight;
+            var actualHeight = (float)CandleChart.ActualHeight - Common.CandleTopBottomMargin * 2;
             var actualItemFullWidth = actualWidth / ViewItemCount;
             var actualItemMargin = actualItemFullWidth * ItemMarginPercent;
 
@@ -364,12 +392,21 @@ namespace Albedo.Views
                 if (i > 0)
                 {
                     canvas.DrawLine(
-                                      new SKPoint(0, actualHeight * ((float)i / gridLevel)),
-                                      new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel)),
+                                      new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
+                                      new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
                                       DrawingTools.GridPaint
                                    );
                 }
             }
+
+            // Draw Candle Info Text
+            var pointingQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 1] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
+            var preQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 2] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth) - 1];
+            var changeText = pointingQuote.Close >= preQuote.Close ? $"+{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}" : $"{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}";
+            var candleInfoText1 = $"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss} \x1F4B1 {NumberUtil.ToRoundedValueString(pointingQuote.Volume)} {changeText}";
+            var candleInfoText2 = $"\x21E4 {NumberUtil.ToRoundedValueString(pointingQuote.Open)} \x2191 {NumberUtil.ToRoundedValueString(pointingQuote.High)} \x2193 {NumberUtil.ToRoundedValueString(pointingQuote.Low)} \x21E5 {NumberUtil.ToRoundedValueString(pointingQuote.Close)} {changeText}";
+            canvas.DrawText(candleInfoText1, 10, 10, DrawingTools.CandleInfoFont, DrawingTools.CandleInfoPaint);
+            canvas.DrawText(candleInfoText2, 10, 22, DrawingTools.CandleInfoFont, DrawingTools.CandleInfoPaint);
 
             for (int i = StartItemIndex; i < EndItemIndex; i++)
             {
@@ -380,17 +417,17 @@ namespace Albedo.Views
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (quote.High - priceMin) / (priceMax - priceMin))),
+                        actualHeight * (float)(1.0m - (quote.High - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (quote.Low - priceMin) / (priceMax - priceMin))),
+                        actualHeight * (float)(1.0m - (quote.Low - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
                         actualItemFullWidth * viewIndex + actualItemMargin / 2,
-                        actualHeight * (float)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin)),
+                        actualHeight * (float)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin,
                         actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
-                        actualHeight * (float)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin))
+                        actualHeight * (float)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin
                         ),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                     );
@@ -406,10 +443,10 @@ namespace Albedo.Views
                         canvas.DrawLine(
                             new SKPoint(
                                 actualItemFullWidth * (viewIndex - 0.5f),
-                                actualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin))),
+                                actualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
                             new SKPoint(
                                 actualItemFullWidth * (viewIndex + 0.5f),
-                                actualHeight * (float)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin))),
+                                actualHeight * (float)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
                             new SKPaint() { Color = SKColors.Yellow }
                             );
                     }
@@ -424,7 +461,7 @@ namespace Albedo.Views
                 return;
             }
 
-            var actualHeight = (float)CandleChartAxis.ActualHeight;
+            var actualHeight = (float)CandleChartAxis.ActualHeight - Common.CandleTopBottomMargin * 2;
 
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
@@ -441,16 +478,16 @@ namespace Albedo.Views
                 canvas.DrawText(
                     gridPriceString,
                     5,
-                    actualHeight * ((float)i / gridLevel) - 7,
+                    actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin,
                     DrawingTools.GridTextFont,
-                    DrawingTools.GridFontPaint);
+                    DrawingTools.GridTextPaint);
             }
 
             // Draw Current Price Ticker
             canvas.DrawText(
                 Quotes[EndItemIndex - 1].Close.ToString(),
                 5,
-                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)),
+                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
                 Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                 );
@@ -464,7 +501,7 @@ namespace Albedo.Views
             }
 
             var actualWidth = (float)VolumeChart.ActualWidth;
-            var actualHeight = (float)VolumeChart.ActualHeight;
+            var actualHeight = (float)VolumeChart.ActualHeight - Common.VolumeTopBottomMargin * 2;
             var actualItemFullWidth = actualWidth / ViewItemCount;
 
             var canvas = e.Surface.Canvas;
@@ -479,8 +516,8 @@ namespace Albedo.Views
                 if (i > 0)
                 {
                     canvas.DrawLine(
-                        new SKPoint(0, actualHeight * ((float)i / gridLevel)),
-                        new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel)),
+                        new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.VolumeTopBottomMargin),
+                        new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.VolumeTopBottomMargin),
                         DrawingTools.GridPaint
                         );
                 }
@@ -495,9 +532,9 @@ namespace Albedo.Views
                 canvas.DrawRect(
                     new SKRect(
                         actualItemFullWidth * viewIndex + ActualItemMargin / 2,
-                        actualHeight * (float)(1.0m - quote.Volume / volumeMax),
+                        actualHeight * (float)(1.0m - quote.Volume / volumeMax) + Common.VolumeTopBottomMargin,
                         actualItemFullWidth * (viewIndex + 1) - ActualItemMargin / 2,
-                        actualHeight
+                        actualHeight + Common.VolumeTopBottomMargin
                         ),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                     );
@@ -511,7 +548,7 @@ namespace Albedo.Views
                 return;
             }
 
-            var actualHeight = (float)VolumeChartAxis.ActualHeight;
+            var actualHeight = (float)VolumeChartAxis.ActualHeight - Common.VolumeTopBottomMargin * 2;
 
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
@@ -527,9 +564,9 @@ namespace Albedo.Views
                 canvas.DrawText(
                     gridPriceString,
                     5,
-                    (actualHeight - 20) * ((float)i / gridLevel) - 7 + 10,
+                    (actualHeight - 6) * ((float)i / gridLevel) + 5 + Common.VolumeTopBottomMargin,
                     DrawingTools.GridTextFont,
-                    DrawingTools.GridFontPaint
+                    DrawingTools.GridTextPaint
                     );
             }
 
@@ -537,7 +574,7 @@ namespace Albedo.Views
             canvas.DrawText(
                 Quotes[EndItemIndex - 1].Volume.ToString(),
                 5,
-                (actualHeight - 20) * (float)(1.0m - Quotes[EndItemIndex - 1].Volume / volumeMax) - 8 + 10,
+                (actualHeight - 6) * (float)(1.0m - Quotes[EndItemIndex - 1].Volume / volumeMax) + 10 + Common.VolumeTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
                 Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                 );

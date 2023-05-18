@@ -14,6 +14,9 @@ namespace Albedo
         public static readonly int ChartItemFullWidth = 100;
         public static readonly float ChartItemMarginPercent = 0.2f;
 
+        public static readonly int CandleTopBottomMargin = 30;
+        public static readonly int VolumeTopBottomMargin = 5;
+
         public static PairMarket SupportedMarket = PairMarket.Binance | PairMarket.Upbit | PairMarket.Bithumb;
 
         public static PairMarketModel CurrentSelectedPairMarket = new(PairMarket.None, "", "");

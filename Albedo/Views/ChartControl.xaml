@@ -11,6 +11,7 @@
              PreviewMouseWheel="UserControl_PreviewMouseWheel"
              MouseLeftButtonDown="UserControl_MouseLeftButtonDown"
              MouseLeftButtonUp="UserControl_MouseLeftButtonUp"
+             MouseMove="UserControl_MouseMove"
              >
     <UserControl.DataContext>
         <vm:ChartControlViewModel x:Name="viewModel"/>
