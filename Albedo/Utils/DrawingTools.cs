@@ -13,5 +13,6 @@ namespace Albedo.Utils
         public static SKPaint CandleInfoPaint = new() { Color = SKColors.White };
         public static SKPaint LongPaint = new() { Color = new SKColor(59, 207, 134) };
         public static SKPaint ShortPaint = new() { Color = new SKColor(237, 49, 97) };
+        public static SKPaint CandlePointerPaint = new() { Color = new SKColor(255, 255, 255, 32) };
     }
 }

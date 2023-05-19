@@ -399,6 +399,15 @@ namespace Albedo.Views
                 }
             }
 
+            // Draw Candle Pointer
+            canvas.DrawRect(
+                (int)(CurrentMouseX / actualItemFullWidth) * actualItemFullWidth,
+                0,
+                actualItemFullWidth,
+                (float)CandleChart.ActualHeight,
+                DrawingTools.CandlePointerPaint
+                );
+
             // Draw Candle Info Text (TODO: 색깔로 수치 표시)
             var pointingQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 1] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
             var preQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 2] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth) - 1];
@@ -522,6 +531,15 @@ namespace Albedo.Views
                         );
                 }
             }
+
+            // Draw Candle Pointer
+            canvas.DrawRect(
+                (int)(CurrentMouseX / actualItemFullWidth) * actualItemFullWidth,
+                0,
+                actualItemFullWidth,
+                (float)VolumeChart.ActualHeight,
+                DrawingTools.CandlePointerPaint
+                );
 
             for (int i = StartItemIndex; i < EndItemIndex; i++)
             {
