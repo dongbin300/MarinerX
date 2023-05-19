@@ -27,7 +27,7 @@ namespace Albedo
         public static CandleInterval ChartInterval = CandleInterval.OneMinute;
         public static Action ChartRefresh = default!;
         public static Action ChartAdditionalLoad = default!;
-        public static Action SearchKeywordChanged = default!;
+        public static Action ArrangePairs = default!;
         public static Action RefreshAllTickers = default!;
     }
 }

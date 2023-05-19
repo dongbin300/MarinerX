@@ -51,9 +51,6 @@ namespace Albedo
     /// - 메뉴 화면에서 코인 메뉴에 별표를 넣고, 클릭하면 즐겨찾기에 자동으로 추가, 다시 클릭하면 즐겨찾기 취소
     /// - 즐겨찾기는 모든 거래소, 모든 타입을 통합해서 보여줌(무조건 하나의 즐겨찾기만 존재)
     /// 
-    /// 코인 정렬 기능
-    /// - 상승/하락률
-    /// - 가나다순
     /// 
     /// 로깅
     /// 기능 정리 및 견적 및 사용 매뉴얼 작성
@@ -148,7 +145,7 @@ namespace Albedo
         {
             try
             {
-                Menu.viewModel.SearchPair();
+
             }
             catch (Exception ex)
             {
@@ -396,8 +393,8 @@ namespace Albedo
                     }
                 };
 
-                // 검색 키워드 변경 이벤트
-                Common.SearchKeywordChanged = Menu.viewModel.SearchPair;
+                // 코인 정리 이벤트
+                Common.ArrangePairs = Menu.viewModel.ArrangePairs;
 
                 // 전체 현재가 최초 로드 이벤트
                 Common.RefreshAllTickers = () =>
@@ -450,6 +447,7 @@ namespace Albedo
                                 });
                             }
                         }
+                        Common.ArrangePairs();
                     }
                 });
                 binanceSocketClient.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
@@ -468,6 +466,7 @@ namespace Albedo
                                     item.Symbol, item.LastPrice, item.PriceChangePercent));
                             });
                         }
+                        Common.ArrangePairs();
                     }
                 });
                 binanceSocketClient.CoinFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
@@ -486,6 +485,7 @@ namespace Albedo
                                     item.Symbol, item.LastPrice, item.PriceChangePercent));
                             });
                         }
+                        Common.ArrangePairs();
                     }
                 });
             }

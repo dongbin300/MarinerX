@@ -392,10 +392,10 @@ namespace Albedo.Views
                 if (i > 0)
                 {
                     canvas.DrawLine(
-                                      new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
-                                      new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
-                                      DrawingTools.GridPaint
-                                   );
+                        new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
+                        new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
+                        DrawingTools.GridPaint
+                        );
                 }
             }
 

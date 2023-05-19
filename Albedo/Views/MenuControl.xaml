@@ -48,8 +48,29 @@
                 </i:Interaction.Triggers>
             </ComboBox>
         </Grid>
-        
-        <TextBox Grid.Row="1" x:Name="SearchTextBox" CharacterCasing="Upper" Text="{Binding KeywordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="28"/>
+                <ColumnDefinition Width="28"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" x:Name="SearchTextBox" CharacterCasing="Upper" Text="{Binding KeywordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Image Grid.Column="1" x:Name="ChangeSortImage" Width="28" Source="{Binding ChangeSortImage}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding ChangeSortClick}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Image>
+            <Image Grid.Column="2" x:Name="AzSortImage" Width="28" Source="{Binding AzSortImage}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding AzSortClick}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Image>
+        </Grid>
 
         <ListBox Grid.Row="2" x:Name="PairListBox" ItemsSource="{Binding ResultPairControls}" Background="{StaticResource Background}" BorderThickness="0">
             <ListBox.ItemTemplate>

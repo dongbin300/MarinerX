@@ -4,10 +4,12 @@ using Albedo.Models;
 using Albedo.Utils;
 using Albedo.Views;
 
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace Albedo.ViewModels
 {
@@ -109,14 +111,52 @@ namespace Albedo.ViewModels
             {
                 keywordText = value;
                 OnPropertyChanged(nameof(KeywordText));
-                Common.SearchKeywordChanged();
+                Common.ArrangePairs();
             }
         }
+        private PairSortType changeSortType = PairSortType.None;
+        public PairSortType ChangeSortType
+        {
+            get => changeSortType;
+            set
+            {
+                changeSortType = value;
+                OnPropertyChanged(nameof(ChangeSortType));
+                OnPropertyChanged(nameof(ChangeSortImage));
+                Common.ArrangePairs();
+            }
+        }
+        private PairSortType azSortType = PairSortType.None;
+        public PairSortType AzSortType
+        {
+            get => azSortType;
+            set
+            {
+                azSortType = value;
+                OnPropertyChanged(nameof(AzSortType));
+                OnPropertyChanged(nameof(AzSortImage));
+                Common.ArrangePairs();
+            }
+        }
+        public BitmapImage ChangeSortImage => new(new Uri("pack://application:,,,/Albedo;component/Resources/" + ChangeSortType switch
+        {
+            PairSortType.Asc => "sort-asc.png",
+            PairSortType.Desc => "sort-desc.png",
+            _ => "sort.png",
+        }));
+        public BitmapImage AzSortImage => new(new Uri("pack://application:,,,/Albedo;component/Resources/" + AzSortType switch
+        {
+            PairSortType.Asc => "az-a.png",
+            PairSortType.Desc => "az-z.png",
+            _ => "az.png",
+        }));
 
         public ICommand? PairMarketSelectionChanged { get; set; }
         public ICommand? PairMarketTypeSelectionChanged { get; set; }
         public ICommand? PairQuoteAssetSelectionChanged { get; set; }
         public ICommand? PairSelectionChanged { get; set; }
+        public ICommand? ChangeSortClick { get; set; }
+        public ICommand? AzSortClick { get; set; }
 
         public MenuControlViewModel()
         {
@@ -180,6 +220,32 @@ namespace Albedo.ViewModels
 
                 Common.Pair = pairControl.Pair;
                 Common.ChartRefresh();
+            });
+
+            // 등락률 정렬 이벤트
+            ChangeSortClick = new DelegateCommand((obj) =>
+            {
+                AzSortType = PairSortType.None;
+                ChangeSortType = ChangeSortType switch
+                {
+                    PairSortType.None => PairSortType.Asc,
+                    PairSortType.Asc => PairSortType.Desc,
+                    PairSortType.Desc => PairSortType.None,
+                    _ => PairSortType.None
+                };
+            });
+
+            // A-Z 정렬 이벤트
+            AzSortClick = new DelegateCommand((obj) =>
+            {
+                ChangeSortType = PairSortType.None;
+                AzSortType = AzSortType switch
+                {
+                    PairSortType.None => PairSortType.Asc,
+                    PairSortType.Asc => PairSortType.Desc,
+                    PairSortType.Desc => PairSortType.None,
+                    _ => PairSortType.None
+                };
             });
         }
 
@@ -318,17 +384,28 @@ namespace Albedo.ViewModels
         }
 
         /// <summary>
-        /// 코인 검색
+        /// 코인 정리
         /// </summary>
-        public void SearchPair()
+        public void ArrangePairs()
         {
-            if (string.IsNullOrEmpty(keywordText))
-            {
-                ResultPairControls = new ObservableCollection<PairControl>(PairControls);
-                return;
-            }
+            /* Searching */
+            ResultPairControls = string.IsNullOrEmpty(keywordText)
+                ? new ObservableCollection<PairControl>(PairControls)
+                : new ObservableCollection<PairControl>(PairControls.Where(p => p.Pair.SymbolKorean.Contains(keywordText)));
 
-            ResultPairControls = new ObservableCollection<PairControl>(PairControls.Where(p => p.Pair.SymbolKorean.Contains(keywordText)));
+            /* Sorting */
+            ResultPairControls = ChangeSortType switch
+            {
+                PairSortType.Asc => new ObservableCollection<PairControl>(ResultPairControls.OrderByDescending(p => p.Pair.PriceChangePercent)),
+                PairSortType.Desc => new ObservableCollection<PairControl>(ResultPairControls.OrderBy(p => p.Pair.PriceChangePercent)),
+                _ => new ObservableCollection<PairControl>(ResultPairControls)
+            };
+            ResultPairControls = AzSortType switch
+            {
+                PairSortType.Asc => new ObservableCollection<PairControl>(ResultPairControls.OrderBy(p => p.Pair.SymbolKorean)),
+                PairSortType.Desc => new ObservableCollection<PairControl>(ResultPairControls.OrderByDescending(p => p.Pair.SymbolKorean)),
+                _ => new ObservableCollection<PairControl>(ResultPairControls)
+            };
         }
 
         /// <summary>

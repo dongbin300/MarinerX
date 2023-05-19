@@ -19,13 +19,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\az-a.png" />
+    <None Remove="Resources\az-z.png" />
+    <None Remove="Resources\az.png" />
     <None Remove="Resources\binance.png" />
     <None Remove="Resources\bithumb.png" />
+    <None Remove="Resources\sort-asc.png" />
+    <None Remove="Resources\sort-desc.png" />
+    <None Remove="Resources\sort.png" />
     <None Remove="Resources\upbit.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="chart2.ico" />
+    <Content Include="Resources\az-a.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\az-z.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\az.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\binance.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -46,6 +61,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\sort-asc.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sort-desc.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\sort.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

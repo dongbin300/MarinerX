@@ -58,7 +58,7 @@ namespace Albedo.Extensions
         /// 빗썸 인터벌 - 1, 3, 5, 10, 30m, 1h, 1d
         /// 15m = 5m * 3,
         /// 1w = 1d * 7,
-        /// 1M = 1d * 30 (TODO: 월별 그룹)
+        /// 1M = 1d * 30
         /// </summary>
         /// <param name="interval"></param>
         /// <returns></returns>
