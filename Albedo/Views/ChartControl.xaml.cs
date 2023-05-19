@@ -81,6 +81,7 @@ namespace Albedo.Views
             else
             {
                 Quotes.Add(quote);
+                CalculateIndicators();
                 ViewStartPosition += ItemFullWidth;
                 ViewEndPosition += ItemFullWidth;
             }
@@ -97,29 +98,20 @@ namespace Albedo.Views
         public void UpdateQuote(Quote quote, CandleInterval toInterval)
         {
             var backtrackCount = 0;
-            switch (toInterval)
+            backtrackCount = toInterval switch
             {
-                case CandleInterval.OneWeek:
-                    backtrackCount = (int)quote.Date.DayOfWeek;
-                    break;
-
-                case CandleInterval.OneMonth:
-                    backtrackCount = quote.Date.Day - 1;
-                    break;
-
-                default:
-                    backtrackCount = toInterval switch
-                    {
-                        CandleInterval.ThreeMinutes => quote.Date.Minute % 3, // 1m * 3
-                        CandleInterval.FiveMinutes => quote.Date.Minute % 5, // 1m * 5
-                        CandleInterval.TenMinutes => quote.Date.Minute % 2, // 5m * 2
-                        CandleInterval.FifteenMinutes => quote.Date.Minute % 3, // 5m * 3
-                        CandleInterval.ThirtyMinutes => quote.Date.Minute % 6, // 5m * 6 | 10m * 3 | 15m * 2
-                        _ => 0
-                    };
-                    break;
-            }
-
+                CandleInterval.OneWeek => (int)quote.Date.DayOfWeek,
+                CandleInterval.OneMonth => quote.Date.Day - 1,
+                _ => toInterval switch
+                {
+                    CandleInterval.ThreeMinutes => quote.Date.Minute % 3, // 1m * 3
+                    CandleInterval.FiveMinutes => quote.Date.Minute % 5, // 1m * 5
+                    CandleInterval.TenMinutes => quote.Date.Minute % 2, // 5m * 2
+                    CandleInterval.FifteenMinutes => quote.Date.Minute % 3, // 5m * 3
+                    CandleInterval.ThirtyMinutes => quote.Date.Minute % 6, // 5m * 6 | 10m * 3 | 15m * 2
+                    _ => 0
+                },
+            };
             var lastQuote = Quotes[^1];
             if (backtrackCount == 0)
             {
@@ -133,6 +125,7 @@ namespace Albedo.Views
                 else // New quote
                 {
                     Quotes.Add(quote);
+                    CalculateIndicators();
                     ViewStartPosition += ItemFullWidth;
                     ViewEndPosition += ItemFullWidth;
                 }
@@ -184,6 +177,7 @@ namespace Albedo.Views
                     Volume = volume
                 };
                 Quotes.Add(quote);
+                CalculateIndicators();
                 ViewStartPosition += ItemFullWidth;
                 ViewEndPosition += ItemFullWidth;
             }
@@ -494,7 +488,7 @@ namespace Albedo.Views
 
             // Draw Current Price Ticker
             canvas.DrawText(
-                Quotes[EndItemIndex - 1].Close.ToString(),
+                NumberUtil.ToRoundedValueString(Quotes[EndItemIndex - 1].Close),
                 5,
                 actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
@@ -577,7 +571,7 @@ namespace Albedo.Views
             var gridLevel = 2; // 2등분
             for (int i = 0; i <= gridLevel; i++)
             {
-                var gridPriceString = Math.Round(volumeMax * ((decimal)(gridLevel - i) / gridLevel), 0).ToString();
+                var gridPriceString = NumberUtil.ToRoundedValueString(volumeMax * ((decimal)(gridLevel - i) / gridLevel));
 
                 canvas.DrawText(
                     gridPriceString,
@@ -590,7 +584,7 @@ namespace Albedo.Views
 
             // Draw Current Volume Ticker
             canvas.DrawText(
-                Quotes[EndItemIndex - 1].Volume.ToString(),
+                NumberUtil.ToRoundedValueString(Quotes[EndItemIndex - 1].Volume),
                 5,
                 (actualHeight - 6) * (float)(1.0m - Quotes[EndItemIndex - 1].Volume / volumeMax) + 10 + Common.VolumeTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
