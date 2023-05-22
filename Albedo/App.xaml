@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="btv"/>
+
         <SolidColorBrush x:Key="ChartBackground" Color="#161A1E"/>
         <SolidColorBrush x:Key="Background" Color="#333337"/>
         <SolidColorBrush x:Key="SelectedBackground" Color="#49494D"/>

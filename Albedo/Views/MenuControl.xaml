@@ -18,6 +18,7 @@
             <RowDefinition Height="28"/>
             <RowDefinition Height="28"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="28"/>
         </Grid.RowDefinitions>
         
         <Grid Grid.Row="0">
@@ -72,7 +73,8 @@
             </Image>
         </Grid>
 
-        <ListBox Grid.Row="2" x:Name="PairListBox" ItemsSource="{Binding ResultPairControls}" Background="{StaticResource Background}" BorderThickness="0">
+        <ListBox Grid.Row="2" x:Name="PairListBox" ItemsSource="{Binding SimplePairControls}" Background="{StaticResource Background}" BorderThickness="0"
+                 Grid.RowSpan="{Binding PairListBoxRowSpan}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <view:PairControl Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListBox}}" Height="45" />
@@ -84,6 +86,16 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </ListBox>
+
+        <StackPanel Grid.Row="3" x:Name="AllListViewButtonPanel" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsSimpleList, Converter={StaticResource btv}}" Background="Transparent">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseLeftButtonDown">
+                    <i:InvokeCommandAction Command="{Binding AllListViewClick}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <Image Source="/Resources/more.png"/>
+            <TextBlock Margin="5">전체 리스트 보기</TextBlock>
+        </StackPanel>
     </Grid>
 
 </UserControl>

@@ -43,6 +43,16 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(ResultPairControls));
             }
         }
+        private ObservableCollection<PairControl> simplePairControls = new();
+        public ObservableCollection<PairControl> SimplePairControls
+        {
+            get => simplePairControls;
+            set
+            {
+                simplePairControls = value;
+                OnPropertyChanged(nameof(SimplePairControls));
+            }
+        }
         private ObservableCollection<PairMarketModel> pairMarkets = new();
         public ObservableCollection<PairMarketModel> PairMarkets
         {
@@ -114,6 +124,27 @@ namespace Albedo.ViewModels
                 Common.ArrangePairs();
             }
         }
+        private bool isSimpleList = false;
+        public bool IsSimpleList
+        {
+            get => isSimpleList;
+            set
+            {
+                isSimpleList = value;
+                OnPropertyChanged(nameof(IsSimpleList));
+                OnPropertyChanged(nameof(PairListBoxRowSpan));
+            }
+        }
+        private bool isAllListView = false;
+        public bool IsAllListView
+        {
+            get => isAllListView;
+            set
+            {
+                isAllListView = value;
+                OnPropertyChanged(nameof(IsAllListView));
+            }
+        }
         private PairSortType changeSortType = PairSortType.None;
         public PairSortType ChangeSortType
         {
@@ -150,6 +181,7 @@ namespace Albedo.ViewModels
             PairSortType.Desc => "az-z.png",
             _ => "az.png",
         }));
+        public int PairListBoxRowSpan => IsSimpleList ? 1 : 2;
 
         public ICommand? PairMarketSelectionChanged { get; set; }
         public ICommand? PairMarketTypeSelectionChanged { get; set; }
@@ -157,6 +189,7 @@ namespace Albedo.ViewModels
         public ICommand? PairSelectionChanged { get; set; }
         public ICommand? ChangeSortClick { get; set; }
         public ICommand? AzSortClick { get; set; }
+        public ICommand? AllListViewClick { get; set; }
 
         public MenuControlViewModel()
         {
@@ -182,6 +215,7 @@ namespace Albedo.ViewModels
                 Common.CurrentSelectedPairMarket = market;
                 PairControls.Clear();
                 InitMarketType();
+                IsAllListView = false;
             });
 
             // 타입 변경 이벤트
@@ -195,6 +229,7 @@ namespace Albedo.ViewModels
                 Common.CurrentSelectedPairMarketType = marketType;
                 PairControls.Clear();
                 InitQuoteAsset();
+                IsAllListView = false;
             });
 
             // 거래자산 변경 이벤트
@@ -208,6 +243,7 @@ namespace Albedo.ViewModels
                 Common.CurrentSelectedPairQuoteAsset = quoteAsset;
                 PairControls.Clear();
                 Common.RefreshAllTickers?.Invoke();
+                IsAllListView = false;
             });
 
             // 코인 선택 변경 이벤트
@@ -246,6 +282,13 @@ namespace Albedo.ViewModels
                     PairSortType.Desc => PairSortType.None,
                     _ => PairSortType.None
                 };
+            });
+
+            // 모든 리스트 보기 클릭 이벤트
+            AllListViewClick = new DelegateCommand((obj) =>
+            {
+                IsAllListView = true;
+                ArrangePairs();
             });
         }
 
@@ -406,6 +449,19 @@ namespace Albedo.ViewModels
                 PairSortType.Desc => new ObservableCollection<PairControl>(ResultPairControls.OrderByDescending(p => p.Pair.SymbolKorean)),
                 _ => new ObservableCollection<PairControl>(ResultPairControls)
             };
+
+            /* Simplify */
+            if (!IsAllListView && ResultPairControls.Count > 10)
+            {
+                SimplePairControls = new ObservableCollection<PairControl>(ResultPairControls.Take(10));
+                IsSimpleList = true;
+            }
+            else
+            {
+                SimplePairControls = new ObservableCollection<PairControl>(ResultPairControls);
+                IsSimpleList = false;
+            }
+
         }
 
         /// <summary>
