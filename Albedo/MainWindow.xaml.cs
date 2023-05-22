@@ -178,6 +178,7 @@ namespace Albedo
                         Menu.viewModel.UpdatePairInfo(new Pair(PairMarket.Upbit, PairMarketType.Spot, Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset, coin.market, coin.trade_price, coin.signed_change_rate * 100));
                     });
                 }
+                Common.ArrangePairs();
             }
             catch (Exception ex)
             {
@@ -515,6 +516,7 @@ namespace Albedo
                                    Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
                                    data.symbol, data.closePrice, data.chgRate));
                             });
+                            Common.ArrangePairs();
                         }
                     }
                 });
