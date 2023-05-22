@@ -181,6 +181,7 @@ namespace Albedo.ViewModels
             PairSortType.Desc => "az-z.png",
             _ => "az.png",
         }));
+        public BitmapImage SettingsImage => new(new Uri("pack://application:,,,/Albedo;component/Resources/" + "setting.png"));
         public int PairListBoxRowSpan => IsSimpleList ? 1 : 2;
 
         public ICommand? PairMarketSelectionChanged { get; set; }
@@ -189,6 +190,7 @@ namespace Albedo.ViewModels
         public ICommand? PairSelectionChanged { get; set; }
         public ICommand? ChangeSortClick { get; set; }
         public ICommand? AzSortClick { get; set; }
+        public ICommand? SettingsClick { get; set; }
         public ICommand? AllListViewClick { get; set; }
 
         public MenuControlViewModel()
@@ -282,6 +284,12 @@ namespace Albedo.ViewModels
                     PairSortType.Desc => PairSortType.None,
                     _ => PairSortType.None
                 };
+            });
+
+            // 설정 클릭 이벤트
+            SettingsClick = new DelegateCommand((obj) =>
+            {
+
             });
 
             // 모든 리스트 보기 클릭 이벤트

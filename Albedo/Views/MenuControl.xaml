@@ -55,6 +55,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="28"/>
                 <ColumnDefinition Width="28"/>
+                <ColumnDefinition Width="28"/>
             </Grid.ColumnDefinitions>
             <TextBox Grid.Column="0" x:Name="SearchTextBox" CharacterCasing="Upper" Text="{Binding KeywordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Image Grid.Column="1" x:Name="ChangeSortImage" Width="28" Source="{Binding ChangeSortImage}">
@@ -68,6 +69,13 @@
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseLeftButtonDown">
                         <i:InvokeCommandAction Command="{Binding AzSortClick}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Image>
+            <Image Grid.Column="3" x:Name="SettingsImage" Width="28" Source="{Binding SettingsImage}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding SettingsClick}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Image>
