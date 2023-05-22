@@ -250,14 +250,32 @@ namespace Albedo
                 var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "binance_api.txt");
                 var data = File.ReadAllLines(path);
 
-                binanceClient = new BinanceClient(new BinanceClientOptions
+                try
                 {
-                    ApiCredentials = new BinanceApiCredentials(data[0], data[1])
-                });
-                binanceSocketClient = new BinanceSocketClient(new BinanceSocketClientOptions
+                    binanceClient = new BinanceClient(new BinanceClientOptions
+                    {
+                        ApiCredentials = new BinanceApiCredentials(data[0], data[1])
+                    });
+                }
+                catch
                 {
-                    ApiCredentials = new BinanceApiCredentials(data[0], data[1])
-                });
+                    MessageBox.Show("바이낸스 API 오류입니다.\n다시 시도해 주세요.");
+                    throw;
+                }
+
+                try
+                {
+                    binanceSocketClient = new BinanceSocketClient(new BinanceSocketClientOptions
+                    {
+                        ApiCredentials = new BinanceApiCredentials(data[0], data[1])
+                    });
+                }
+                catch
+                {
+                    MessageBox.Show("바이낸스 소켓 오류입니다.\n다시 시도해 주세요.");
+                    throw;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -272,8 +290,25 @@ namespace Albedo
                 var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "bithumb_api.txt");
                 var data = File.ReadAllLines(path);
 
-                bithumbClient = new BithumbClient(data[0], data[1]);
-                bithumbSocketClient = new BithumbSocketClient();
+                try
+                {
+                    bithumbClient = new BithumbClient(data[0], data[1]);
+                }
+                catch
+                {
+                    MessageBox.Show("빗썸 API 오류입니다.\n다시 시도해 주세요.");
+                    throw;
+                }
+
+                try
+                {
+                    bithumbSocketClient = new BithumbSocketClient();
+                }
+                catch
+                {
+                    MessageBox.Show("빗썸 소켓 오류입니다.\n다시 시도해 주세요.");
+                    throw;
+                }
                 var krwSymbols = bithumbClient.Public.GetAllTickersAsync(BithumbPaymentCurrency.KRW);
                 krwSymbols.Wait();
                 foreach (var krwSymbol in krwSymbols.Result.data?.coins ?? default!)
@@ -300,7 +335,15 @@ namespace Albedo
                 var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "upbit_api.txt");
                 var data = File.ReadAllLines(path);
 
-                upbitClient = new UpbitClient(data[0], data[1]);
+                try
+                {
+                    upbitClient = new UpbitClient(data[0], data[1]);
+                }
+                catch
+                {
+                    MessageBox.Show("업비트 API 오류입니다.\n다시 시도해 주세요.");
+                    throw;
+                }
                 var marketList = upbitClient.QuotationMarketList.GetMarketListAsync();
                 marketList.Wait();
                 foreach (var market in marketList.Result)
