@@ -1,4 +1,6 @@
 ﻿using Albedo.Enums;
+using Albedo.Managers;
+using Albedo.Models;
 using Albedo.Utils;
 
 using Skender.Stock.Indicators;
@@ -55,6 +57,7 @@ namespace Albedo.Views
         {
             InitializeComponent();
             chartControlTimer.Elapsed += ChartControlTimer_Elapsed;
+            Common.CalculateIndicators = CalculateIndicators;
         }
 
         public void Init(List<Quote> quotes)
@@ -216,14 +219,36 @@ namespace Albedo.Views
         #region Indicator
         public void CalculateIndicators()
         {
-            var results = Quotes.GetEma(112);
             Indicators.Clear();
-            foreach (var result in results)
+            if (SettingsMan.MaEnable1)
             {
-                var indicator = result.Ema == null ?
-                    new Models.Indicator() { Date = result.Date, Value = 0 } :
-                    new Models.Indicator() { Date = result.Date, Value = (decimal)result.Ema.Value };
-                Indicators.Add(indicator);
+                var period = SettingsMan.MaPeriod1;
+                switch (SettingsMan.MaType1.Type)
+                {
+                    case Enums.MaType.Sma:
+                        Indicators.Add(new Models.Indicator(11, 
+                            Quotes.GetSma(period)
+                            .Select(result => result.Sma == null ?
+                            new IndicatorData(result.Date, 0) :
+                            new IndicatorData(result.Date, (decimal)result.Sma.Value)).ToList()));
+                        break;
+
+                    case Enums.MaType.Wma:
+                        Indicators.Add(new Models.Indicator(11,
+                            Quotes.GetWma(period)
+                            .Select(result => result.Wma == null ?
+                            new IndicatorData(result.Date, 0) :
+                            new IndicatorData(result.Date, (decimal)result.Wma.Value)).ToList()));
+                        break;
+
+                    case Enums.MaType.Ema:
+                        Indicators.Add(new Models.Indicator(11,
+                            Quotes.GetEma(period)
+                            .Select(result => result.Ema == null ?
+                            new IndicatorData(result.Date, 0) :
+                            new IndicatorData(result.Date, (decimal)result.Ema.Value)).ToList()));
+                        break;
+                }
             }
         }
         #endregion
@@ -433,24 +458,30 @@ namespace Albedo.Views
                     );
 
                 // Draw Indicators
-                if (i < Indicators.Count && i >= 1)
+                foreach(var indicator in Indicators)
                 {
-                    var preIndicator = Indicators[i - 1];
-                    var indicator = Indicators[i];
+                    var indicatorData = indicator.Data;
 
-                    if (preIndicator != null && indicator != null && preIndicator.Value != 0 && indicator.Value != 0)
+                    if (i < indicatorData.Count && i >= 1)
                     {
-                        canvas.DrawLine(
-                            new SKPoint(
-                                actualItemFullWidth * (viewIndex - 0.5f),
-                                actualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
-                            new SKPoint(
-                                actualItemFullWidth * (viewIndex + 0.5f),
-                                actualHeight * (float)(1.0m - (indicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
-                            new SKPaint() { Color = SKColors.Yellow }
-                            );
+                        var preIndicator = indicatorData[i - 1];
+                        var _indicator = indicatorData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = SKColors.Yellow }
+                                );
+                        }
                     }
                 }
+               
             }
         }
 

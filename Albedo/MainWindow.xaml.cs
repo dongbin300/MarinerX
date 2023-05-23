@@ -25,6 +25,9 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
+    /// 지표 저장방식 변경
+    /// 이평 라인색, 굵기 차트에 적용
+    /// 
     /// 설정 UI 및 버튼 추가
     /// - 라이트/다크 모드(추후)
     /// - 화면설정
@@ -39,6 +42,11 @@ namespace Albedo
     ///                 - 편차
     ///                 - 라인색[중심선, 상한선, 하한선]
     ///                 - 굵기[중심선, 상한선, 하한선]
+    ///             - 일목균형표
+    ///                 - 기간[단기, 중기, 장기]
+    ///                 - 구름대 표시 ON/OFF
+    ///                 - 라인색[전환선(단기), 기준선(중기), 후행스팬(중기), 선행스팬1(단기,중기), 선행스팬2(장기,중기)]
+    ///                 - 굵기[전환선(단기), 기준선(중기), 후행스팬(중기), 선행스팬1(단기,중기), 선행스팬2(장기,중기)]
     ///             - RSI
     ///                 - 기간
     ///                 - 과열
@@ -215,20 +223,7 @@ namespace Albedo
         {
             try
             {
-                Common.ChartInterval = Settings.Default.Interval switch
-                {
-                    "1분" => CandleInterval.OneMinute,
-                    "3분" => CandleInterval.ThreeMinutes,
-                    "5분" => CandleInterval.FiveMinutes,
-                    "10분" => CandleInterval.TenMinutes,
-                    "15분" => CandleInterval.FifteenMinutes,
-                    "30분" => CandleInterval.ThirtyMinutes,
-                    "1시간" => CandleInterval.OneHour,
-                    "1일" => CandleInterval.OneDay,
-                    "1주" => CandleInterval.OneWeek,
-                    "1월" => CandleInterval.OneMonth,
-                    _ => CandleInterval.OneMinute,
-                };
+                SettingsMan.Init();
 
                 if (!Directory.Exists("Logs"))
                 {

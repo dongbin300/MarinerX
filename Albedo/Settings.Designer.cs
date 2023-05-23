@@ -130,5 +130,65 @@ namespace Albedo {
                 this["DefaultCandleCount"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int MaPeriod1 {
+            get {
+                return ((int)(this["MaPeriod1"]));
+            }
+            set {
+                this["MaPeriod1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MaType1 {
+            get {
+                return ((string)(this["MaType1"]));
+            }
+            set {
+                this["MaType1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MaLineColor1 {
+            get {
+                return ((string)(this["MaLineColor1"]));
+            }
+            set {
+                this["MaLineColor1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MaLineWeight1 {
+            get {
+                return ((string)(this["MaLineWeight1"]));
+            }
+            set {
+                this["MaLineWeight1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MaEnable1 {
+            get {
+                return ((bool)(this["MaEnable1"]));
+            }
+            set {
+                this["MaEnable1"] = value;
+            }
+        }
     }
 }

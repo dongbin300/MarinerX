@@ -87,5 +87,15 @@ namespace Albedo.Views
                     break;
             }
         }
+
+        /// <summary>
+        /// 설정 창을 닫을 때 지표 재계산
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            Common.CalculateIndicators?.Invoke();
+        }
     }
 }
