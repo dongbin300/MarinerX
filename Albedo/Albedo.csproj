@@ -26,6 +26,8 @@
     <None Remove="Resources\bithumb.png" />
     <None Remove="Resources\more.png" />
     <None Remove="Resources\more2.png" />
+    <None Remove="Resources\setting.png" />
+    <None Remove="Resources\setting2.png" />
     <None Remove="Resources\sort-asc.png" />
     <None Remove="Resources\sort-desc.png" />
     <None Remove="Resources\sort.png" />
@@ -53,6 +55,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\more2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\setting.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\setting2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\upbit.png">

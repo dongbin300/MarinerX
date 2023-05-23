@@ -1,8 +1,6 @@
 ﻿using Albedo.Commands;
 using Albedo.Enums;
 
-using Binance.Net.Enums;
-
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -29,8 +27,8 @@ namespace Albedo.ViewModels
                     return;
                 }
 
-                Settings.Default.Interval = obj.ToString();
-                Settings.Default.Save();
+                Albedo.Settings.Default.Interval = obj.ToString();
+                Albedo.Settings.Default.Save();
                 Common.ChartInterval = obj.ToString() switch
                 {
                     "1분" => CandleInterval.OneMinute,

@@ -10,6 +10,7 @@ namespace Albedo
         public static readonly int ChartLoadLimit = 600;
         public static readonly int ChartUpbitLoadLimit = 200;
         public static readonly int ChartDefaultViewCount = 120;
+        public static readonly int DefaultPairCount = 10;
 
         public static readonly int ChartItemFullWidth = 100;
         public static readonly float ChartItemMarginPercent = 0.2f;

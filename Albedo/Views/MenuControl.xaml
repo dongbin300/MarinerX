@@ -72,7 +72,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Image>
-            <Image Grid.Column="3" x:Name="SettingsImage" Width="28" Source="{Binding SettingsImage}">
+            <Image Grid.Column="3" x:Name="SettingsImage" Width="25" Source="{Binding SettingsImage}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseLeftButtonDown">
                         <i:InvokeCommandAction Command="{Binding SettingsClick}"/>

@@ -289,7 +289,8 @@ namespace Albedo.ViewModels
             // 설정 클릭 이벤트
             SettingsClick = new DelegateCommand((obj) =>
             {
-
+                var settingsView = new SettingsView();
+                settingsView.ShowDialog();
             });
 
             // 모든 리스트 보기 클릭 이벤트
@@ -459,9 +460,9 @@ namespace Albedo.ViewModels
             };
 
             /* Simplify */
-            if (!IsAllListView && ResultPairControls.Count > 10)
+            if (!IsAllListView && ResultPairControls.Count > Settings.Default.DefaultPairCount)
             {
-                SimplePairControls = new ObservableCollection<PairControl>(ResultPairControls.Take(10));
+                SimplePairControls = new ObservableCollection<PairControl>(ResultPairControls.Take(Settings.Default.DefaultPairCount));
                 IsSimpleList = true;
             }
             else

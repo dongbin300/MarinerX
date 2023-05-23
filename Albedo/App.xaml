@@ -19,6 +19,20 @@
             <Setter Property="FontSize" Value="13" />
         </Style>
 
+        <Style TargetType="{x:Type TextBlock}" x:Key="Description">
+            <Setter Property="Foreground" Value="Silver" />
+            <Setter Property="FontFamily" Value="Meiryo UI" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="1,7" />
+        </Style>
+
+        <Style TargetType="{x:Type TextBlock}" x:Key="Error">
+            <Setter Property="Foreground" Value="Red" />
+            <Setter Property="FontFamily" Value="Meiryo UI" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="10,7" />
+        </Style>
+
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="Foreground" Value="#F1F1F1" />
             <Setter Property="Background" Value="Transparent" />

@@ -26,9 +26,7 @@ namespace Albedo
     /// Interaction logic for MainWindow.xaml
     /// 
     /// 설정 UI 및 버튼 추가
-    /// - API키 입력
-    /// - 라이트/다크 모드
-    /// - 기본 리스트 숫자
+    /// - 라이트/다크 모드(추후)
     /// - 화면설정
     ///     - 인디케이터
     ///             - 이평
@@ -247,14 +245,12 @@ namespace Albedo
         {
             try
             {
-                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "binance_api.txt");
-                var data = File.ReadAllLines(path);
-
                 try
                 {
                     binanceClient = new BinanceClient(new BinanceClientOptions
                     {
-                        ApiCredentials = new BinanceApiCredentials(data[0], data[1])
+                        // API Key 없어도 잘 돌아감?
+                        //ApiCredentials = new BinanceApiCredentials(Settings.Default.BinanceApiKey, Settings.Default.BinanceSecretKey)
                     });
                 }
                 catch
@@ -267,7 +263,8 @@ namespace Albedo
                 {
                     binanceSocketClient = new BinanceSocketClient(new BinanceSocketClientOptions
                     {
-                        ApiCredentials = new BinanceApiCredentials(data[0], data[1])
+                        // API Key 없어도 잘 돌아감?
+                        //ApiCredentials = new BinanceApiCredentials(Settings.Default.BinanceApiKey, Settings.Default.BinanceSecretKey)
                     });
                 }
                 catch
@@ -287,12 +284,11 @@ namespace Albedo
         {
             try
             {
-                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "bithumb_api.txt");
-                var data = File.ReadAllLines(path);
-
                 try
                 {
-                    bithumbClient = new BithumbClient(data[0], data[1]);
+                    // API Key 없어도 잘 돌아감?
+                    //bithumbClient = new BithumbClient(Settings.Default.BithumbApiKey, Settings.Default.BithumbSecretKey);
+                    bithumbClient = new BithumbClient("", "");
                 }
                 catch
                 {
@@ -332,12 +328,10 @@ namespace Albedo
         {
             try
             {
-                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "upbit_api.txt");
-                var data = File.ReadAllLines(path);
-
                 try
                 {
-                    upbitClient = new UpbitClient(data[0], data[1]);
+                    // API Key 없으면 안 돌아감
+                    upbitClient = new UpbitClient(Settings.Default.UpbitApiKey, Settings.Default.UpbitSecretKey);
                 }
                 catch
                 {

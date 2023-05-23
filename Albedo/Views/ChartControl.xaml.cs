@@ -342,7 +342,7 @@ namespace Albedo.Views
         #region Main Render
         public void Render()
         {
-            foreach (var radioButton in IntervalGrid.Children.OfType<RadioButton>().Where(radioButton => radioButton.CommandParameter.Equals(Settings.Default.Interval)))
+            foreach (var radioButton in IntervalGrid.Children.OfType<RadioButton>().Where(radioButton => radioButton.CommandParameter.Equals(Albedo.Settings.Default.Interval)))
             {
                 radioButton.IsChecked = true;
                 break;
@@ -383,14 +383,11 @@ namespace Albedo.Views
             var gridLevel = 4; // 4등분
             for (int i = 0; i <= gridLevel; i++)
             {
-                if (i > 0)
-                {
-                    canvas.DrawLine(
-                        new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
-                        new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
-                        DrawingTools.GridPaint
-                        );
-                }
+                canvas.DrawLine(
+                    new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
+                    new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.CandleTopBottomMargin),
+                    DrawingTools.GridPaint
+                    );
             }
 
             // Draw Candle Pointer
@@ -516,14 +513,11 @@ namespace Albedo.Views
             var gridLevel = 2; // 2등분
             for (int i = 0; i <= gridLevel; i++)
             {
-                if (i > 0)
-                {
-                    canvas.DrawLine(
-                        new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.VolumeTopBottomMargin),
-                        new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.VolumeTopBottomMargin),
-                        DrawingTools.GridPaint
-                        );
-                }
+                canvas.DrawLine(
+                    new SKPoint(0, actualHeight * ((float)i / gridLevel) + Common.VolumeTopBottomMargin),
+                    new SKPoint(actualWidth, actualHeight * ((float)i / gridLevel) + Common.VolumeTopBottomMargin),
+                    DrawingTools.GridPaint
+                    );
             }
 
             // Draw Candle Pointer
