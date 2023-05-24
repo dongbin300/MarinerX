@@ -46,7 +46,9 @@
         </Grid>
 
         <Grid Grid.Column="1" Background="{StaticResource ChartBackground}">
-            <ContentControl x:Name="MainContent" Margin="5"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ContentControl x:Name="MainContent" Margin="5"/>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Window>

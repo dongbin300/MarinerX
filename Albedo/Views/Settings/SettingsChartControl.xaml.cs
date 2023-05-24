@@ -1,6 +1,7 @@
 ﻿using Albedo.Managers;
 using Albedo.Models;
 
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -46,11 +47,11 @@ namespace Albedo.Views.Settings
             DefaultCandleCountText.Text = SettingsMan.DefaultCandleCount.ToString();
 
             // 이평선 1
-            MaPeriodText1.Text = SettingsMan.MaPeriod1.ToString();
-            MaTypeCombo1.SelectedItem = SettingsMan.MaType1;
-            MaLineColorCombo1.SelectedItem = SettingsMan.MaLineColor1;
-            MaLineWeightCombo1.SelectedItem = SettingsMan.MaLineWeight1;
-            MaEnable1.IsChecked = Albedo.Settings.Default.MaEnable1;
+            MaEnable1.IsChecked = SettingsMan.Indicators.Mas[0].Enable;
+            MaPeriodText1.Text = SettingsMan.Indicators.Mas[0].Period.ToString();
+            MaTypeCombo1.SelectedItem = MaTypeCombo1.Items.OfType<MaTypeModel>().First(x=>x.Type.Equals(SettingsMan.Indicators.Mas[0].Type.Type));
+            MaLineColorCombo1.SelectedItem = MaLineColorCombo1.Items.OfType<LineColorModel>().First(x => x.LineColor.Equals(SettingsMan.Indicators.Mas[0].LineColor.LineColor));
+            MaLineWeightCombo1.SelectedItem = MaLineWeightCombo1.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(SettingsMan.Indicators.Mas[0].LineWeight.LineWeight));
         }
 
         /// <summary>
@@ -83,100 +84,6 @@ namespace Albedo.Views.Settings
                 DefaultCandleCountErrorText.Visibility = Visibility.Visible;
                 Albedo.Settings.Default.DefaultCandleCount = Common.ChartDefaultViewCount;
             }
-            Albedo.Settings.Default.Save();
-        }
-
-        /// <summary>
-        /// 이평선 기간 수정
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MaPeriodText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (isInit)
-            {
-                return;
-            }
-
-            if (int.TryParse(MaPeriodText1.Text, out var period))
-            {
-                if (period >= 1 && period <= 1000)
-                {
-                    Albedo.Settings.Default.MaPeriod1 = period;
-                }
-                else
-                {
-                    Albedo.Settings.Default.MaPeriod1 = Common.DefaultMaPeriod;
-                }
-            }
-            else
-            {
-                Albedo.Settings.Default.MaPeriod1 = Common.DefaultMaPeriod;
-            }
-            Albedo.Settings.Default.Save();
-        }
-
-        /// <summary>
-        /// 이평선 타입 수정
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MaTypeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (isInit)
-            {
-                return;
-            }
-
-            if (MaTypeCombo1.SelectedItem is not MaTypeModel model)
-            {
-                return;
-            }
-
-            Albedo.Settings.Default.MaType1 = model.Type.ToString();
-            Albedo.Settings.Default.Save();
-        }
-
-        private void MaLineColorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (isInit)
-            {
-                return;
-            }
-
-            if (MaLineColorCombo1.SelectedItem is not LineColorModel model)
-            {
-                return;
-            }
-
-            Albedo.Settings.Default.MaLineColor1 = model.LineColor.ToString();
-            Albedo.Settings.Default.Save();
-        }
-
-        private void MaLineWeightCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (isInit)
-            {
-                return;
-            }
-
-            if (MaLineWeightCombo1.SelectedItem is not LineWeightModel model)
-            {
-                return;
-            }
-
-            Albedo.Settings.Default.MaLineWeight1 = model.LineWeight.ToString();
-            Albedo.Settings.Default.Save();
-        }
-
-        private void MaEnable_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            if (isInit)
-            {
-                return;
-            }
-
-            Albedo.Settings.Default.MaEnable1 = MaEnable1.IsChecked ?? false;
             Albedo.Settings.Default.Save();
         }
     }

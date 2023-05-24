@@ -1,4 +1,5 @@
 ﻿using Albedo.Enums;
+using Albedo.Extensions;
 using Albedo.Managers;
 using Albedo.Models;
 using Albedo.Utils;
@@ -26,7 +27,6 @@ namespace Albedo.Views
         private System.Timers.Timer chartControlTimer = new System.Timers.Timer(5);
 
         public List<Quote> Quotes = new();
-        public List<Models.Indicator> Indicators = new();
         public int TotalCount => Quotes.Count;
 
         public float ChartWidth => Quotes.Count * ItemFullWidth;
@@ -219,34 +219,38 @@ namespace Albedo.Views
         #region Indicator
         public void CalculateIndicators()
         {
-            Indicators.Clear();
-            if (SettingsMan.MaEnable1)
+            foreach (var ma in SettingsMan.Indicators.Mas)
             {
-                var period = SettingsMan.MaPeriod1;
-                switch (SettingsMan.MaType1.Type)
+                if (!ma.Enable)
+                {
+                    continue;
+                }
+
+                var period = ma.Period;
+                switch (ma.Type.Type)
                 {
                     case Enums.MaType.Sma:
-                        Indicators.Add(new Models.Indicator(11, 
-                            Quotes.GetSma(period)
-                            .Select(result => result.Sma == null ?
-                            new IndicatorData(result.Date, 0) :
-                            new IndicatorData(result.Date, (decimal)result.Sma.Value)).ToList()));
+                        ma.Data = Quotes.GetSma(period)
+                            .Select(r => r.Sma == null ?
+                            new IndicatorData(r.Date, 0) :
+                            new IndicatorData(r.Date, (decimal)r.Sma.Value))
+                            .ToList();
                         break;
 
                     case Enums.MaType.Wma:
-                        Indicators.Add(new Models.Indicator(11,
-                            Quotes.GetWma(period)
-                            .Select(result => result.Wma == null ?
-                            new IndicatorData(result.Date, 0) :
-                            new IndicatorData(result.Date, (decimal)result.Wma.Value)).ToList()));
+                        ma.Data = Quotes.GetWma(period)
+                           .Select(r => r.Wma == null ?
+                           new IndicatorData(r.Date, 0) :
+                           new IndicatorData(r.Date, (decimal)r.Wma.Value))
+                           .ToList();
                         break;
 
                     case Enums.MaType.Ema:
-                        Indicators.Add(new Models.Indicator(11,
-                            Quotes.GetEma(period)
-                            .Select(result => result.Ema == null ?
-                            new IndicatorData(result.Date, 0) :
-                            new IndicatorData(result.Date, (decimal)result.Ema.Value)).ToList()));
+                        ma.Data = Quotes.GetEma(period)
+                           .Select(r => r.Ema == null ?
+                           new IndicatorData(r.Date, 0) :
+                           new IndicatorData(r.Date, (decimal)r.Ema.Value))
+                           .ToList();
                         break;
                 }
             }
@@ -386,6 +390,38 @@ namespace Albedo.Views
         #endregion
 
         #region Chart Content Render
+        private (decimal, decimal) GetYMaxMin()
+        {
+            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
+            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+            decimal indicatorMax = 0;
+            decimal indicatorMin = 99999999;
+            foreach(var ma in SettingsMan.Indicators.Mas)
+            {
+                var values = ma.Data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
+                if(values == null || !values.Any())
+                {
+                    continue;
+                }
+                var max = values.Max(x => x.Value);
+                indicatorMax = Math.Max(indicatorMax, max);
+            }
+            foreach (var ma in SettingsMan.Indicators.Mas)
+            {
+                var values = ma.Data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
+                if (values == null || !values.Any())
+                {
+                    continue;
+                }
+                var min = values. Min(x => x.Value);
+                indicatorMin = Math.Min(indicatorMin, min);
+            }
+            var yMax = Math.Max(priceMax, indicatorMax);
+            var yMin = Math.Min(priceMin, indicatorMin);
+
+            return (yMax, yMin);
+        }
+
         private void CandleChart_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
         {
             if (ViewItemCount <= 1)
@@ -401,8 +437,7 @@ namespace Albedo.Views
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
 
-            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
-            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+            (var yMax, var yMin) = GetYMaxMin();
 
             // Draw Grid
             var gridLevel = 4; // 4등분
@@ -442,46 +477,44 @@ namespace Albedo.Views
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (quote.High - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (quote.High - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (quote.Low - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (quote.Low - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
                         actualItemFullWidth * viewIndex + actualItemMargin / 2,
-                        actualHeight * (float)(1.0m - (quote.Open - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin,
+                        actualHeight * (float)(1.0m - (quote.Open - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
                         actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
-                        actualHeight * (float)(1.0m - (quote.Close - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin
+                        actualHeight * (float)(1.0m - (quote.Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin
                         ),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                     );
 
                 // Draw Indicators
-                foreach(var indicator in Indicators)
+                foreach (var ma in SettingsMan.Indicators.Mas)
                 {
-                    var indicatorData = indicator.Data;
-
-                    if (i < indicatorData.Count && i >= 1)
+                    if (i < ma.Data.Count && i >= 1)
                     {
-                        var preIndicator = indicatorData[i - 1];
-                        var _indicator = indicatorData[i];
+                        var preIndicator = ma.Data[i - 1];
+                        var _indicator = ma.Data[i];
 
                         if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
                         {
                             canvas.DrawLine(
                                 new SKPoint(
                                     actualItemFullWidth * (viewIndex - 0.5f),
-                                    actualHeight * (float)(1.0m - (preIndicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                                 new SKPoint(
                                     actualItemFullWidth * (viewIndex + 0.5f),
-                                    actualHeight * (float)(1.0m - (_indicator.Value - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin),
-                                new SKPaint() { Color = SKColors.Yellow }
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = ma.LineColor.Color.ToSKColor(), StrokeWidth = ma.LineWeight.LineWeight.ToStrokeWidth() }
                                 );
                         }
                     }
                 }
-               
+
             }
         }
 
@@ -497,14 +530,13 @@ namespace Albedo.Views
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
 
-            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
-            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+            (var yMax, var yMin) = GetYMaxMin();
 
             // Draw Grid
             var gridLevel = 4; // 4등분
             for (int i = 0; i <= gridLevel; i++)
             {
-                var gridPriceString = NumberUtil.ToRoundedValueString(priceMin + (priceMax - priceMin) * ((decimal)(gridLevel - i) / gridLevel));
+                var gridPriceString = NumberUtil.ToRoundedValueString(yMin + (yMax - yMin) * ((decimal)(gridLevel - i) / gridLevel));
 
                 canvas.DrawText(
                     gridPriceString,
@@ -518,7 +550,7 @@ namespace Albedo.Views
             canvas.DrawText(
                 NumberUtil.ToRoundedValueString(Quotes[EndItemIndex - 1].Close),
                 5,
-                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - priceMin) / (priceMax - priceMin)) + Common.CandleTopBottomMargin,
+                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
                 Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                 );

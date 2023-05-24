@@ -1,18 +1,22 @@
-﻿using Albedo.Enums;
+﻿using Newtonsoft.Json;
 
-using System.Windows.Media;
+using System.Collections.Generic;
 
 namespace Albedo.Models
 {
     public class MaModel
     {
+        public bool Enable { get; set; }
         public int Period { get; set; }
-        public MaType Type { get; set; }
-        public SolidColorBrush LineColor { get; set; } = default!;
-        public int LineWeight { get; set; }
+        public MaTypeModel Type { get; set; }
+        public LineColorModel LineColor { get; set; } = default!;
+        public LineWeightModel LineWeight { get; set; }
+        [JsonIgnore]
+        public List<IndicatorData> Data { get; set; } = new();
 
-        public MaModel(int period, MaType type, SolidColorBrush lineColor, int lineWeight)
+        public MaModel(bool enable, int period, MaTypeModel type, LineColorModel lineColor, LineWeightModel lineWeight)
         {
+            Enable = enable;
             Period = period;
             Type = type;
             LineColor = lineColor;

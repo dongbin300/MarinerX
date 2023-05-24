@@ -14,7 +14,7 @@
             </StackPanel>
             <TextBox x:Name="DefaultCandleCountText" TextChanged="DefaultCandleCountText_TextChanged"/>
             <StackPanel Orientation="Horizontal">
-                <CheckBox x:Name="MaEnable1" Checked="MaEnable_CheckedChanged" Unchecked="MaEnable_CheckedChanged"></CheckBox>
+                <CheckBox x:Name="MaEnable1"></CheckBox>
                 <TextBlock Style="{StaticResource Description}">이동평균선 1</TextBlock>
             </StackPanel>
             <Grid>
@@ -26,15 +26,15 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Vertical">
                     <TextBlock Style="{StaticResource Description}">기간</TextBlock>
-                    <TextBox x:Name="MaPeriodText1" TextChanged="MaPeriodText_TextChanged"/>
+                    <TextBox x:Name="MaPeriodText1"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Vertical">
                     <TextBlock Style="{StaticResource Description}">종류</TextBlock>
-                    <ComboBox x:Name="MaTypeCombo1" SelectedValuePath="Type" DisplayMemberPath="Text" SelectionChanged="MaTypeCombo_SelectionChanged"/>
+                    <ComboBox x:Name="MaTypeCombo1" SelectedValuePath="Type" DisplayMemberPath="Text"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Vertical">
                     <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
-                    <ComboBox x:Name="MaLineColorCombo1" SelectedValuePath="LineColor" SelectionChanged="MaLineColorCombo_SelectionChanged">
+                    <ComboBox x:Name="MaLineColorCombo1" SelectedValuePath="LineColor">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
@@ -44,7 +44,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Vertical">
                     <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
-                    <ComboBox x:Name="MaLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text" SelectionChanged="MaLineWeightCombo_SelectionChanged"/>
+                    <ComboBox x:Name="MaLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
                 </StackPanel>
             </Grid>
         </StackPanel>

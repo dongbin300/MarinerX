@@ -25,9 +25,6 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
-    /// 지표 저장방식 변경
-    /// 이평 라인색, 굵기 차트에 적용
-    /// 
     /// 설정 UI 및 버튼 추가
     /// - 라이트/다크 모드(추후)
     /// - 화면설정

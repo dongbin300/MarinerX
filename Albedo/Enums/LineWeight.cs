@@ -1,8 +1,8 @@
 ﻿namespace Albedo.Enums
 {
-    public enum LineWeight
+    public enum LineWeight : int
     {
-        Px1,
+        Px1 = 1,
         Px2,
         Px3,
         Px4,

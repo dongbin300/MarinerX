@@ -29,20 +29,8 @@
     <Setting Name="DefaultCandleCount" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">120</Value>
     </Setting>
-    <Setting Name="MaPeriod1" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">5</Value>
-    </Setting>
-    <Setting Name="MaType1" Type="System.String" Scope="User">
+    <Setting Name="IndicatorString" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="MaLineColor1" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="MaLineWeight1" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="MaEnable1" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -1,4 +1,6 @@
-﻿using Albedo.Views.Settings;
+﻿using Albedo.Managers;
+using Albedo.Views.Settings;
+using Albedo.Models;
 
 using System.Windows;
 using System.Windows.Controls;
@@ -89,12 +91,21 @@ namespace Albedo.Views
         }
 
         /// <summary>
-        /// 설정 창을 닫을 때 지표 재계산
+        /// 설정 창을 닫을 때 설정 저장 및 지표 재계산
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Window_Closed(object sender, System.EventArgs e)
         {
+            SettingsMan.Indicators.Mas.Clear();
+            SettingsMan.Indicators.Mas.Add(new MaModel(
+                chartControl.MaEnable1.IsChecked ?? false,
+                int.Parse(chartControl.MaPeriodText1.Text),
+                (MaTypeModel)chartControl.MaTypeCombo1.SelectedItem,
+                (LineColorModel)chartControl.MaLineColorCombo1.SelectedItem,
+                (LineWeightModel)chartControl.MaLineWeightCombo1.SelectedItem));
+            SettingsMan.Save();
+
             Common.CalculateIndicators?.Invoke();
         }
     }
