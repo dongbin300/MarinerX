@@ -82,7 +82,7 @@
         </Grid>
 
         <ListBox Grid.Row="2" x:Name="PairListBox" ItemsSource="{Binding SimplePairControls}" Background="{StaticResource Background}" BorderThickness="0"
-                 Grid.RowSpan="{Binding PairListBoxRowSpan}">
+                 Grid.RowSpan="{Binding PairListBoxRowSpan}" ItemContainerStyle="{StaticResource BaseListBoxItem}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <view:PairControl Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListBox}}" Height="45" />

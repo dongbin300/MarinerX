@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" 
-             d:DesignHeight="40" d:DesignWidth="200" Background="{StaticResource Background}">
+             d:DesignHeight="40" d:DesignWidth="200" Background="Transparent">
 
     <Grid Grid.Row="0" Background="Transparent">
         <Grid.RowDefinitions>

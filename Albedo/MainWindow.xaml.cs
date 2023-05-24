@@ -25,6 +25,9 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
+    /// 캔들 정보 컬러라이즈
+    /// 인디케이터 수치 차트 상단 캔들 정보에 같이 표시
+    /// 
     /// 설정 UI 및 버튼 추가
     /// - 라이트/다크 모드(추후)
     /// - 화면설정

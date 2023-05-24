@@ -57,6 +57,23 @@
             <Setter Property="UseLayoutRounding" Value="True" />
         </Style>
 
+        <Style TargetType="ListBoxItem" x:Key="BaseListBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Name="border" Padding="2" SnapsToDevicePixels="true">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="#49494D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!--#region ComboBox -->
         <ControlTemplate TargetType="{x:Type ToggleButton}" x:Key="ComboBoxToggleButton">
             <Grid Margin="2">
@@ -324,5 +341,6 @@
             </Setter>
         </Style>
         <!--#endregion-->
+        
     </Application.Resources>
 </Application>
