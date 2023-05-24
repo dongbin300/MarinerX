@@ -17,16 +17,6 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Row="0" Grid.Column="0">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Pair.IsSelected}" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SelectedBackground}" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="1*"/>
