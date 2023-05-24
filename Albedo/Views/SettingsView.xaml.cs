@@ -104,6 +104,30 @@ namespace Albedo.Views
                 (MaTypeModel)chartControl.MaTypeCombo1.SelectedItem,
                 (LineColorModel)chartControl.MaLineColorCombo1.SelectedItem,
                 (LineWeightModel)chartControl.MaLineWeightCombo1.SelectedItem));
+            SettingsMan.Indicators.Mas.Add(new MaModel(
+               chartControl.MaEnable2.IsChecked ?? false,
+               int.Parse(chartControl.MaPeriodText2.Text),
+               (MaTypeModel)chartControl.MaTypeCombo2.SelectedItem,
+               (LineColorModel)chartControl.MaLineColorCombo2.SelectedItem,
+               (LineWeightModel)chartControl.MaLineWeightCombo2.SelectedItem));
+            SettingsMan.Indicators.Mas.Add(new MaModel(
+               chartControl.MaEnable3.IsChecked ?? false,
+               int.Parse(chartControl.MaPeriodText3.Text),
+               (MaTypeModel)chartControl.MaTypeCombo3.SelectedItem,
+               (LineColorModel)chartControl.MaLineColorCombo3.SelectedItem,
+               (LineWeightModel)chartControl.MaLineWeightCombo3.SelectedItem));
+            SettingsMan.Indicators.Mas.Add(new MaModel(
+               chartControl.MaEnable4.IsChecked ?? false,
+               int.Parse(chartControl.MaPeriodText4.Text),
+               (MaTypeModel)chartControl.MaTypeCombo4.SelectedItem,
+               (LineColorModel)chartControl.MaLineColorCombo4.SelectedItem,
+               (LineWeightModel)chartControl.MaLineWeightCombo4.SelectedItem));
+            SettingsMan.Indicators.Mas.Add(new MaModel(
+               chartControl.MaEnable5.IsChecked ?? false,
+               int.Parse(chartControl.MaPeriodText5.Text),
+               (MaTypeModel)chartControl.MaTypeCombo5.SelectedItem,
+               (LineColorModel)chartControl.MaLineColorCombo5.SelectedItem,
+               (LineWeightModel)chartControl.MaLineWeightCombo5.SelectedItem));
             SettingsMan.Save();
 
             Common.CalculateIndicators?.Invoke();

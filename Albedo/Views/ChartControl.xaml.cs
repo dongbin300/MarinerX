@@ -396,10 +396,10 @@ namespace Albedo.Views
             var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
             decimal indicatorMax = 0;
             decimal indicatorMin = 99999999;
-            foreach(var ma in SettingsMan.Indicators.Mas)
+            foreach (var ma in SettingsMan.Indicators.Mas)
             {
                 var values = ma.Data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
-                if(values == null || !values.Any())
+                if (values == null || !values.Any())
                 {
                     continue;
                 }
@@ -413,7 +413,7 @@ namespace Albedo.Views
                 {
                     continue;
                 }
-                var min = values. Min(x => x.Value);
+                var min = values.Min(x => x.Value);
                 indicatorMin = Math.Min(indicatorMin, min);
             }
             var yMax = Math.Max(priceMax, indicatorMax);
@@ -458,26 +458,6 @@ namespace Albedo.Views
                 (float)CandleChart.ActualHeight,
                 DrawingTools.CandlePointerPaint
                 );
-
-            // Draw Candle Info Text
-            var pointingQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 1] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
-            var preQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 2] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth) - 1];
-            var changeText = pointingQuote.Close >= preQuote.Close ? $"+{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}" : $"{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}";
-            var candleInfoText = new List<SKColoredText>
-            {
-                new SKColoredText($"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss}  \x0024 ", DrawingTools.BaseColor, -5),
-                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Volume), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                SKColoredText.NewLine,
-                new SKColoredText("\x21E4 ", DrawingTools.BaseColor),
-                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Open), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                 new SKColoredText("\x2191 ", DrawingTools.BaseColor),
-                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.High), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                 new SKColoredText("\x2193 ", DrawingTools.BaseColor),
-                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Low), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                 new SKColoredText("\x21E5 ", DrawingTools.BaseColor),
-                new SKColoredText($"{NumberUtil.ToRoundedValueString(pointingQuote.Close)}({changeText})", pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-            };
-            canvas.DrawColoredText(candleInfoText, 10, 10, DrawingTools.CandleInfoFont, -3);
 
             for (int i = StartItemIndex; i < EndItemIndex; i++)
             {
@@ -525,8 +505,43 @@ namespace Albedo.Views
                         }
                     }
                 }
-
             }
+
+            // Draw Candle Info Text
+            var pointingQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 1] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
+            var preQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 2] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth) - 1];
+            var changeText = pointingQuote.Close >= preQuote.Close ? $"+{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}" : $"{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}";
+            var candleInfoText = new List<SKColoredText>
+            {
+                new SKColoredText($"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss}  \x0024 ", DrawingTools.BaseColor, -5),
+                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Volume), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
+                SKColoredText.NewLine,
+                new SKColoredText("\x21E4 ", DrawingTools.BaseColor),
+                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Open), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
+                 new SKColoredText("\x2191 ", DrawingTools.BaseColor),
+                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.High), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
+                 new SKColoredText("\x2193 ", DrawingTools.BaseColor),
+                new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Low), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
+                 new SKColoredText("\x21E5 ", DrawingTools.BaseColor),
+                new SKColoredText($"{NumberUtil.ToRoundedValueString(pointingQuote.Close)}({changeText})", pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
+            };
+            canvas.DrawColoredText(candleInfoText, 3, 10, DrawingTools.CandleInfoFont, -3);
+            // Draw Indicator Info Text
+            var indicatorInfoText = new List<SKColoredText>();
+            foreach (var ma in SettingsMan.Indicators.Mas)
+            {
+                if (!ma.Enable)
+                {
+                    continue;
+                }
+
+                var pointingIndicator = CurrentMouseX == -1358 ? ma.Data[EndItemIndex - 1] : ma.Data[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
+
+                indicatorInfoText.Add(new SKColoredText($"{ma.Type.Type.ToString().ToUpper()} {ma.Period}", DrawingTools.BaseColor));
+                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicator.Value), ma.LineColor.Color.ToSKColor()));
+                indicatorInfoText.Add(SKColoredText.NewLine);
+            }
+            canvas.DrawColoredText(indicatorInfoText, 3, 33, DrawingTools.CandleInfoFont, -3);
         }
 
         private void CandleChartAxis_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)

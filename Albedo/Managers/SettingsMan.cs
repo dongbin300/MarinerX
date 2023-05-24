@@ -37,7 +37,7 @@ namespace Albedo.Managers
 
         public static void Load()
         {
-            Indicators = JsonConvert.DeserializeObject<IndicatorsModel>(Settings.Default.IndicatorString) ?? default!;
+            Indicators = JsonConvert.DeserializeObject<IndicatorsModel>(Settings.Default.IndicatorString) ?? new IndicatorsModel();
             DefaultCandleCount = Settings.Default.DefaultCandleCount;
         }
 

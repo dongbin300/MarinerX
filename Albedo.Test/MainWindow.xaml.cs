@@ -11,17 +11,26 @@ namespace Albedo.Test
 
         public string Text { get; set; }
         public SKColor TextColor { get; set; }
+        public SKColor BackgroundColor { get; set; }
 
         public SKColoredText(string text, SKColor fontColor)
         {
             Text = text;
             TextColor = fontColor;
+            BackgroundColor = SKColors.Transparent;
+        }
+
+        public SKColoredText(string text, SKColor fontColor, SKColor backgroundColor)
+        {
+            Text = text;
+            TextColor = fontColor;
+            BackgroundColor = backgroundColor;
         }
     }
 
     public static class SkiaSharpExtension
     {
-        public static void DrawStyledText(this SKCanvas canvas, IEnumerable<SKColoredText> text, float x, float y, SKFont font, float xMargin)
+        public static void DrawColoredText(this SKCanvas canvas, IEnumerable<SKColoredText> text, float x, float y, SKFont font)
         {
             float startX = x;
             float currentX = x;
@@ -35,14 +44,23 @@ namespace Albedo.Test
                     continue;
                 }
 
+                var textBounds = new SKRect();
+                var textPaint = new SKPaint() { Color = textItem.TextColor, TextSize = font.Size };
+                textPaint.MeasureText(textItem.Text, ref textBounds);
+                var backgroundRect = new SKRect(currentX - 5, currentY - textBounds.Height - 5, currentX + textBounds.Width + 10, currentY + 5);
+                if(textItem.BackgroundColor != SKColors.Transparent)
+                {
+                    canvas.DrawRect(backgroundRect, new SKPaint() { Color = textItem.BackgroundColor });
+                }
+
                 canvas.DrawText(
                     textItem.Text,
                     currentX,
                     currentY,
                     font,
-                    new SKPaint() { Color = textItem.TextColor });
+                    textPaint);
 
-                currentX += textItem.Text.Length * (font.Size + xMargin);
+                currentX += textBounds.Width + 5;
             }
         }
     }
@@ -67,14 +85,13 @@ namespace Albedo.Test
 
             var text = new List<SKColoredText>
             {
-                new SKColoredText("TEST", SKColors.White),
+                new SKColoredText("TEST", SKColors.White, SKColors.Gray.WithAlpha(120)),
                 new SKColoredText("CONTENT", SKColors.Red),
                 SKColoredText.NewLine,
                 new SKColoredText("TEST", SKColors.White),
                 new SKColoredText("CONTENT", SKColors.Green),
             };
-            canvas.DrawStyledText(text, 20, 20, font, -4);
-            //canvas.DrawText(text, 10, 10, font, paint);
+            canvas.DrawColoredText(text, 20, 20, font);
         }
     }
 }
