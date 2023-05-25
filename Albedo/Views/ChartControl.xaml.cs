@@ -476,6 +476,7 @@ namespace Albedo.Views
             canvas.Clear(SKColors.Transparent);
 
             (var yMax, var yMin) = GetYMaxMin();
+            var significantDigit = NumberUtil.GetSignificantDigitCount(Quotes[^1].Open);
 
             // Draw Grid
             var gridLevel = 4; // 4등분
@@ -633,7 +634,7 @@ namespace Albedo.Views
                 var pointingIndicator = CurrentMouseX == -1358 ? ma.Data[EndItemIndex - 1] : ma.Data[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
                 indicatorInfoText.Add(new SKColoredText($"{ma.Type.Type.ToString().ToUpper()} {ma.Period}", DrawingTools.BaseColor));
-                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicator.Value), ma.LineColor.Color.ToSKColor()));
+                indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), ma.LineColor.Color.ToSKColor()));
                 indicatorInfoText.Add(SKColoredText.NewLine);
             }
             foreach (var bb in SettingsMan.Indicators.Bbs)
@@ -648,9 +649,9 @@ namespace Albedo.Views
                 var pointingIndicatorLower = CurrentMouseX == -1358 ? bb.LowerData[EndItemIndex - 1] : bb.LowerData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
                 indicatorInfoText.Add(new SKColoredText($"BB {bb.Period},{bb.Deviation}", DrawingTools.BaseColor));
-                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicatorLower.Value), bb.LowerLineColor.Color.ToSKColor(), -4));
-                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicatorSma.Value), bb.SmaLineColor.Color.ToSKColor(), -4));
-                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicatorUpper.Value), bb.UpperLineColor.Color.ToSKColor(), -4));
+                indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorLower.Value, significantDigit).ToString(), bb.LowerLineColor.Color.ToSKColor(), -4));
+                indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSma.Value, significantDigit).ToString(), bb.SmaLineColor.Color.ToSKColor(), -4));
+                indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorUpper.Value, significantDigit).ToString(), bb.UpperLineColor.Color.ToSKColor(), -4));
                 indicatorInfoText.Add(SKColoredText.NewLine);
             }
             canvas.DrawColoredText(indicatorInfoText, 3, 33, DrawingTools.CandleInfoFont, -3);
