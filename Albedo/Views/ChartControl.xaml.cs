@@ -636,6 +636,23 @@ namespace Albedo.Views
                 indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicator.Value), ma.LineColor.Color.ToSKColor()));
                 indicatorInfoText.Add(SKColoredText.NewLine);
             }
+            foreach (var bb in SettingsMan.Indicators.Bbs)
+            {
+                if (!bb.Enable)
+                {
+                    continue;
+                }
+
+                var pointingIndicatorSma = CurrentMouseX == -1358 ? bb.SmaData[EndItemIndex - 1] : bb.SmaData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
+                var pointingIndicatorUpper = CurrentMouseX == -1358 ? bb.UpperData[EndItemIndex - 1] : bb.UpperData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
+                var pointingIndicatorLower = CurrentMouseX == -1358 ? bb.LowerData[EndItemIndex - 1] : bb.LowerData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
+
+                indicatorInfoText.Add(new SKColoredText($"BB {bb.Period},{bb.Deviation}", DrawingTools.BaseColor));
+                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicatorLower.Value), bb.LowerLineColor.Color.ToSKColor(), -4));
+                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicatorSma.Value), bb.SmaLineColor.Color.ToSKColor(), -4));
+                indicatorInfoText.Add(new SKColoredText(NumberUtil.ToRoundedValueString(pointingIndicatorUpper.Value), bb.UpperLineColor.Color.ToSKColor(), -4));
+                indicatorInfoText.Add(SKColoredText.NewLine);
+            }
             canvas.DrawColoredText(indicatorInfoText, 3, 33, DrawingTools.CandleInfoFont, -3);
         }
 
