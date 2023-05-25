@@ -128,6 +128,18 @@ namespace Albedo.Views
                (MaTypeModel)chartControl.MaTypeCombo5.SelectedItem,
                (LineColorModel)chartControl.MaLineColorCombo5.SelectedItem,
                (LineWeightModel)chartControl.MaLineWeightCombo5.SelectedItem));
+            SettingsMan.Indicators.Bbs.Clear();
+            SettingsMan.Indicators.Bbs.Add(new BbModel(
+                chartControl.BbEnable1.IsChecked ?? false,
+                int.Parse(chartControl.BbPeriodText1.Text),
+                int.Parse(chartControl.BbDeviationText1.Text),
+                (LineColorModel)chartControl.BbSmaLineColorCombo1.SelectedItem,
+                (LineWeightModel)chartControl.BbSmaLineWeightCombo1.SelectedItem,
+                (LineColorModel)chartControl.BbUpperLineColorCombo1.SelectedItem,
+                (LineWeightModel)chartControl.BbUpperLineWeightCombo1.SelectedItem,
+                (LineColorModel)chartControl.BbLowerLineColorCombo1.SelectedItem,
+                (LineWeightModel)chartControl.BbLowerLineWeightCombo1.SelectedItem));
+
             SettingsMan.Save();
 
             Common.CalculateIndicators?.Invoke();

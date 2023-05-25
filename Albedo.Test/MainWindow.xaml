@@ -7,6 +7,4 @@
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="900">
-
-    <skia:SKElement x:Name="Screen" PaintSurface="Screen_PaintSurface"/>
 </Window>

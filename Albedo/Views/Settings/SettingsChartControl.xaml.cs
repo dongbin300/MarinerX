@@ -37,6 +37,9 @@ namespace Albedo.Views.Settings
             MaLineColorCombo3.Items.Clear();
             MaLineColorCombo4.Items.Clear();
             MaLineColorCombo5.Items.Clear();
+            BbSmaLineColorCombo1.Items.Clear();
+            BbUpperLineColorCombo1.Items.Clear();
+            BbLowerLineColorCombo1.Items.Clear();
             foreach (var item in Common.MaLineColors)
             {
                 MaLineColorCombo1.Items.Add(item);
@@ -44,6 +47,9 @@ namespace Albedo.Views.Settings
                 MaLineColorCombo3.Items.Add(item);
                 MaLineColorCombo4.Items.Add(item);
                 MaLineColorCombo5.Items.Add(item);
+                BbSmaLineColorCombo1.Items.Add(item);
+                BbUpperLineColorCombo1.Items.Add(item);
+                BbLowerLineColorCombo1.Items.Add(item);
             }
 
             MaLineWeightCombo1.Items.Clear();
@@ -51,6 +57,9 @@ namespace Albedo.Views.Settings
             MaLineWeightCombo3.Items.Clear();
             MaLineWeightCombo4.Items.Clear();
             MaLineWeightCombo5.Items.Clear();
+            BbSmaLineWeightCombo1.Items.Clear();
+            BbUpperLineWeightCombo1.Items.Clear();
+            BbLowerLineWeightCombo1.Items.Clear();
             foreach (var item in Common.MaLineWeights)
             {
                 MaLineWeightCombo1.Items.Add(item);
@@ -58,6 +67,9 @@ namespace Albedo.Views.Settings
                 MaLineWeightCombo3.Items.Add(item);
                 MaLineWeightCombo4.Items.Add(item);
                 MaLineWeightCombo5.Items.Add(item);
+                BbSmaLineWeightCombo1.Items.Add(item);
+                BbUpperLineWeightCombo1.Items.Add(item);
+                BbLowerLineWeightCombo1.Items.Add(item);
             }
 
             DefaultCandleCountErrorText.Visibility = Visibility.Hidden;
@@ -92,6 +104,16 @@ namespace Albedo.Views.Settings
             MaLineWeightCombo4.SelectedIndex = 0;
             MaLineWeightCombo5.SelectedIndex = 0;
 
+            BbPeriodText1.Text = "20";
+            BbDeviationText1.Text = "2";
+            BbSmaLineColorCombo1.SelectedIndex = 0;
+            BbUpperLineColorCombo1.SelectedIndex = 0;
+            BbLowerLineColorCombo1.SelectedIndex = 0;
+            BbSmaLineWeightCombo1.SelectedIndex = 0;
+            BbUpperLineWeightCombo1.SelectedIndex = 0;
+            BbLowerLineWeightCombo1.SelectedIndex = 0;
+
+            #region MA
             // 이평선 1
             if (SettingsMan.Indicators.Mas.Count >= 1)
             {
@@ -141,6 +163,23 @@ namespace Albedo.Views.Settings
                 MaLineColorCombo5.SelectedItem = MaLineColorCombo5.Items.OfType<LineColorModel>().First(x => x.LineColor.Equals(SettingsMan.Indicators.Mas[4].LineColor.LineColor));
                 MaLineWeightCombo5.SelectedItem = MaLineWeightCombo5.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(SettingsMan.Indicators.Mas[4].LineWeight.LineWeight));
             }
+            #endregion
+
+            #region BB
+            // 볼린저밴드 1
+            if (SettingsMan.Indicators.Bbs.Count >= 1)
+            {
+                BbEnable1.IsChecked = SettingsMan.Indicators.Bbs[0].Enable;
+                BbPeriodText1.Text = SettingsMan.Indicators.Bbs[0].Period.ToString();
+                BbDeviationText1.Text = SettingsMan.Indicators.Bbs[0].Deviation.ToString();
+                BbSmaLineColorCombo1.SelectedItem = BbSmaLineColorCombo1.Items.OfType<LineColorModel>().First(x => x.LineColor.Equals(SettingsMan.Indicators.Bbs[0].SmaLineColor.LineColor));
+                BbUpperLineColorCombo1.SelectedItem = BbUpperLineColorCombo1.Items.OfType<LineColorModel>().First(x => x.LineColor.Equals(SettingsMan.Indicators.Bbs[0].UpperLineColor.LineColor));
+                BbLowerLineColorCombo1.SelectedItem = BbLowerLineColorCombo1.Items.OfType<LineColorModel>().First(x => x.LineColor.Equals(SettingsMan.Indicators.Bbs[0].LowerLineColor.LineColor));
+                BbSmaLineWeightCombo1.SelectedItem = BbSmaLineWeightCombo1.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(SettingsMan.Indicators.Bbs[0].SmaLineWeight.LineWeight));
+                BbUpperLineWeightCombo1.SelectedItem = BbUpperLineWeightCombo1.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(SettingsMan.Indicators.Bbs[0].UpperLineWeight.LineWeight));
+                BbLowerLineWeightCombo1.SelectedItem = BbLowerLineWeightCombo1.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(SettingsMan.Indicators.Bbs[0].LowerLineWeight.LineWeight));
+            }
+            #endregion
         }
 
         /// <summary>

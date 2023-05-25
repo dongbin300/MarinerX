@@ -254,6 +254,24 @@ namespace Albedo.Views
                         break;
                 }
             }
+            foreach(var bb in SettingsMan.Indicators.Bbs)
+            {
+                if (!bb.Enable)
+                {
+                    continue;
+                }
+
+                var bbResult = Quotes.GetBollingerBands(bb.Period, bb.Deviation);
+                bb.SmaData = bbResult.Select(r => r.Sma == null ?
+                    new IndicatorData(r.Date, 0) :
+                    new IndicatorData(r.Date, (decimal)r.Sma.Value)).ToList();
+                bb.UpperData = bbResult.Select(r => r.UpperBand == null ?
+                    new IndicatorData(r.Date, 0) :
+                    new IndicatorData(r.Date, (decimal)r.UpperBand.Value)).ToList();
+                bb.LowerData = bbResult.Select(r => r.LowerBand == null ?
+                    new IndicatorData(r.Date, 0) :
+                    new IndicatorData(r.Date, (decimal)r.LowerBand.Value)).ToList();
+            }
         }
         #endregion
 
@@ -416,6 +434,26 @@ namespace Albedo.Views
                 var min = values.Min(x => x.Value);
                 indicatorMin = Math.Min(indicatorMin, min);
             }
+            foreach (var bb in SettingsMan.Indicators.Bbs)
+            {
+                var values = bb.UpperData.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
+                if (values == null || !values.Any())
+                {
+                    continue;
+                }
+                var max = values.Max(x => x.Value);
+                indicatorMax = Math.Max(indicatorMax, max);
+            }
+            foreach (var bb in SettingsMan.Indicators.Bbs)
+            {
+                var values = bb.LowerData.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
+                if (values == null || !values.Any())
+                {
+                    continue;
+                }
+                var min = values.Min(x => x.Value);
+                indicatorMin = Math.Min(indicatorMin, min);
+            }
             var yMax = Math.Max(priceMax, indicatorMax);
             var yMin = Math.Min(priceMin, indicatorMin);
 
@@ -501,6 +539,63 @@ namespace Albedo.Views
                                     actualItemFullWidth * (viewIndex + 0.5f),
                                     actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                                 new SKPaint() { Color = ma.LineColor.Color.ToSKColor(), StrokeWidth = ma.LineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                }
+                foreach(var bb in SettingsMan.Indicators.Bbs)
+                {
+                    if (i < bb.SmaData.Count && i >= 1)
+                    {
+                        var preIndicator = bb.SmaData[i - 1];
+                        var _indicator = bb.SmaData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = bb.SmaLineColor.Color.ToSKColor(), StrokeWidth = bb.SmaLineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                    if (i < bb.UpperData.Count && i >= 1)
+                    {
+                        var preIndicator = bb.UpperData[i - 1];
+                        var _indicator = bb.UpperData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = bb.UpperLineColor.Color.ToSKColor(), StrokeWidth = bb.UpperLineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                    if (i < bb.LowerData.Count && i >= 1)
+                    {
+                        var preIndicator = bb.LowerData[i - 1];
+                        var _indicator = bb.LowerData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = bb.LowerLineColor.Color.ToSKColor(), StrokeWidth = bb.LowerLineWeight.LineWeight.ToStrokeWidth() }
                                 );
                         }
                     }

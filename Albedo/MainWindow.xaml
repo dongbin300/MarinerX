@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Loaded="Window_Loaded"
         PreviewKeyDown="Window_PreviewKeyDown"
-        Title="Albedo" Height="400" Width="900">
+        Title="Albedo" Height="450" Width="900">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="270"/>
