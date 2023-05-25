@@ -4,6 +4,7 @@ using Albedo.Utils;
 using Albedo.Views;
 
 using Binance.Net.Clients;
+using Binance.Net.Interfaces.Clients;
 
 using Bithumb.Net.Clients;
 
@@ -20,7 +21,15 @@ namespace Albedo.Managers
     public class ChartMan
     {
         #region Refresh Chart (Binance Refresh+Update / Upbit Refresh / Bithumb Refresh+Update)
-        public static (ChartControl, int) RefreshBinanceSpotChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
+        public static (ChartControl, int) RefreshBinanceChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId, PairMarketType marketType) => marketType switch
+        {
+            PairMarketType.Spot => RefreshBinanceSpotChart(binanceClient, binanceSocketClient, subId),
+            PairMarketType.Futures => RefreshBinanceFuturesChart(binanceClient, binanceSocketClient, subId),
+            PairMarketType.CoinFutures => RefreshBinanceCoinFuturesChart(binanceClient, binanceSocketClient, subId),
+            _ => (new ChartControl(), 0)
+        };
+
+        private static (ChartControl, int) RefreshBinanceSpotChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
             {
@@ -91,7 +100,7 @@ namespace Albedo.Managers
             }
         }
 
-        public static (ChartControl, int) RefreshBinanceFuturesChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
+        private static (ChartControl, int) RefreshBinanceFuturesChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
             {
@@ -162,7 +171,7 @@ namespace Albedo.Managers
             }
         }
 
-        public static (ChartControl, int) RefreshBinanceCoinFuturesChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
+        private static (ChartControl, int) RefreshBinanceCoinFuturesChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
             {
@@ -244,6 +253,7 @@ namespace Albedo.Managers
                 switch (Common.ChartInterval)
                 {
                     case CandleInterval.OneMinute:
+                    case CandleInterval.ThreeMinutes:
                     case CandleInterval.FiveMinutes:
                     case CandleInterval.FifteenMinutes:
                     case CandleInterval.ThirtyMinutes:
@@ -379,7 +389,28 @@ namespace Albedo.Managers
         #endregion
 
         #region Additional Chart (Binance, Upbit)
-        public static void LoadAdditionalBinanceSpotChart(BinanceClient binanceClient, ChartControl chartControl)
+        public static void LoadAdditionalBinanceChart(BinanceClient binanceClient, ChartControl chartControl, PairMarketType marketType)
+        {
+            switch (marketType)
+            {
+                case PairMarketType.Spot:
+                    LoadAdditionalBinanceSpotChart(binanceClient, chartControl);
+                    break;
+
+                case PairMarketType.Futures:
+                    LoadAdditionalBinanceFuturesChart(binanceClient, chartControl);
+                    break;
+
+                case PairMarketType.CoinFutures:
+                    LoadAdditionalBinanceCoinFuturesChart(binanceClient, chartControl);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private static void LoadAdditionalBinanceSpotChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
             {
@@ -408,7 +439,7 @@ namespace Albedo.Managers
             }
         }
 
-        public static void LoadAdditionalBinanceFuturesChart(BinanceClient binanceClient, ChartControl chartControl)
+        private static void LoadAdditionalBinanceFuturesChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
             {
@@ -437,7 +468,7 @@ namespace Albedo.Managers
             }
         }
 
-        public static void LoadAdditionalBinanceCoinFuturesChart(BinanceClient binanceClient, ChartControl chartControl)
+        private static void LoadAdditionalBinanceCoinFuturesChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
             {

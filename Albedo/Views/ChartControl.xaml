@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Albedo.ViewModels"
              xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
@@ -63,22 +64,29 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
+            <Image Grid.Row="0" Width="20" Source="{Binding FavoritesImage}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding FavoritesImageClick}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Image>
             <!--
                 바이낸스: 1초, 1, 3, 5, 15, 30분, 1, 2, 4, 6, 8, 12시간, 1, 3일, 1주, 1월
                 업비트: 1, 3, 5, 15, 10, 30분, 1, 4시간, 1일, 1주, 1월
                 빗썸: 1, 3, 5, 10, 30분, 1, 6, 12시간, 1일, 1주, 1월
                 공통: 1, 3, 5, 30분, 1시간, 1일, 1주, 1월
             -->
-            <RadioButton Grid.Row="0" Command="{Binding IntervalClick}" CommandParameter="1분" Content="1분"/>
-            <RadioButton Grid.Row="1" Command="{Binding IntervalClick}" CommandParameter="3분" Content="3분"/>
-            <RadioButton Grid.Row="2" Command="{Binding IntervalClick}" CommandParameter="5분" Content="5분"/>
-            <RadioButton Grid.Row="3" Command="{Binding IntervalClick}" CommandParameter="10분" Content="10분"/>
-            <RadioButton Grid.Row="4" Command="{Binding IntervalClick}" CommandParameter="15분" Content="15분"/>
-            <RadioButton Grid.Row="5" Command="{Binding IntervalClick}" CommandParameter="30분" Content="30분"/>
-            <RadioButton Grid.Row="6" Command="{Binding IntervalClick}" CommandParameter="1시간" Content="1시간"/>
-            <RadioButton Grid.Row="7" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
-            <RadioButton Grid.Row="8" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
-            <RadioButton Grid.Row="9" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
+            <RadioButton Grid.Row="1" Command="{Binding IntervalClick}" CommandParameter="1분" Content="1분"/>
+            <RadioButton Grid.Row="2" Command="{Binding IntervalClick}" CommandParameter="3분" Content="3분"/>
+            <RadioButton Grid.Row="3" Command="{Binding IntervalClick}" CommandParameter="5분" Content="5분"/>
+            <RadioButton Grid.Row="4" Command="{Binding IntervalClick}" CommandParameter="10분" Content="10분"/>
+            <RadioButton Grid.Row="5" Command="{Binding IntervalClick}" CommandParameter="15분" Content="15분"/>
+            <RadioButton Grid.Row="6" Command="{Binding IntervalClick}" CommandParameter="30분" Content="30분"/>
+            <RadioButton Grid.Row="7" Command="{Binding IntervalClick}" CommandParameter="1시간" Content="1시간"/>
+            <RadioButton Grid.Row="8" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
+            <RadioButton Grid.Row="9" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
+            <RadioButton Grid.Row="10" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1월"/>
         </Grid>
 
         <Grid Name="ChartGrid" Grid.Column="1">

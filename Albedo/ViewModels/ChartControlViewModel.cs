@@ -1,8 +1,10 @@
 ﻿using Albedo.Commands;
 using Albedo.Enums;
+using Albedo.Managers;
 
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace Albedo.ViewModels
 {
@@ -16,10 +18,27 @@ namespace Albedo.ViewModels
         }
         #endregion Notify Property Changed
 
+        public BitmapImage FavoritesImage => Common.Pair.FavoritesImage;
+
+        public ICommand? FavoritesImageClick { get; set; }
         public ICommand? IntervalClick { get; set; }
 
         public ChartControlViewModel()
         {
+            FavoritesImageClick = new DelegateCommand((obj) =>
+            {
+                if (Common.Pair.IsFavorites)
+                {
+                    SettingsMan.FavoritesList.Remove(Common.Pair.Id);
+                }
+                else
+                {
+                    SettingsMan.FavoritesList.Add(Common.Pair.Id);
+                }
+                OnPropertyChanged(nameof(FavoritesImage));
+                SettingsMan.Save();
+            });
+
             IntervalClick = new DelegateCommand((obj) =>
             {
                 if (obj == null)
@@ -27,8 +46,8 @@ namespace Albedo.ViewModels
                     return;
                 }
 
-                Albedo.Settings.Default.Interval = obj.ToString();
-                Albedo.Settings.Default.Save();
+                Settings.Default.Interval = obj.ToString();
+                Settings.Default.Save();
                 Common.ChartInterval = obj.ToString() switch
                 {
                     "1분" => CandleInterval.OneMinute,

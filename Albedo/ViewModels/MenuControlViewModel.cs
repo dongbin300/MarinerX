@@ -1,5 +1,6 @@
 ﻿using Albedo.Commands;
 using Albedo.Enums;
+using Albedo.Managers;
 using Albedo.Models;
 using Albedo.Utils;
 using Albedo.Views;
@@ -307,6 +308,10 @@ namespace Albedo.ViewModels
         private void InitMarket()
         {
             PairMarkets.Clear();
+            if (Common.SupportedMarket.HasFlag(PairMarket.Favorites))
+            {
+                PairMarkets.Add(new PairMarketModel(PairMarket.Favorites, "즐겨찾기", "Resources/favorites-on.png"));
+            }
             if (Common.SupportedMarket.HasFlag(PairMarket.Binance))
             {
                 PairMarkets.Add(new PairMarketModel(PairMarket.Binance, "바이낸스", "Resources/binance.png"));
@@ -347,6 +352,11 @@ namespace Albedo.ViewModels
                 case PairMarket.Upbit:
                 case PairMarket.Bithumb:
                     PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Spot, "현물"));
+                    break;
+
+                case PairMarket.Favorites:
+                    PairQuoteAssets.Clear();
+                    Common.RefreshAllTickers?.Invoke();
                     break;
             }
             if (PairMarketTypes.Count > 0)
@@ -423,6 +433,9 @@ namespace Albedo.ViewModels
                     PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.KRW, "KRW"));
                     PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
                     break;
+
+                default:
+                    break;
             }
             if (PairQuoteAssets.Count > 0)
             {
@@ -479,6 +492,14 @@ namespace Albedo.ViewModels
         /// <param name="pair"></param>
         public void UpdatePairInfo(Pair pair)
         {
+            if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites)
+            {
+                if (!pair.IsFavorites)
+                {
+                    return;
+                }
+            }
+
             var pairTag = $"{pair.Market}_{pair.MarketType}_{pair.Symbol}";
             var _pair = PairControls.Where(p => p.Tag.Equals(pairTag));
 

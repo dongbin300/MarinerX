@@ -3,12 +3,15 @@ using Albedo.Models;
 
 using Newtonsoft.Json;
 
+using System.Collections.Generic;
+
 namespace Albedo.Managers
 {
     public class SettingsMan
     {
         public static int DefaultCandleCount { get; set; }
         public static IndicatorsModel Indicators { get; set; } = default!;
+        public static List<string> FavoritesList { get; set; } = default!;
 
         public SettingsMan()
         {
@@ -38,12 +41,14 @@ namespace Albedo.Managers
         public static void Load()
         {
             Indicators = JsonConvert.DeserializeObject<IndicatorsModel>(Settings.Default.IndicatorString) ?? new IndicatorsModel();
+            FavoritesList = JsonConvert.DeserializeObject<List<string>>(Settings.Default.FavoritesString) ?? new List<string>();
             DefaultCandleCount = Settings.Default.DefaultCandleCount;
         }
 
         public static void Save()
         {
             Settings.Default.IndicatorString = JsonConvert.SerializeObject(Indicators);
+            Settings.Default.FavoritesString = JsonConvert.SerializeObject(FavoritesList);
             Settings.Default.Save();
         }
     }

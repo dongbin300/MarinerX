@@ -142,5 +142,17 @@ namespace Albedo {
                 this["IndicatorString"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FavoritesString {
+            get {
+                return ((string)(this["FavoritesString"]));
+            }
+            set {
+                this["FavoritesString"] = value;
+            }
+        }
     }
 }

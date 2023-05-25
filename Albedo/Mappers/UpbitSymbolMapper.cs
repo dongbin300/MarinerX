@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Albedo.Enums;
+
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Albedo.Mappers
@@ -28,6 +30,26 @@ namespace Albedo.Mappers
         public static string GetKoreanName(string symbol)
         {
             return values.TryGetValue(symbol, out var name) ? name : symbol.Split('-')[1];
+        }
+
+        public static PairQuoteAsset GetPairQuoteAsset(string symbol)
+        {
+            if (symbol.StartsWith("KRW"))
+            {
+                return PairQuoteAsset.KRW;
+            }
+            else if (symbol.StartsWith("BTC"))
+            {
+                return PairQuoteAsset.BTC;
+            }
+            else if (symbol.StartsWith("USDT"))
+            {
+                return PairQuoteAsset.USDT;
+            }
+            else
+            {
+                return PairQuoteAsset.None;
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ namespace Albedo.Enums
     public enum PairMarket
     {
         None,
+        Favorites,
         Binance,
         Upbit,
         Bithumb

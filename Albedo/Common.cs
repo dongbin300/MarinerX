@@ -21,7 +21,7 @@ namespace Albedo
         public static readonly int CandleTopBottomMargin = 30;
         public static readonly int VolumeTopBottomMargin = 5;
 
-        public static PairMarket SupportedMarket = PairMarket.Binance | PairMarket.Upbit | PairMarket.Bithumb;
+        public static PairMarket SupportedMarket = PairMarket.Favorites | PairMarket.Binance | PairMarket.Upbit | PairMarket.Bithumb;
 
         public static PairMarketModel CurrentSelectedPairMarket = new(PairMarket.None, "", "");
         public static PairMarketTypeModel CurrentSelectedPairMarketType = new(PairMarketType.None, "");
