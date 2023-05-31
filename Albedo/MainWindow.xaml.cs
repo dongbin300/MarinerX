@@ -174,7 +174,10 @@ namespace Albedo
                     }
                     else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Upbit)
                     {
-                        ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
+                        if(Common.Pair.Market == PairMarket.Upbit)
+                        {
+                            ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
+                        }
                     }
                 });
             }

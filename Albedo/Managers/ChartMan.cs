@@ -4,7 +4,6 @@ using Albedo.Utils;
 using Albedo.Views;
 
 using Binance.Net.Clients;
-using Binance.Net.Interfaces.Clients;
 
 using Bithumb.Net.Clients;
 
@@ -586,72 +585,79 @@ namespace Albedo.Managers
         #region Update chart (Upbit)
         public static void UpdateUpbitSpotChart(UpbitClient upbitClient, ChartControl chartControl)
         {
-            var symbol = Common.Pair.Symbol;
-            switch (Common.ChartInterval)
+            try
             {
-                case CandleInterval.OneMinute:
-                case CandleInterval.ThreeMinutes:
-                case CandleInterval.FiveMinutes:
-                case CandleInterval.ThirtyMinutes:
-                case CandleInterval.OneHour:
-                    var minuteCandleResult = upbitClient.QuotationCandles.GetMinutesCandlesAsync(symbol, Common.ChartInterval.ToUpbitMinuteInterval());
-                    minuteCandleResult.Wait();
-                    var minuteCandle = minuteCandleResult.Result.ElementAt(0);
-                    chartControl.UpdateQuote(new Quote()
-                    {
-                        Date = minuteCandle.candle_date_time_kst,
-                        Open = minuteCandle.opening_price,
-                        High = minuteCandle.high_price,
-                        Low = minuteCandle.low_price,
-                        Close = minuteCandle.trade_price,
-                        Volume = minuteCandle.candle_acc_trade_volume
-                    });
-                    break;
+                var symbol = Common.Pair.Symbol;
+                switch (Common.ChartInterval)
+                {
+                    case CandleInterval.OneMinute:
+                    case CandleInterval.ThreeMinutes:
+                    case CandleInterval.FiveMinutes:
+                    case CandleInterval.ThirtyMinutes:
+                    case CandleInterval.OneHour:
+                        var minuteCandleResult = upbitClient.QuotationCandles.GetMinutesCandlesAsync(symbol, Common.ChartInterval.ToUpbitMinuteInterval());
+                        minuteCandleResult.Wait();
+                        var minuteCandle = minuteCandleResult.Result.ElementAt(0);
+                        chartControl.UpdateQuote(new Quote()
+                        {
+                            Date = minuteCandle.candle_date_time_kst,
+                            Open = minuteCandle.opening_price,
+                            High = minuteCandle.high_price,
+                            Low = minuteCandle.low_price,
+                            Close = minuteCandle.trade_price,
+                            Volume = minuteCandle.candle_acc_trade_volume
+                        });
+                        break;
 
-                case CandleInterval.OneDay:
-                    var dayCandleResult = upbitClient.QuotationCandles.GetDaysCandlesAsync(symbol);
-                    dayCandleResult.Wait();
-                    var dayCandle = dayCandleResult.Result.ElementAt(0);
-                    chartControl.UpdateQuote(new Quote()
-                    {
-                        Date = dayCandle.candle_date_time_kst,
-                        Open = dayCandle.opening_price,
-                        High = dayCandle.high_price,
-                        Low = dayCandle.low_price,
-                        Close = dayCandle.trade_price,
-                        Volume = dayCandle.candle_acc_trade_volume
-                    });
-                    break;
+                    case CandleInterval.OneDay:
+                        var dayCandleResult = upbitClient.QuotationCandles.GetDaysCandlesAsync(symbol);
+                        dayCandleResult.Wait();
+                        var dayCandle = dayCandleResult.Result.ElementAt(0);
+                        chartControl.UpdateQuote(new Quote()
+                        {
+                            Date = dayCandle.candle_date_time_kst,
+                            Open = dayCandle.opening_price,
+                            High = dayCandle.high_price,
+                            Low = dayCandle.low_price,
+                            Close = dayCandle.trade_price,
+                            Volume = dayCandle.candle_acc_trade_volume
+                        });
+                        break;
 
-                case CandleInterval.OneWeek:
-                    var weekCandleResult = upbitClient.QuotationCandles.GetWeeksCandlesAsync(symbol);
-                    weekCandleResult.Wait();
-                    var weekCandle = weekCandleResult.Result.ElementAt(0);
-                    chartControl.UpdateQuote(new Quote()
-                    {
-                        Date = weekCandle.candle_date_time_kst,
-                        Open = weekCandle.opening_price,
-                        High = weekCandle.high_price,
-                        Low = weekCandle.low_price,
-                        Close = weekCandle.trade_price,
-                        Volume = weekCandle.candle_acc_trade_volume
-                    });
-                    break;
+                    case CandleInterval.OneWeek:
+                        var weekCandleResult = upbitClient.QuotationCandles.GetWeeksCandlesAsync(symbol);
+                        weekCandleResult.Wait();
+                        var weekCandle = weekCandleResult.Result.ElementAt(0);
+                        chartControl.UpdateQuote(new Quote()
+                        {
+                            Date = weekCandle.candle_date_time_kst,
+                            Open = weekCandle.opening_price,
+                            High = weekCandle.high_price,
+                            Low = weekCandle.low_price,
+                            Close = weekCandle.trade_price,
+                            Volume = weekCandle.candle_acc_trade_volume
+                        });
+                        break;
 
-                case CandleInterval.OneMonth:
-                    var monthCandleResult = upbitClient.QuotationCandles.GetMonthsCandlesAsync(symbol);
-                    monthCandleResult.Wait();
-                    var monthCandle = monthCandleResult.Result.ElementAt(0);
-                    chartControl.UpdateQuote(new Quote()
-                    {
-                        Date = monthCandle.candle_date_time_kst,
-                        Open = monthCandle.opening_price,
-                        High = monthCandle.high_price,
-                        Low = monthCandle.low_price,
-                        Close = monthCandle.trade_price,
-                        Volume = monthCandle.candle_acc_trade_volume
-                    });
-                    break;
+                    case CandleInterval.OneMonth:
+                        var monthCandleResult = upbitClient.QuotationCandles.GetMonthsCandlesAsync(symbol);
+                        monthCandleResult.Wait();
+                        var monthCandle = monthCandleResult.Result.ElementAt(0);
+                        chartControl.UpdateQuote(new Quote()
+                        {
+                            Date = monthCandle.candle_date_time_kst,
+                            Open = monthCandle.opening_price,
+                            High = monthCandle.high_price,
+                            Low = monthCandle.low_price,
+                            Close = monthCandle.trade_price,
+                            Volume = monthCandle.candle_acc_trade_volume
+                        });
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
         }
         #endregion

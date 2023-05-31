@@ -84,11 +84,11 @@ namespace Albedo.Views
             else
             {
                 Quotes.Add(quote);
-                CalculateIndicators();
                 ViewStartPosition += ItemFullWidth;
                 ViewEndPosition += ItemFullWidth;
             }
 
+            CalculateIndicators();
             Render();
         }
 
@@ -128,7 +128,6 @@ namespace Albedo.Views
                 else // New quote
                 {
                     Quotes.Add(quote);
-                    CalculateIndicators();
                     ViewStartPosition += ItemFullWidth;
                     ViewEndPosition += ItemFullWidth;
                 }
@@ -142,6 +141,7 @@ namespace Albedo.Views
                 lastQuote.Volume = backtrackQuotes.Sum(x => x.Volume) + quote.Volume;
             }
 
+            CalculateIndicators();
             Render();
         }
 
@@ -180,7 +180,6 @@ namespace Albedo.Views
                     Volume = volume
                 };
                 Quotes.Add(quote);
-                CalculateIndicators();
                 ViewStartPosition += ItemFullWidth;
                 ViewEndPosition += ItemFullWidth;
             }
@@ -192,6 +191,7 @@ namespace Albedo.Views
                 lastQuote.Volume += volume;
             }
 
+            CalculateIndicators();
             Render();
         }
 
