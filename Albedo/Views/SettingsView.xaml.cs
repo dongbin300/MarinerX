@@ -20,8 +20,6 @@ namespace Albedo.Views
         private SolidColorBrush selectedColor = new SolidColorBrush(Color.FromRgb(0x49, 0x49, 0x4D));
         private SolidColorBrush transparentColor = new SolidColorBrush(Colors.Transparent);
 
-        private string currentMenu = string.Empty;
-
         private SettingsChartControl chartControl = new SettingsChartControl();
         private SettingsMarketControl marketControl = new SettingsMarketControl();
         private SettingsPairControl pairControl = new SettingsPairControl();
@@ -31,11 +29,7 @@ namespace Albedo.Views
             InitializeComponent();
 
             SetDefault();
-            currentMenu = "P1";
-            R1.Visibility = Visibility.Visible;
-            P1.Background = selectedColor;
-            T1.FontWeight = FontWeights.Bold;
-            MainContent.Content = marketControl;
+            SwitchMenu(Common.CurrentSettingsMenu);
         }
 
         private void SetDefault()
@@ -59,16 +53,21 @@ namespace Albedo.Views
             }
 
             var menu = panel.Name.ToString();
-            if (menu == currentMenu)
+            if (menu == Common.CurrentSettingsMenu)
             {
                 return;
             }
 
             SetDefault();
+            SwitchMenu(menu);
+        }
+
+        private void SwitchMenu(string menu)
+        {
             switch (menu)
             {
                 case "P1":
-                    currentMenu = "P1";
+                    Common.CurrentSettingsMenu = "P1";
                     R1.Visibility = Visibility.Visible;
                     P1.Background = selectedColor;
                     T1.FontWeight = FontWeights.Bold;
@@ -76,7 +75,7 @@ namespace Albedo.Views
                     break;
 
                 case "P2":
-                    currentMenu = "P2";
+                    Common.CurrentSettingsMenu = "P2";
                     R2.Visibility = Visibility.Visible;
                     P2.Background = selectedColor;
                     T2.FontWeight = FontWeights.Bold;
@@ -84,7 +83,7 @@ namespace Albedo.Views
                     break;
 
                 case "P3":
-                    currentMenu = "P3";
+                    Common.CurrentSettingsMenu = "P3";
                     R3.Visibility = Visibility.Visible;
                     P3.Background = selectedColor;
                     T3.FontWeight = FontWeights.Bold;
