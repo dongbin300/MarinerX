@@ -18,7 +18,15 @@
                 <Image Width="20" Source="/Resources/binance.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="BinanceApiSecretKeyText" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="BinanceApiSecretKeyText" TextChanged="SecretKey_TextChanged"/>
+                <PasswordBox Grid.Column="0" x:Name="BinanceApiSecretKeyPassword" PasswordChanged="SecretKey_PasswordChanged"/>
+                <Image x:Name="BinanceEyeImage" Grid.Column="1" Width="30" Source="/Resources/eye.png" MouseLeftButtonDown="BinanceEyeImage_MouseLeftButtonDown"/>
+            </Grid>
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/upbit.png"/>
@@ -30,7 +38,15 @@
                 <Image Width="20" Source="/Resources/upbit.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="UpbitApiSecretKeyText" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="UpbitApiSecretKeyText" TextChanged="SecretKey_TextChanged"/>
+                <PasswordBox Grid.Column="0" x:Name="UpbitApiSecretKeyPassword" PasswordChanged="SecretKey_PasswordChanged"/>
+                <Image x:Name="UpbitEyeImage" Grid.Column="1" Width="30" Source="/Resources/eye.png" MouseLeftButtonDown="UpbitEyeImage_MouseLeftButtonDown"/>
+            </Grid>
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/bithumb.png"/>
@@ -42,7 +58,15 @@
                 <Image Width="20" Source="/Resources/bithumb.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="BithumbApiSecretKeyText" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="BithumbApiSecretKeyText" TextChanged="SecretKey_TextChanged"/>
+                <PasswordBox Grid.Column="0" x:Name="BithumbApiSecretKeyPassword" PasswordChanged="SecretKey_PasswordChanged"/>
+                <Image x:Name="BithumbEyeImage" Grid.Column="1" Width="30" Source="/Resources/eye.png" MouseLeftButtonDown="BithumbEyeImage_MouseLeftButtonDown"/>
+            </Grid>
         </StackPanel>
     </Grid>
 </UserControl>

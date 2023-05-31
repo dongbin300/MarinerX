@@ -51,6 +51,25 @@
             </Style.Triggers>
         </Style>
 
+        <Style TargetType="{x:Type PasswordBox}">
+            <Setter Property="PasswordChar" Value="*"/>
+            <Setter Property="Foreground" Value="#F1F1F1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="Meiryo UI" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="BorderBrush" Value="#666" />
+            <Setter Property="BorderThickness" Value="0 0 0 1" />
+            <Setter Property="CaretBrush" Value="{StaticResource Long}" />
+            <Style.Triggers>
+                <Trigger Property="TextBox.IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource Long}" />
+                </Trigger>
+                <Trigger Property="TextBox.IsMouseOver" Value="False">
+                    <Setter Property="BorderBrush" Value="#666" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <Style TargetType="{x:Type Image}">
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
             <Setter Property="RenderOptions.EdgeMode" Value="Aliased" />
