@@ -9,6 +9,13 @@ namespace Albedo.Managers
 {
     public class SettingsMan
     {
+        public static string BinanceApiKey { get; set; } = string.Empty;
+        public static string BinanceSecretKey { get; set; } = string.Empty;
+        public static string UpbitApiKey { get; set; } = string.Empty;
+        public static string UpbitSecretKey { get; set; } = string.Empty;
+        public static string BithumbApiKey { get; set; } = string.Empty;
+        public static string BithumbSecretKey { get; set; } = string.Empty;
+        public static int SimpleListCount { get; set; }
         public static int DefaultCandleCount { get; set; }
         public static IndicatorsModel Indicators { get; set; } = default!;
         public static List<string> FavoritesList { get; set; } = default!;
@@ -40,9 +47,16 @@ namespace Albedo.Managers
 
         public static void Load()
         {
+            BinanceApiKey = Settings.Default.BinanceApiKey;
+            BinanceSecretKey = Settings.Default.BinanceSecretKey;
+            UpbitApiKey = Settings.Default.UpbitApiKey;
+            UpbitSecretKey = Settings.Default.UpbitSecretKey;
+            BithumbApiKey = Settings.Default.BithumbApiKey;
+            BithumbSecretKey = Settings.Default.BithumbSecretKey;
+            SimpleListCount = Settings.Default.DefaultPairCount;
+            DefaultCandleCount = Settings.Default.DefaultCandleCount;
             Indicators = JsonConvert.DeserializeObject<IndicatorsModel>(Settings.Default.IndicatorString) ?? new IndicatorsModel();
             FavoritesList = JsonConvert.DeserializeObject<List<string>>(Settings.Default.FavoritesString) ?? new List<string>();
-            DefaultCandleCount = Settings.Default.DefaultCandleCount;
         }
 
         public static void Save()

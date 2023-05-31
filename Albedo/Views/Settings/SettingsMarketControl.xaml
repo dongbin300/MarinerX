@@ -12,37 +12,37 @@
                 <Image Width="20" Source="/Resources/binance.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY</TextBlock>
             </StackPanel>
-            <TextBox x:Name="BinanceApiKeyText" TextChanged="ApiKeyTextChanged"/>
+            <TextBox x:Name="BinanceApiKeyText" />
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/binance.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="BinanceApiSecretKeyText" TextChanged="ApiKeyTextChanged"/>
+            <TextBox x:Name="BinanceApiSecretKeyText" />
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/upbit.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (ACCESS)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="UpbitApiKeyText" TextChanged="ApiKeyTextChanged"/>
+            <TextBox x:Name="UpbitApiKeyText" />
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/upbit.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="UpbitApiSecretKeyText" TextChanged="ApiKeyTextChanged"/>
+            <TextBox x:Name="UpbitApiSecretKeyText" />
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/bithumb.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (CONNECT)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="BithumbApiKeyText" TextChanged="ApiKeyTextChanged"/>
+            <TextBox x:Name="BithumbApiKeyText" />
 
             <StackPanel Orientation="Horizontal">
                 <Image Width="20" Source="/Resources/bithumb.png"/>
                 <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
             </StackPanel>
-            <TextBox x:Name="BithumbApiSecretKeyText" TextChanged="ApiKeyTextChanged"/>
+            <TextBox x:Name="BithumbApiSecretKeyText" />
         </StackPanel>
     </Grid>
 </UserControl>

@@ -199,20 +199,16 @@ namespace Albedo.Views.Settings
                 if (defaultCandleCount >= 10 && defaultCandleCount <= 1000)
                 {
                     DefaultCandleCountErrorText.Visibility = Visibility.Hidden;
-                    Albedo.Settings.Default.DefaultCandleCount = defaultCandleCount;
                 }
                 else
                 {
                     DefaultCandleCountErrorText.Visibility = Visibility.Visible;
-                    Albedo.Settings.Default.DefaultCandleCount = Common.ChartDefaultViewCount;
                 }
             }
             else
             {
                 DefaultCandleCountErrorText.Visibility = Visibility.Visible;
-                Albedo.Settings.Default.DefaultCandleCount = Common.ChartDefaultViewCount;
             }
-            Albedo.Settings.Default.Save();
         }
     }
 }

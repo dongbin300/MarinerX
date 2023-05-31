@@ -32,20 +32,16 @@ namespace Albedo.Views.Settings
                 if (simpleListCount > 0)
                 {
                     SimpleListCountErrorText.Visibility = Visibility.Hidden;
-                    Albedo.Settings.Default.DefaultPairCount = simpleListCount;
                 }
                 else
                 {
                     SimpleListCountErrorText.Visibility = Visibility.Visible;
-                    Albedo.Settings.Default.DefaultPairCount = Common.DefaultPairCount;
                 }
             }
             else
             {
                 SimpleListCountErrorText.Visibility = Visibility.Visible;
-                Albedo.Settings.Default.DefaultPairCount = Common.DefaultPairCount;
             }
-            Albedo.Settings.Default.Save();
         }
     }
 }

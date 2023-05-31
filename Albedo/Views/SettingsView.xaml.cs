@@ -1,7 +1,10 @@
 ﻿using Albedo.Managers;
-using Albedo.Views.Settings;
 using Albedo.Models;
+using Albedo.Utils;
+using Albedo.Views.Settings;
 
+using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -97,52 +100,80 @@ namespace Albedo.Views
         /// <param name="e"></param>
         private void Window_Closed(object sender, System.EventArgs e)
         {
-            SettingsMan.Indicators.Mas.Clear();
-            SettingsMan.Indicators.Mas.Add(new MaModel(
-                chartControl.MaEnable1.IsChecked ?? false,
-                int.Parse(chartControl.MaPeriodText1.Text),
-                (MaTypeModel)chartControl.MaTypeCombo1.SelectedItem,
-                (LineColorModel)chartControl.MaLineColorCombo1.SelectedItem,
-                (LineWeightModel)chartControl.MaLineWeightCombo1.SelectedItem));
-            SettingsMan.Indicators.Mas.Add(new MaModel(
-               chartControl.MaEnable2.IsChecked ?? false,
-               int.Parse(chartControl.MaPeriodText2.Text),
-               (MaTypeModel)chartControl.MaTypeCombo2.SelectedItem,
-               (LineColorModel)chartControl.MaLineColorCombo2.SelectedItem,
-               (LineWeightModel)chartControl.MaLineWeightCombo2.SelectedItem));
-            SettingsMan.Indicators.Mas.Add(new MaModel(
-               chartControl.MaEnable3.IsChecked ?? false,
-               int.Parse(chartControl.MaPeriodText3.Text),
-               (MaTypeModel)chartControl.MaTypeCombo3.SelectedItem,
-               (LineColorModel)chartControl.MaLineColorCombo3.SelectedItem,
-               (LineWeightModel)chartControl.MaLineWeightCombo3.SelectedItem));
-            SettingsMan.Indicators.Mas.Add(new MaModel(
-               chartControl.MaEnable4.IsChecked ?? false,
-               int.Parse(chartControl.MaPeriodText4.Text),
-               (MaTypeModel)chartControl.MaTypeCombo4.SelectedItem,
-               (LineColorModel)chartControl.MaLineColorCombo4.SelectedItem,
-               (LineWeightModel)chartControl.MaLineWeightCombo4.SelectedItem));
-            SettingsMan.Indicators.Mas.Add(new MaModel(
-               chartControl.MaEnable5.IsChecked ?? false,
-               int.Parse(chartControl.MaPeriodText5.Text),
-               (MaTypeModel)chartControl.MaTypeCombo5.SelectedItem,
-               (LineColorModel)chartControl.MaLineColorCombo5.SelectedItem,
-               (LineWeightModel)chartControl.MaLineWeightCombo5.SelectedItem));
-            SettingsMan.Indicators.Bbs.Clear();
-            SettingsMan.Indicators.Bbs.Add(new BbModel(
-                chartControl.BbEnable1.IsChecked ?? false,
-                int.Parse(chartControl.BbPeriodText1.Text),
-                int.Parse(chartControl.BbDeviationText1.Text),
-                (LineColorModel)chartControl.BbSmaLineColorCombo1.SelectedItem,
-                (LineWeightModel)chartControl.BbSmaLineWeightCombo1.SelectedItem,
-                (LineColorModel)chartControl.BbUpperLineColorCombo1.SelectedItem,
-                (LineWeightModel)chartControl.BbUpperLineWeightCombo1.SelectedItem,
-                (LineColorModel)chartControl.BbLowerLineColorCombo1.SelectedItem,
-                (LineWeightModel)chartControl.BbLowerLineWeightCombo1.SelectedItem));
+            try
+            {
+                // Chart
+                SettingsMan.DefaultCandleCount = int.Parse(chartControl.DefaultCandleCountText.Text);
+                SettingsMan.Indicators.Mas.Clear();
+                SettingsMan.Indicators.Mas.Add(new MaModel(
+                    chartControl.MaEnable1.IsChecked ?? false,
+                    int.Parse(chartControl.MaPeriodText1.Text),
+                    (MaTypeModel)chartControl.MaTypeCombo1.SelectedItem,
+                    (LineColorModel)chartControl.MaLineColorCombo1.SelectedItem,
+                    (LineWeightModel)chartControl.MaLineWeightCombo1.SelectedItem));
+                SettingsMan.Indicators.Mas.Add(new MaModel(
+                   chartControl.MaEnable2.IsChecked ?? false,
+                   int.Parse(chartControl.MaPeriodText2.Text),
+                   (MaTypeModel)chartControl.MaTypeCombo2.SelectedItem,
+                   (LineColorModel)chartControl.MaLineColorCombo2.SelectedItem,
+                   (LineWeightModel)chartControl.MaLineWeightCombo2.SelectedItem));
+                SettingsMan.Indicators.Mas.Add(new MaModel(
+                   chartControl.MaEnable3.IsChecked ?? false,
+                   int.Parse(chartControl.MaPeriodText3.Text),
+                   (MaTypeModel)chartControl.MaTypeCombo3.SelectedItem,
+                   (LineColorModel)chartControl.MaLineColorCombo3.SelectedItem,
+                   (LineWeightModel)chartControl.MaLineWeightCombo3.SelectedItem));
+                SettingsMan.Indicators.Mas.Add(new MaModel(
+                   chartControl.MaEnable4.IsChecked ?? false,
+                   int.Parse(chartControl.MaPeriodText4.Text),
+                   (MaTypeModel)chartControl.MaTypeCombo4.SelectedItem,
+                   (LineColorModel)chartControl.MaLineColorCombo4.SelectedItem,
+                   (LineWeightModel)chartControl.MaLineWeightCombo4.SelectedItem));
+                SettingsMan.Indicators.Mas.Add(new MaModel(
+                   chartControl.MaEnable5.IsChecked ?? false,
+                   int.Parse(chartControl.MaPeriodText5.Text),
+                   (MaTypeModel)chartControl.MaTypeCombo5.SelectedItem,
+                   (LineColorModel)chartControl.MaLineColorCombo5.SelectedItem,
+                   (LineWeightModel)chartControl.MaLineWeightCombo5.SelectedItem));
+                SettingsMan.Indicators.Bbs.Clear();
+                SettingsMan.Indicators.Bbs.Add(new BbModel(
+                    chartControl.BbEnable1.IsChecked ?? false,
+                    int.Parse(chartControl.BbPeriodText1.Text),
+                    int.Parse(chartControl.BbDeviationText1.Text),
+                    (LineColorModel)chartControl.BbSmaLineColorCombo1.SelectedItem,
+                    (LineWeightModel)chartControl.BbSmaLineWeightCombo1.SelectedItem,
+                    (LineColorModel)chartControl.BbUpperLineColorCombo1.SelectedItem,
+                    (LineWeightModel)chartControl.BbUpperLineWeightCombo1.SelectedItem,
+                    (LineColorModel)chartControl.BbLowerLineColorCombo1.SelectedItem,
+                    (LineWeightModel)chartControl.BbLowerLineWeightCombo1.SelectedItem));
 
-            SettingsMan.Save();
+                // Market
+                SettingsMan.BinanceApiKey = marketControl.BinanceApiKeyText.Text;
+                SettingsMan.BinanceSecretKey = marketControl.BinanceApiSecretKeyText.Text;
+                SettingsMan.UpbitApiKey = marketControl.UpbitApiKeyText.Text;
+                SettingsMan.UpbitSecretKey = marketControl.UpbitApiSecretKeyText.Text;
+                SettingsMan.BithumbApiKey = marketControl.BithumbApiKeyText.Text;
+                SettingsMan.BithumbSecretKey = marketControl.BithumbApiSecretKeyText.Text;
 
-            Common.CalculateIndicators?.Invoke();
+                // Pair
+                SettingsMan.SimpleListCount = int.Parse(pairControl.SimpleListCountText.Text);
+
+                SettingsMan.Save();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(SettingsView), MethodBase.GetCurrentMethod()?.Name, "#설정값에러#" + ex.ToString());
+                MessageBox.Show("설정값 중에서 잘못된 값이 있습니다.\n다시 한번 확인해 주세요.");
+            }
+
+            try
+            {
+                Common.CalculateIndicators?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(SettingsView), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
         }
     }
 }

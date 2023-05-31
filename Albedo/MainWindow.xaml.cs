@@ -26,7 +26,7 @@ namespace Albedo
     /// 설정 UI 및 버튼 추가
     /// - 라이트/다크 모드(추후)
     /// - 화면설정
-    ///     - 인디케이터
+    ///     - 인디케이터(추후)
     ///             - 일목균형표
     ///                 - 기간[단기, 중기, 장기]
     ///                 - 구름대 표시 ON/OFF
@@ -38,6 +38,8 @@ namespace Albedo
     ///                 - 침체
     ///                 - 라인색
     ///                 - 굵기
+    ///                 
+    /// 현재 캔들 하이라이트 처리(추후)
     /// 
     /// 로깅
     /// 기능 정리 및 견적 및 사용 매뉴얼 작성
@@ -156,28 +158,25 @@ namespace Albedo
         {
             try
             {
-                if (Chart.Content is not ChartControl chartControl)
+                DispatcherService.Invoke(() =>
                 {
-                    return;
-                }
-
-                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites)
-                {
-                    if(Common.Pair.Market == PairMarket.Upbit)
+                    if (Chart.Content is not ChartControl chartControl)
                     {
-                        DispatcherService.Invoke(() =>
+                        return;
+                    }
+
+                    if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites)
+                    {
+                        if (Common.Pair.Market == PairMarket.Upbit)
                         {
                             ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
-                        });
+                        }
                     }
-                }
-                else if(Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Upbit)
-                {
-                    DispatcherService.Invoke(() =>
+                    else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Upbit)
                     {
                         ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
-                    });
-                }
+                    }
+                });
             }
             catch (Exception ex)
             {

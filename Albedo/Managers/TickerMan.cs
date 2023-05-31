@@ -276,6 +276,7 @@ namespace Albedo.Managers
                 if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
                 {
                     var pairId = $"Bithumb_Spot_{data.symbol}";
+                    var quoteAsset = BithumbSymbolMapper.GetPairQuoteAsset(data.symbol);
                     DispatcherService.Invoke(() =>
                     {
                         if (SettingsMan.FavoritesList.Contains(pairId))
@@ -283,7 +284,7 @@ namespace Albedo.Managers
                             menu.viewModel.UpdatePairInfo(new Pair(
                                 PairMarket.Bithumb,
                                 PairMarketType.Spot,
-                                Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
+                                quoteAsset,
                                 data.symbol, data.closePrice, data.chgRate));
                         }
                     });
