@@ -10,7 +10,7 @@ namespace Albedo.Models
         public int Period { get; set; }
         public MaTypeModel Type { get; set; }
         public LineColorModel LineColor { get; set; } = default!;
-        public LineWeightModel LineWeight { get; set; }
+        public LineWeightModel LineWeight { get; set; } = default!;
         [JsonIgnore]
         public List<IndicatorData> Data { get; set; } = new();
 

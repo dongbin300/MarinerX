@@ -272,6 +272,27 @@ namespace Albedo.Views
                     new IndicatorData(r.Date, 0) :
                     new IndicatorData(r.Date, (decimal)r.LowerBand.Value)).ToList();
             }
+
+            var ic = SettingsMan.Indicators.Ic;
+            if (ic.Enable)
+            {
+                var icResult = Quotes.GetIchimoku(ic.ShortPeriod, ic.MidPeriod, ic.LongPeriod);
+                ic.TenkanData = icResult.Select(r => r.TenkanSen == null ?
+                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, r.TenkanSen.Value)).ToList();
+                ic.KijunData = icResult.Select(r => r.KijunSen == null ?
+                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, r.KijunSen.Value)).ToList();
+                ic.ChikouData = icResult.Select(r => r.ChikouSpan == null ?
+                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, r.ChikouSpan.Value)).ToList();
+                ic.Senkou1Data = icResult.Select(r => r.SenkouSpanA == null ?
+                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, r.SenkouSpanA.Value)).ToList();
+                ic.Senkou2Data = icResult.Select(r => r.SenkouSpanB == null ?
+                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, r.SenkouSpanB.Value)).ToList();
+            }
         }
         #endregion
 
@@ -525,6 +546,11 @@ namespace Albedo.Views
                 // Draw Indicators
                 foreach (var ma in SettingsMan.Indicators.Mas)
                 {
+                    if (!ma.Enable)
+                    {
+                        continue;
+                    }
+
                     if (i < ma.Data.Count && i >= 1)
                     {
                         var preIndicator = ma.Data[i - 1];
@@ -546,6 +572,11 @@ namespace Albedo.Views
                 }
                 foreach (var bb in SettingsMan.Indicators.Bbs)
                 {
+                    if (!bb.Enable)
+                    {
+                        continue;
+                    }
+
                     if (i < bb.SmaData.Count && i >= 1)
                     {
                         var preIndicator = bb.SmaData[i - 1];
@@ -597,6 +628,100 @@ namespace Albedo.Views
                                     actualItemFullWidth * (viewIndex + 0.5f),
                                     actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                                 new SKPaint() { Color = bb.LowerLineColor.Color.ToSKColor(), StrokeWidth = bb.LowerLineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                }
+                var ic = SettingsMan.Indicators.Ic;
+                if (ic.Enable)
+                {
+                    if (i < ic.TenkanData.Count && i >= 1)
+                    {
+                        var preIndicator = ic.TenkanData[i - 1];
+                        var _indicator = ic.TenkanData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = ic.TenkanLineColor.Color.ToSKColor(), StrokeWidth = ic.TenkanLineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                    if (i < ic.KijunData.Count && i >= 1)
+                    {
+                        var preIndicator = ic.KijunData[i - 1];
+                        var _indicator = ic.KijunData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = ic.KijunLineColor.Color.ToSKColor(), StrokeWidth = ic.KijunLineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                    if (i < ic.ChikouData.Count && i >= 1)
+                    {
+                        var preIndicator = ic.ChikouData[i - 1];
+                        var _indicator = ic.ChikouData[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = ic.ChikouLineColor.Color.ToSKColor(), StrokeWidth = ic.ChikouLineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                    if (i < ic.Senkou1Data.Count && i >= 1)
+                    {
+                        var preIndicator = ic.Senkou1Data[i - 1];
+                        var _indicator = ic.Senkou1Data[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = ic.Senkou1LineColor.Color.ToSKColor(), StrokeWidth = ic.Senkou1LineWeight.LineWeight.ToStrokeWidth() }
+                                );
+                        }
+                    }
+                    if (i < ic.Senkou2Data.Count && i >= 1)
+                    {
+                        var preIndicator = ic.Senkou2Data[i - 1];
+                        var _indicator = ic.Senkou2Data[i];
+
+                        if (preIndicator != null && _indicator != null && preIndicator.Value != 0 && _indicator.Value != 0)
+                        {
+                            canvas.DrawLine(
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex - 0.5f),
+                                    actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPoint(
+                                    actualItemFullWidth * (viewIndex + 0.5f),
+                                    actualHeight * (float)(1.0m - (_indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                                new SKPaint() { Color = ic.Senkou2LineColor.Color.ToSKColor(), StrokeWidth = ic.Senkou2LineWeight.LineWeight.ToStrokeWidth() }
                                 );
                         }
                     }

@@ -10,8 +10,11 @@ using Binance.Net.Objects;
 using Bithumb.Net.Clients;
 using Bithumb.Net.Enums;
 
+using Skender.Stock.Indicators;
+
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -41,7 +44,6 @@ namespace Albedo
     ///                 
     /// 현재 캔들 하이라이트 처리(추후)
     /// 
-    /// 로깅
     /// 기능 정리 및 견적 및 사용 매뉴얼 작성
     /// </summary>
     public partial class MainWindow : Window

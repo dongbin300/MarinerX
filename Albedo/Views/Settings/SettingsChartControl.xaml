@@ -260,7 +260,124 @@
                     <ComboBox x:Name="BbLowerLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
                 </StackPanel>
             </Grid>
-            
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">일목균형표</TextBlock>
+                <CheckBox x:Name="IcEnable"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간(단기)</TextBlock>
+                    <TextBox x:Name="IcShortPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간(중기)</TextBlock>
+                    <TextBox x:Name="IcMidPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간(장기)</TextBlock>
+                    <TextBox x:Name="IcLongPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">구름대 표시</TextBlock>
+                    <CheckBox x:Name="IcCloudEnable"></CheckBox>
+                </StackPanel>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">전환선 라인색(단기)</TextBlock>
+                    <ComboBox x:Name="IcTenkanLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기준선 라인색(중기)</TextBlock>
+                    <ComboBox x:Name="IcKijunLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">후행스팬 라인색(중기)</TextBlock>
+                    <ComboBox x:Name="IcChikouLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬1 라인색(단기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou1LineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬2 라인색(장기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou2LineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">전환선 라인두께(단기)</TextBlock>
+                    <ComboBox x:Name="IcTenkanLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기준선 라인두께(중기)</TextBlock>
+                    <ComboBox x:Name="IcKijunLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">후행스팬 라인두께(중기)</TextBlock>
+                    <ComboBox x:Name="IcChikouLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬1 라인두께(단기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou1LineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬2 라인두께(장기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou2LineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
         </StackPanel>
     </Grid>
 </UserControl>

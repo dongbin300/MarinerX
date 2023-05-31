@@ -12,9 +12,9 @@ namespace Albedo.Models
         public LineColorModel SmaLineColor { get; set; } = default!;
         public LineColorModel UpperLineColor { get; set; } = default!;
         public LineColorModel LowerLineColor { get; set; } = default!;
-        public LineWeightModel SmaLineWeight { get; set; }
-        public LineWeightModel UpperLineWeight { get; set; }
-        public LineWeightModel LowerLineWeight { get; set; }
+        public LineWeightModel SmaLineWeight { get; set; } = default!;
+        public LineWeightModel UpperLineWeight { get; set; } = default!;
+        public LineWeightModel LowerLineWeight { get; set; } = default!;
         [JsonIgnore]
         public List<IndicatorData> SmaData { get; set; } = new();
         [JsonIgnore]

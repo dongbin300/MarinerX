@@ -145,6 +145,22 @@ namespace Albedo.Views
                     (LineWeightModel)chartControl.BbUpperLineWeightCombo1.SelectedItem,
                     (LineColorModel)chartControl.BbLowerLineColorCombo1.SelectedItem,
                     (LineWeightModel)chartControl.BbLowerLineWeightCombo1.SelectedItem));
+                SettingsMan.Indicators.Ic = new IcModel(
+                    chartControl.IcEnable.IsChecked ?? false,
+                    int.Parse(chartControl.IcShortPeriodText.Text),
+                    int.Parse(chartControl.IcMidPeriodText.Text),
+                    int.Parse(chartControl.IcLongPeriodText.Text),
+                    chartControl.IcCloudEnable.IsChecked ?? false,
+                    (LineColorModel)chartControl.IcTenkanLineColorCombo.SelectedItem,
+                    (LineColorModel)chartControl.IcKijunLineColorCombo.SelectedItem,
+                    (LineColorModel)chartControl.IcChikouLineColorCombo.SelectedItem,
+                    (LineColorModel)chartControl.IcSenkou1LineColorCombo.SelectedItem,
+                    (LineColorModel)chartControl.IcSenkou2LineColorCombo.SelectedItem,
+                    (LineWeightModel)chartControl.IcTenkanLineWeightCombo.SelectedItem,
+                    (LineWeightModel)chartControl.IcKijunLineWeightCombo.SelectedItem,
+                    (LineWeightModel)chartControl.IcChikouLineWeightCombo.SelectedItem,
+                    (LineWeightModel)chartControl.IcSenkou1LineWeightCombo.SelectedItem,
+                    (LineWeightModel)chartControl.IcSenkou2LineWeightCombo.SelectedItem);
 
                 // Market
                 SettingsMan.BinanceApiKey = marketControl.BinanceApiKeyText.Text;
