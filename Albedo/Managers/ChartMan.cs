@@ -53,7 +53,7 @@ namespace Albedo.Managers
                     quotes = quotes.Merge(CandleInterval.TenMinutes);
                 }
                 chartControl.Init(quotes);
-                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Settings.Default.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.UnsubscribeAsync(subId);
                 var klineUpdateResult = binanceSocketClient.SpotApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
@@ -124,7 +124,7 @@ namespace Albedo.Managers
                     quotes = quotes.Merge(CandleInterval.TenMinutes);
                 }
                 chartControl.Init(quotes);
-                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Settings.Default.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.UsdFuturesStreams.UnsubscribeAsync(subId);
                 var klineUpdateResult = binanceSocketClient.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
@@ -195,7 +195,7 @@ namespace Albedo.Managers
                     quotes = quotes.Merge(CandleInterval.TenMinutes);
                 }
                 chartControl.Init(quotes);
-                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Settings.Default.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
                 binanceSocketClient.CoinFuturesStreams.UnsubscribeAsync(subId);
                 var klineUpdateResult = binanceSocketClient.CoinFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
@@ -322,7 +322,7 @@ namespace Albedo.Managers
                         break;
 
                 }
-                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Settings.Default.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
                 return chartControl;
             }
@@ -360,7 +360,7 @@ namespace Albedo.Managers
                     quotes = quotes.Merge(Common.ChartInterval);
                 }
                 chartControl.Init(quotes);
-                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - Settings.Default.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
                 bithumbSocketClient.Streams.SubscribeToTransactionAsync(symbol, (obj) =>
                 {
