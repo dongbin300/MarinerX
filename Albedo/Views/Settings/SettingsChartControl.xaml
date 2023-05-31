@@ -378,6 +378,36 @@
                 </StackPanel>
             </Grid>
 
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">RSI</TextBlock>
+                <CheckBox x:Name="RsiEnable"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="RsiPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="RsiLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="RsiLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+            
         </StackPanel>
     </Grid>
 </UserControl>

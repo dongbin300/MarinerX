@@ -61,6 +61,14 @@ namespace Albedo.Managers
 
         public static void Save()
         {
+            Settings.Default.BinanceApiKey = BinanceApiKey;
+            Settings.Default.BinanceSecretKey = BinanceSecretKey;
+            Settings.Default.UpbitApiKey = UpbitApiKey;
+            Settings.Default.UpbitSecretKey = UpbitSecretKey;
+            Settings.Default.BithumbApiKey = BithumbApiKey;
+            Settings.Default.BithumbSecretKey = BithumbSecretKey;
+            Settings.Default.DefaultPairCount = SimpleListCount;
+            Settings.Default.DefaultCandleCount = DefaultCandleCount;
             Settings.Default.IndicatorString = JsonConvert.SerializeObject(Indicators);
             Settings.Default.FavoritesString = JsonConvert.SerializeObject(FavoritesList);
             Settings.Default.Save();

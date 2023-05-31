@@ -161,6 +161,11 @@ namespace Albedo.Views
                     (LineWeightModel)chartControl.IcChikouLineWeightCombo.SelectedItem,
                     (LineWeightModel)chartControl.IcSenkou1LineWeightCombo.SelectedItem,
                     (LineWeightModel)chartControl.IcSenkou2LineWeightCombo.SelectedItem);
+                SettingsMan.Indicators.Rsi = new RsiModel(
+                    chartControl.RsiEnable.IsChecked ?? false,
+                    int.Parse(chartControl.RsiPeriodText.Text),
+                    (LineColorModel)chartControl.RsiLineColorCombo.SelectedItem,
+                    (LineWeightModel)chartControl.RsiLineWeightCombo.SelectedItem);
 
                 // Market
                 SettingsMan.BinanceApiKey = marketControl.BinanceApiKeyText.Text;

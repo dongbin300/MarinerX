@@ -72,6 +72,7 @@ namespace Albedo.Test
     {
         SKFont font = new SKFont(SKTypeface.FromFamilyName("Meiryo UI"), 12);
         SKPaint paint = new SKPaint() { Color = SKColors.White };
+        SKPaint pathPaint = new SKPaint() { Style = SKPaintStyle.Fill, Color = SKColors.White };
 
         public MainWindow()
         {
@@ -83,15 +84,32 @@ namespace Albedo.Test
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Black);
 
-            var text = new List<SKColoredText>
-            {
-                new SKColoredText("TEST", SKColors.White, SKColors.Gray.WithAlpha(120)),
-                new SKColoredText("CONTENT", SKColors.Red),
-                SKColoredText.NewLine,
-                new SKColoredText("TEST", SKColors.White),
-                new SKColoredText("CONTENT", SKColors.Green),
-            };
-            canvas.DrawColoredText(text, 20, 20, font);
+            //var text = new List<SKColoredText>
+            //{
+            //    new SKColoredText("TEST", SKColors.White, SKColors.Gray.WithAlpha(120)),
+            //    new SKColoredText("CONTENT", SKColors.Red),
+            //    SKColoredText.NewLine,
+            //    new SKColoredText("TEST", SKColors.White),
+            //    new SKColoredText("CONTENT", SKColors.Green),
+            //};
+            //canvas.DrawColoredText(text, 20, 20, font);
+
+            var path = new SKPath();
+            path.MoveTo(10, 200);
+            path.LineTo(30, 150);
+            path.LineTo(50, 250);
+            path.LineTo(70, 420);
+            path.LineTo(90, 400);
+            path.LineTo(110, 360);
+
+            path.LineTo(10, 400);
+            path.LineTo(30, 420);
+            path.LineTo(50, 250);
+            path.LineTo(70, 200);
+            path.LineTo(90, 150);
+            path.LineTo(110, 130);
+
+            canvas.DrawPath(path, pathPaint);
         }
     }
 }

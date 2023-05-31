@@ -10,11 +10,8 @@ using Binance.Net.Objects;
 using Bithumb.Net.Clients;
 using Bithumb.Net.Enums;
 
-using Skender.Stock.Indicators;
-
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -28,19 +25,6 @@ namespace Albedo
     /// 
     /// 설정 UI 및 버튼 추가
     /// - 라이트/다크 모드(추후)
-    /// - 화면설정
-    ///     - 인디케이터(추후)
-    ///             - 일목균형표
-    ///                 - 기간[단기, 중기, 장기]
-    ///                 - 구름대 표시 ON/OFF
-    ///                 - 라인색[전환선(단기), 기준선(중기), 후행스팬(중기), 선행스팬1(단기,중기), 선행스팬2(장기,중기)]
-    ///                 - 굵기[전환선(단기), 기준선(중기), 후행스팬(중기), 선행스팬1(단기,중기), 선행스팬2(장기,중기)]
-    ///             - RSI
-    ///                 - 기간
-    ///                 - 과열
-    ///                 - 침체
-    ///                 - 라인색
-    ///                 - 굵기
     ///                 
     /// 현재 캔들 하이라이트 처리(추후)
     /// 

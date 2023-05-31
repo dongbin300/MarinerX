@@ -45,6 +45,7 @@ namespace Albedo.Views.Settings
             IcChikouLineColorCombo.Items.Clear();
             IcSenkou1LineColorCombo.Items.Clear();
             IcSenkou2LineColorCombo.Items.Clear();
+            RsiLineColorCombo.Items.Clear();
             foreach (var item in Common.MaLineColors)
             {
                 MaLineColorCombo1.Items.Add(item);
@@ -60,6 +61,7 @@ namespace Albedo.Views.Settings
                 IcChikouLineColorCombo.Items.Add(item);
                 IcSenkou1LineColorCombo.Items.Add(item);
                 IcSenkou2LineColorCombo.Items.Add(item);
+                RsiLineColorCombo.Items.Add(item);
             }
 
             MaLineWeightCombo1.Items.Clear();
@@ -75,6 +77,7 @@ namespace Albedo.Views.Settings
             IcChikouLineWeightCombo.Items.Clear();
             IcSenkou1LineWeightCombo.Items.Clear();
             IcSenkou2LineWeightCombo.Items.Clear();
+            RsiLineWeightCombo.Items.Clear();
             foreach (var item in Common.MaLineWeights)
             {
                 MaLineWeightCombo1.Items.Add(item);
@@ -90,6 +93,7 @@ namespace Albedo.Views.Settings
                 IcChikouLineWeightCombo.Items.Add(item);
                 IcSenkou1LineWeightCombo.Items.Add(item);
                 IcSenkou2LineWeightCombo.Items.Add(item);
+                RsiLineWeightCombo.Items.Add(item);
             }
 
             DefaultCandleCountErrorText.Visibility = Visibility.Hidden;
@@ -147,6 +151,10 @@ namespace Albedo.Views.Settings
             IcChikouLineWeightCombo.SelectedIndex = 0;
             IcSenkou1LineWeightCombo.SelectedIndex = 0;
             IcSenkou2LineWeightCombo.SelectedIndex = 0;
+
+            RsiPeriodText.Text = "14";
+            RsiLineColorCombo.SelectedIndex = 0;
+            RsiLineWeightCombo.SelectedIndex = 0;
 
             #region MA
             // 이평선 1
@@ -242,6 +250,18 @@ namespace Albedo.Views.Settings
                 IcChikouLineWeightCombo.SelectedItem = IcChikouLineWeightCombo.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(ic.ChikouLineWeight.LineWeight));
                 IcSenkou1LineWeightCombo.SelectedItem = IcSenkou1LineWeightCombo.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(ic.Senkou1LineWeight.LineWeight));
                 IcSenkou2LineWeightCombo.SelectedItem = IcSenkou2LineWeightCombo.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(ic.Senkou2LineWeight.LineWeight));
+            }
+            #endregion
+
+            #region RSI
+            // RSI
+            if(SettingsMan.Indicators.Rsi != null)
+            {
+                var rsi = SettingsMan.Indicators.Rsi;
+                RsiEnable.IsChecked = rsi.Enable;
+                RsiPeriodText.Text = rsi.Period.ToString();
+                RsiLineColorCombo.SelectedItem = RsiLineColorCombo.Items.OfType<LineColorModel>().First(x => x.LineColor.Equals(rsi.LineColor.LineColor));
+                RsiLineWeightCombo.SelectedItem = RsiLineWeightCombo.Items.OfType<LineWeightModel>().First(x => x.LineWeight.Equals(rsi.LineWeight.LineWeight));
             }
             #endregion
         }
