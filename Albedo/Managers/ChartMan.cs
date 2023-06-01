@@ -426,7 +426,7 @@ namespace Albedo.Managers
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList();
-                if (quotes.Count == 1)
+                if (quotes.Count <= 1)
                 {
                     Common.ChartAdditionalComplete = true;
                 }
@@ -459,7 +459,7 @@ namespace Albedo.Managers
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList();
-                if (quotes.Count == 1)
+                if (quotes.Count <= 1)
                 {
                     Common.ChartAdditionalComplete = true;
                 }
@@ -492,7 +492,7 @@ namespace Albedo.Managers
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList();
-                if (quotes.Count == 1)
+                if (quotes.Count <= 1)
                 {
                     Common.ChartAdditionalComplete = true;
                 }

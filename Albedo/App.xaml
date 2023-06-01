@@ -6,9 +6,9 @@
         <BooleanToVisibilityConverter x:Key="btv"/>
 
         <SolidColorBrush x:Key="ChartBackground" Color="#161A1E"/>
-        <SolidColorBrush x:Key="Background" Color="#333337"/>
-        <SolidColorBrush x:Key="SelectedBackground" Color="#49494D"/>
-        <SolidColorBrush x:Key="Separator" Color="#434346"/>
+        <SolidColorBrush x:Key="Background" Color="#24292E"/>
+        <SolidColorBrush x:Key="SelectedBackground" Color="#444D56"/>
+        <SolidColorBrush x:Key="Separator" Color="#141414"/>
         <SolidColorBrush x:Key="Long" Color="#3BCF86"/>
         <SolidColorBrush x:Key="Short" Color="#ED3161"/>
 
