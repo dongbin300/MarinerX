@@ -3,21 +3,48 @@ using Albedo.Managers;
 using Albedo.Mappers;
 using Albedo.Utils;
 
-using CryptoExchange.Net.CommonObjects;
-
 using System;
+using System.ComponentModel;
 using System.Windows.Media.Imaging;
 
 namespace Albedo.Models
 {
-    public class Pair
+    public class Pair : INotifyPropertyChanged
     {
+        #region Notify Property Changed
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion Notify Property Changed
+
         public PairMarket Market { get; set; }
         public PairMarketType MarketType { get; set; }
         public PairQuoteAsset QuoteAsset { get; set; }
         public string Symbol { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public decimal PriceChangePercent { get; set; }
+        private decimal price = 0;
+        public decimal Price
+        {
+            get => price;
+            set
+            {
+                price = value;
+                OnPropertyChanged(nameof(Price));
+                OnPropertyChanged(nameof(PriceString));
+            }
+        }
+        private decimal priceChangePercent = 0;
+        public decimal PriceChangePercent
+        {
+            get => priceChangePercent;
+            set
+            {
+                priceChangePercent = value;
+                OnPropertyChanged(nameof(PriceChangePercent));
+                OnPropertyChanged(nameof(PriceChangePercentString));
+            }
+        }
         public bool IsRendered { get; set; }
         public bool IsSelected { get; set; }
 

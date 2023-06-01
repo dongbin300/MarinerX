@@ -1,6 +1,7 @@
 ﻿using Albedo.Commands;
 using Albedo.Enums;
 using Albedo.Managers;
+using Albedo.Models;
 
 using System.ComponentModel;
 using System.Windows.Input;
@@ -19,6 +20,8 @@ namespace Albedo.ViewModels
         #endregion Notify Property Changed
 
         public BitmapImage FavoritesImage => Common.Pair.FavoritesImage;
+        public BitmapImage MarketImage => Common.Pair.MarketIcon;
+        public Pair Pair => Common.Pair;
 
         public ICommand? FavoritesImageClick { get; set; }
         public ICommand? IntervalClick { get; set; }
