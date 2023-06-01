@@ -22,5 +22,15 @@ namespace Albedo.Utils
         {
             return value.ToString("#,0.############################");
         }
+
+        public static decimal Max(decimal value1, decimal value2, decimal value3)
+        {
+            return Math.Max(value1, Math.Max(value2, value3));
+        }
+
+        public static decimal Min(decimal value1, decimal value2, decimal value3)
+        {
+            return Math.Min(value1, Math.Min(value2, value3));
+        }
     }
 }

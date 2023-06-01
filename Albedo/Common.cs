@@ -9,6 +9,8 @@ namespace Albedo
 {
     public class Common
     {
+        public static readonly decimal NullValue = -39909;
+
         public static readonly int ChartLoadLimit = 600;
         public static readonly int ChartUpbitLoadLimit = 200;
 

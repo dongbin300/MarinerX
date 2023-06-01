@@ -54,8 +54,6 @@ namespace Albedo.Views
         public Point StartMousePosition;
         public float CurrentMouseX;
 
-        private readonly decimal InvalidIndicatorValue = 0;
-
         public ChartControl()
         {
             InitializeComponent();
@@ -236,7 +234,7 @@ namespace Albedo.Views
                     case Enums.MaType.Sma:
                         ma.Data = Quotes.GetSma(period)
                             .Select(r => r.Sma == null ?
-                            new IndicatorData(r.Date, 0) :
+                            new IndicatorData(r.Date, Common.NullValue) :
                             new IndicatorData(r.Date, (decimal)r.Sma.Value))
                             .ToList();
                         break;
@@ -244,7 +242,7 @@ namespace Albedo.Views
                     case Enums.MaType.Wma:
                         ma.Data = Quotes.GetWma(period)
                            .Select(r => r.Wma == null ?
-                           new IndicatorData(r.Date, 0) :
+                           new IndicatorData(r.Date, Common.NullValue) :
                            new IndicatorData(r.Date, (decimal)r.Wma.Value))
                            .ToList();
                         break;
@@ -252,7 +250,7 @@ namespace Albedo.Views
                     case Enums.MaType.Ema:
                         ma.Data = Quotes.GetEma(period)
                            .Select(r => r.Ema == null ?
-                           new IndicatorData(r.Date, 0) :
+                           new IndicatorData(r.Date, Common.NullValue) :
                            new IndicatorData(r.Date, (decimal)r.Ema.Value))
                            .ToList();
                         break;
@@ -267,13 +265,13 @@ namespace Albedo.Views
 
                 var bbResult = Quotes.GetBollingerBands(bb.Period, bb.Deviation);
                 bb.SmaData = bbResult.Select(r => r.Sma == null ?
-                    new IndicatorData(r.Date, 0) :
+                    new IndicatorData(r.Date, Common.NullValue) :
                     new IndicatorData(r.Date, (decimal)r.Sma.Value)).ToList();
                 bb.UpperData = bbResult.Select(r => r.UpperBand == null ?
-                    new IndicatorData(r.Date, 0) :
+                    new IndicatorData(r.Date, Common.NullValue) :
                     new IndicatorData(r.Date, (decimal)r.UpperBand.Value)).ToList();
                 bb.LowerData = bbResult.Select(r => r.LowerBand == null ?
-                    new IndicatorData(r.Date, 0) :
+                    new IndicatorData(r.Date, Common.NullValue) :
                     new IndicatorData(r.Date, (decimal)r.LowerBand.Value)).ToList();
             }
 
@@ -282,19 +280,19 @@ namespace Albedo.Views
             {
                 var icResult = Quotes.GetIchimoku(ic.ShortPeriod, ic.MidPeriod, ic.LongPeriod);
                 ic.TenkanData = icResult.Select(r => r.TenkanSen == null ?
-                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, Common.NullValue) :
                 new IndicatorData(r.Date, r.TenkanSen.Value)).ToList();
                 ic.KijunData = icResult.Select(r => r.KijunSen == null ?
-                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, Common.NullValue) :
                 new IndicatorData(r.Date, r.KijunSen.Value)).ToList();
                 ic.ChikouData = icResult.Select(r => r.ChikouSpan == null ?
-                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, Common.NullValue) :
                 new IndicatorData(r.Date, r.ChikouSpan.Value)).ToList();
                 ic.Senkou1Data = icResult.Select(r => r.SenkouSpanA == null ?
-                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, Common.NullValue) :
                 new IndicatorData(r.Date, r.SenkouSpanA.Value)).ToList();
                 ic.Senkou2Data = icResult.Select(r => r.SenkouSpanB == null ?
-                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, Common.NullValue) :
                 new IndicatorData(r.Date, r.SenkouSpanB.Value)).ToList();
             }
 
@@ -303,7 +301,7 @@ namespace Albedo.Views
             {
                 var rsiResult = Quotes.GetRsi(rsi.Period);
                 rsi.Data = rsiResult.Select(r => r.Rsi == null ?
-                new IndicatorData(r.Date, 0) :
+                new IndicatorData(r.Date, Common.NullValue) :
                 new IndicatorData(r.Date, (decimal)r.Rsi.Value)).ToList();
             }
         }
@@ -439,6 +437,26 @@ namespace Albedo.Views
         #endregion
 
         #region Chart Content Render
+        private decimal GetIndicatorMax(List<IndicatorData> data)
+        {
+            var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != Common.NullValue);
+            if (values == null || !values.Any())
+            {
+                return Common.NullValue;
+            }
+            return values.Max(x => x.Value);
+        }
+
+        private decimal GetIndicatorMin(List<IndicatorData> data)
+        {
+            var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != Common.NullValue);
+            if (values == null || !values.Any())
+            {
+                return Common.NullValue;
+            }
+            return values.Min(x => x.Value);
+        }
+
         private (decimal, decimal) GetYMaxMin()
         {
             var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
@@ -447,44 +465,32 @@ namespace Albedo.Views
             decimal indicatorMin = 99999999;
             foreach (var ma in SettingsMan.Indicators.Mas)
             {
-                var values = ma.Data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
-                if (values == null || !values.Any())
-                {
-                    continue;
-                }
-                var max = values.Max(x => x.Value);
+                var max = GetIndicatorMax(ma.Data);
+                var min = GetIndicatorMin(ma.Data);
+                min = min == Common.NullValue ? 99999999 : min;
                 indicatorMax = Math.Max(indicatorMax, max);
-            }
-            foreach (var ma in SettingsMan.Indicators.Mas)
-            {
-                var values = ma.Data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
-                if (values == null || !values.Any())
-                {
-                    continue;
-                }
-                var min = values.Min(x => x.Value);
                 indicatorMin = Math.Min(indicatorMin, min);
             }
             foreach (var bb in SettingsMan.Indicators.Bbs)
             {
-                var values = bb.UpperData.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
-                if (values == null || !values.Any())
-                {
-                    continue;
-                }
-                var max = values.Max(x => x.Value);
+                var max = GetIndicatorMax(bb.UpperData);
+                var min = GetIndicatorMin(bb.LowerData);
+                min = min == Common.NullValue ? 99999999 : min;
                 indicatorMax = Math.Max(indicatorMax, max);
-            }
-            foreach (var bb in SettingsMan.Indicators.Bbs)
-            {
-                var values = bb.LowerData.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
-                if (values == null || !values.Any())
-                {
-                    continue;
-                }
-                var min = values.Min(x => x.Value);
                 indicatorMin = Math.Min(indicatorMin, min);
             }
+            {
+                var ic = SettingsMan.Indicators.Ic;
+                var max1 = GetIndicatorMax(ic.Senkou1Data);
+                var max2 = GetIndicatorMax(ic.Senkou2Data);
+                var min1 = GetIndicatorMin(ic.Senkou1Data);
+                var min2 = GetIndicatorMin(ic.Senkou2Data);
+                min1 = min1 == Common.NullValue ? 99999999 : min1;
+                min2 = min2 == Common.NullValue ? 99999999 : min2;
+                indicatorMax = NumberUtil.Max(indicatorMax, max1, max2);
+                indicatorMin = NumberUtil.Min(indicatorMin, min1, min2);
+            }
+
             var yMax = Math.Max(priceMax, indicatorMax);
             var yMin = Math.Min(priceMin, indicatorMin);
 
@@ -493,7 +499,7 @@ namespace Albedo.Views
 
         private void DrawIndicatorLine(SKCanvas canvas, IndicatorData preIndicator, IndicatorData indicator, int viewIndex, float actualItemFullWidth, float actualHeight, decimal yMax, decimal yMin, SKPaint paint)
         {
-            if (preIndicator != null && indicator != null && preIndicator.Value != InvalidIndicatorValue && indicator.Value != InvalidIndicatorValue)
+            if (preIndicator != null && indicator != null && preIndicator.Value != Common.NullValue && indicator.Value != Common.NullValue)
             {
                 canvas.DrawLine(
                     new SKPoint(
