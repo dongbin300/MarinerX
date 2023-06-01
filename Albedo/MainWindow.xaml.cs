@@ -295,6 +295,8 @@ namespace Albedo
                 // 차트 새로고침 이벤트
                 Common.ChartRefresh = () =>
                 {
+                    Common.ChartAdditionalComplete = false;
+
                     switch (Common.CurrentSelectedPairMarket.PairMarket)
                     {
                         case PairMarket.Favorites: // 즐겨찾기
@@ -340,6 +342,11 @@ namespace Albedo
                 Common.ChartAdditionalLoad = () =>
                 {
                     if (Chart.Content is not ChartControl chartControl)
+                    {
+                        return;
+                    }
+
+                    if (Common.ChartAdditionalComplete) // 모든 차트가 로드되었을 경우
                     {
                         return;
                     }

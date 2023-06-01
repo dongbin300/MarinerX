@@ -601,17 +601,28 @@ namespace Albedo.Views
                 {
                     var senkouPath = new SKPath();
                     var firstSenkou = ic.Senkou1Data[StartItemIndex];
-                    senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                    if (firstSenkou.Value != Common.NullValue)
+                    {
+                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                    }
                     for (int i = StartItemIndex; i < EndItemIndex; i++)
                     {
                         var viewIndex = i - StartItemIndex;
                         var senkou = ic.Senkou1Data[i];
+                        if (senkou.Value == Common.NullValue)
+                        {
+                            continue;
+                        }
                         senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                     }
                     for (int i = EndItemIndex - 1; i >= StartItemIndex; i--)
                     {
                         var viewIndex = i - StartItemIndex;
                         var senkou = ic.Senkou2Data[i];
+                        if (senkou.Value == Common.NullValue)
+                        {
+                            continue;
+                        }
                         senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                     }
                     canvas.DrawPath(senkouPath, new SKPaint()
@@ -687,8 +698,7 @@ namespace Albedo.Views
             try
             {
                 var pointingQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 1] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
-                var preQuote = CurrentMouseX == -1358 ? Quotes[EndItemIndex - 2] : Quotes[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth) - 1];
-                var changeText = pointingQuote.Close >= preQuote.Close ? $"+{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}" : $"{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}";
+                var changeText = pointingQuote.Close >= pointingQuote.Open ? $"+{(pointingQuote.Close - pointingQuote.Open) / pointingQuote.Open:P2}" : $"{(pointingQuote.Close - pointingQuote.Open) / pointingQuote.Open:P2}";
                 var candleInfoText = new List<SKColoredText>
             {
                 new SKColoredText($"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss}  V", DrawingTools.BaseColor, -5),

@@ -426,6 +426,10 @@ namespace Albedo.Managers
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList();
+                if (quotes.Count == 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
                 if (Common.ChartInterval == CandleInterval.TenMinutes)
                 {
                     quotes = quotes.Merge(CandleInterval.TenMinutes);
@@ -455,6 +459,10 @@ namespace Albedo.Managers
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList();
+                if (quotes.Count == 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
                 if (Common.ChartInterval == CandleInterval.TenMinutes)
                 {
                     quotes = quotes.Merge(CandleInterval.TenMinutes);
@@ -484,6 +492,10 @@ namespace Albedo.Managers
                     Close = x.ClosePrice,
                     Volume = x.Volume,
                 }).ToList();
+                if (quotes.Count == 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
                 if (Common.ChartInterval == CandleInterval.TenMinutes)
                 {
                     quotes = quotes.Merge(CandleInterval.TenMinutes);
@@ -519,6 +531,10 @@ namespace Albedo.Managers
                             Close = x.trade_price,
                             Volume = x.candle_acc_trade_volume
                         }).ToList();
+                        if (minuteQuotes.Count == 0)
+                        {
+                            Common.ChartAdditionalComplete = true;
+                        }
                         minuteQuotes.Reverse();
                         chartControl.ConcatenateQuotes(minuteQuotes);
                         break;
@@ -535,6 +551,10 @@ namespace Albedo.Managers
                             Close = x.trade_price,
                             Volume = x.candle_acc_trade_volume
                         }).ToList();
+                        if (dayQuotes.Count == 0)
+                        {
+                            Common.ChartAdditionalComplete = true;
+                        }
                         dayQuotes.Reverse();
                         chartControl.ConcatenateQuotes(dayQuotes);
                         break;
@@ -551,6 +571,10 @@ namespace Albedo.Managers
                             Close = x.trade_price,
                             Volume = x.candle_acc_trade_volume
                         }).ToList();
+                        if (weekQuotes.Count == 0)
+                        {
+                            Common.ChartAdditionalComplete = true;
+                        }
                         weekQuotes.Reverse();
                         chartControl.ConcatenateQuotes(weekQuotes);
                         break;
@@ -567,6 +591,10 @@ namespace Albedo.Managers
                             Close = x.trade_price,
                             Volume = x.candle_acc_trade_volume
                         }).ToList();
+                        if (monthQuotes.Count == 0)
+                        {
+                            Common.ChartAdditionalComplete = true;
+                        }
                         monthQuotes.Reverse();
                         chartControl.ConcatenateQuotes(monthQuotes);
                         break;

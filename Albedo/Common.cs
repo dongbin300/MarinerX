@@ -34,6 +34,8 @@ namespace Albedo
         public static Action RefreshAllTickers = default!;
         public static Action CalculateIndicators = default!;
 
+        public static bool ChartAdditionalComplete = false;
+
         public static string CurrentSettingsMenu = "P1";
 
         public static List<MaTypeModel> MaTypes = new()
