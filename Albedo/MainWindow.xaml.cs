@@ -15,6 +15,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 using Upbit.Net.Clients;
 
@@ -23,9 +24,7 @@ namespace Albedo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// 
-    /// 설정 UI 및 버튼 추가
-    /// - 라이트/다크 모드(추후)
-    ///                 
+    /// 라이트/다크 모드(추후)
     /// 현재 캔들 하이라이트 처리(추후)
     /// 
     /// 기능 정리 및 견적 및 사용 매뉴얼 작성
@@ -39,9 +38,8 @@ namespace Albedo
         BithumbSocketClient bithumbSocketClient = new(); // for ticker
         BithumbSocketClient bithumbSocketClient2 = new(); // for transaction
         UpbitClient upbitClient = new();
-        System.Timers.Timer timer = new(1000);
-        System.Timers.Timer upbitTimer = new(3000);
-        System.Timers.Timer upbitCandleTimer = new(1000);
+        DispatcherTimer upbitTimer = new();
+        DispatcherTimer upbitCandleTimer = new();
 
         public MainWindow()
         {
@@ -59,10 +57,10 @@ namespace Albedo
                 InitBinanceSocketStreams();
                 InitBithumbSocketStreams();
 
-                timer.Elapsed += Timer_Elapsed;
-                upbitTimer.Elapsed += UpbitTimer_Elapsed;
-                upbitCandleTimer.Elapsed += UpbitCandleTimer_Elapsed;
-                timer.Start();
+                upbitTimer.Interval = TimeSpan.FromSeconds(3);
+                upbitCandleTimer.Interval = TimeSpan.FromSeconds(1);
+                upbitTimer.Tick += UpbitTimer_Tick;
+                upbitCandleTimer.Tick += UpbitCandleTimer_Tick;
                 upbitTimer.Start();
                 upbitCandleTimer.Start();
             }
@@ -116,19 +114,7 @@ namespace Albedo
         #endregion
 
         #region Timer Event
-        private void Timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
-            }
-        }
-
-        private void UpbitTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        private void UpbitTimer_Tick(object? sender, EventArgs e)
         {
             try
             {
@@ -140,32 +126,29 @@ namespace Albedo
             }
         }
 
-        private void UpbitCandleTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        private void UpbitCandleTimer_Tick(object? sender, EventArgs e)
         {
             try
             {
-                DispatcherService.Invoke(() =>
+                if (Chart.Content is not ChartControl chartControl)
                 {
-                    if (Chart.Content is not ChartControl chartControl)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites)
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites)
+                {
+                    if (Common.Pair.Market == PairMarket.Upbit)
                     {
-                        if (Common.Pair.Market == PairMarket.Upbit)
-                        {
-                            ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
-                        }
+                        ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
                     }
-                    else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Upbit)
+                }
+                else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Upbit)
+                {
+                    if (Common.Pair.Market == PairMarket.Upbit)
                     {
-                        if(Common.Pair.Market == PairMarket.Upbit)
-                        {
-                            ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
-                        }
+                        ChartMan.UpdateUpbitSpotChart(upbitClient, chartControl);
                     }
-                });
+                }
             }
             catch (Exception ex)
             {

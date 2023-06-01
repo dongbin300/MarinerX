@@ -14,6 +14,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 using static Albedo.Apis.WinApi;
 
@@ -24,7 +25,7 @@ namespace Albedo.Views
     /// </summary>
     public partial class ChartControl : UserControl
     {
-        private System.Timers.Timer chartControlTimer = new System.Timers.Timer(5);
+        private DispatcherTimer chartControlTimer = new();
 
         public List<Quote> Quotes = new();
         public int TotalCount => Quotes.Count;
@@ -58,7 +59,8 @@ namespace Albedo.Views
         public ChartControl()
         {
             InitializeComponent();
-            chartControlTimer.Elapsed += ChartControlTimer_Elapsed;
+            chartControlTimer.Interval = TimeSpan.FromMilliseconds(5);
+            chartControlTimer.Tick += ChartControlTimer_Tick;
             Common.CalculateIndicators = CalculateIndicators;
         }
 
@@ -350,7 +352,7 @@ namespace Albedo.Views
             chartControlTimer.Stop();
         }
 
-        private void ChartControlTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        private void ChartControlTimer_Tick(object? sender, EventArgs e)
         {
             var currentMousePosition = GetCursorPosition();
             Vector diff = currentMousePosition - StartMousePosition;
@@ -363,29 +365,26 @@ namespace Albedo.Views
             StartMousePosition = currentMousePosition;
             var movePosition = (float)diff.X / ActualItemFullWidth * ItemFullWidth * 1.3f;
 
-            DispatcherService.Invoke(() =>
+            if (diff.X > 0) // Graph Move Left
             {
-                if (diff.X > 0) // Graph Move Left
+                if (ViewStartPosition - movePosition < 0) // Reach left-end
                 {
-                    if (ViewStartPosition - movePosition < 0) // Reach left-end
-                    {
-                        movePosition = ViewStartPosition;
-                    }
-                    ViewStartPosition -= movePosition;
-                    ViewEndPosition -= movePosition;
-                    Render();
+                    movePosition = ViewStartPosition;
                 }
-                else if (diff.X < 0) // Graph Move Right
+                ViewStartPosition -= movePosition;
+                ViewEndPosition -= movePosition;
+                Render();
+            }
+            else if (diff.X < 0) // Graph Move Right
+            {
+                if (ViewEndPosition - movePosition > ChartWidth) // Reach right-end
                 {
-                    if (ViewEndPosition - movePosition > ChartWidth) // Reach right-end
-                    {
-                        movePosition = ViewEndPosition - ChartWidth;
-                    }
-                    ViewStartPosition -= movePosition;
-                    ViewEndPosition -= movePosition;
-                    Render();
+                    movePosition = ViewEndPosition - ChartWidth;
                 }
-            });
+                ViewStartPosition -= movePosition;
+                ViewEndPosition -= movePosition;
+                Render();
+            }
         }
         #endregion
 
@@ -686,16 +685,16 @@ namespace Albedo.Views
                 var changeText = pointingQuote.Close >= preQuote.Close ? $"+{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}" : $"{(pointingQuote.Close - preQuote.Close) / preQuote.Close:P2}";
                 var candleInfoText = new List<SKColoredText>
             {
-                new SKColoredText($"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss}  \x0024 ", DrawingTools.BaseColor, -5),
+                new SKColoredText($"{pointingQuote.Date.ToLocalTime():yyyy-MM-dd HH:mm:ss}  V", DrawingTools.BaseColor, -5),
                 new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Volume), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
                 SKColoredText.NewLine,
-                new SKColoredText("\x21E4 ", DrawingTools.BaseColor),
+                new SKColoredText("O", DrawingTools.BaseColor),
                 new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Open), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                 new SKColoredText("\x2191 ", DrawingTools.BaseColor),
+                 new SKColoredText("H", DrawingTools.BaseColor),
                 new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.High), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                 new SKColoredText("\x2193 ", DrawingTools.BaseColor),
+                 new SKColoredText("L", DrawingTools.BaseColor),
                 new SKColoredText(NumberUtil.ToRoundedValueString(pointingQuote.Low), pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
-                 new SKColoredText("\x21E5 ", DrawingTools.BaseColor),
+                 new SKColoredText("C", DrawingTools.BaseColor),
                 new SKColoredText($"{NumberUtil.ToRoundedValueString(pointingQuote.Close)}({changeText})", pointingQuote.Open < pointingQuote.Close ? DrawingTools.LongColor : DrawingTools.ShortColor, -4),
             };
                 canvas.DrawColoredText(candleInfoText, 3, 10, DrawingTools.CandleInfoFont, -3);
@@ -739,7 +738,7 @@ namespace Albedo.Views
                 }
                 if (ic.Enable)
                 {
-                    indicatorInfoText.Add(new SKColoredText($"Ichimoku {ic.ShortPeriod},{ic.MidPeriod},{ic.LongPeriod}", DrawingTools.BaseColor, -5));
+                    indicatorInfoText.Add(new SKColoredText($"Ichimoku {ic.ShortPeriod},{ic.MidPeriod},{ic.LongPeriod} ", DrawingTools.BaseColor, -5));
                     if (!ic.CloudEnable)
                     {
                         var pointingIndicatorTenkan = CurrentMouseX == -1358 ? ic.TenkanData[EndItemIndex - 1] : ic.TenkanData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];

@@ -10,9 +10,6 @@ using Binance.Net.Clients;
 using Bithumb.Net.Clients;
 using Bithumb.Net.Enums;
 
-using System.Windows.Controls;
-using System.Windows.Media.Animation;
-
 using Upbit.Net.Clients;
 
 namespace Albedo.Managers
@@ -169,14 +166,11 @@ namespace Albedo.Managers
                     var pairId = $"Upbit_Spot_{coin.market}";
                     if (SettingsMan.FavoritesList.Contains(pairId))
                     {
-                        DispatcherService.Invoke(() =>
-                        {
-                            menu.viewModel.UpdatePairInfo(new Pair(
-                                    PairMarket.Upbit,
-                                    PairMarketType.Spot,
-                                    quoteAsset,
-                                    coin.market, coin.trade_price, coin.signed_change_rate * 100));
-                        });
+                        menu.viewModel.UpdatePairInfo(new Pair(
+                                PairMarket.Upbit,
+                                PairMarketType.Spot,
+                                quoteAsset,
+                                coin.market, coin.trade_price, coin.signed_change_rate * 100));
                     }
                 }
                 Common.ArrangePairs();
@@ -194,14 +188,11 @@ namespace Albedo.Managers
                 tickerResult.Wait();
                 foreach (var coin in tickerResult.Result)
                 {
-                    DispatcherService.Invoke(() =>
-                    {
-                        menu.viewModel.UpdatePairInfo(new Pair(
-                       PairMarket.Upbit,
-                       PairMarketType.Spot,
-                       Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
-                       coin.market, coin.trade_price, coin.signed_change_rate * 100));
-                    });
+                    menu.viewModel.UpdatePairInfo(new Pair(
+                   PairMarket.Upbit,
+                   PairMarketType.Spot,
+                   Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset,
+                   coin.market, coin.trade_price, coin.signed_change_rate * 100));
                 }
                 Common.ArrangePairs();
             }
