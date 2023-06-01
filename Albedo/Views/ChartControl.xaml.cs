@@ -548,6 +548,91 @@ namespace Albedo.Views
             var ic = SettingsMan.Indicators.Ic;
             var rsi = SettingsMan.Indicators.Rsi;
 
+            // Draw Ichimoku Cloud
+            if (ic.Enable)
+            {
+                if (ic.CloudEnable) // Cloud Mode
+                {
+                    var isFirstSenkou = true;
+                    var senkouPath = new SKPath();
+                    var firstSenkou = ic.Senkou1Data[StartItemIndex];
+                    if (firstSenkou.Value != Common.NullValue)
+                    {
+                        isFirstSenkou = false;
+                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                    }
+                    for (int i = StartItemIndex; i < EndItemIndex; i++)
+                    {
+                        var viewIndex = i - StartItemIndex;
+                        var senkou = ic.Senkou1Data[i];
+                        if (senkou.Value == Common.NullValue)
+                        {
+                            continue;
+                        }
+                        if (isFirstSenkou)
+                        {
+                            isFirstSenkou = false;
+                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                        }
+                        else
+                        {
+                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                        }
+
+                    }
+                    for (int i = EndItemIndex - 1; i >= StartItemIndex; i--)
+                    {
+                        var viewIndex = i - StartItemIndex;
+                        var senkou = ic.Senkou2Data[i];
+                        if (senkou.Value == Common.NullValue)
+                        {
+                            continue;
+                        }
+                        if (isFirstSenkou)
+                        {
+                            isFirstSenkou = false;
+                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                        }
+                        else
+                        {
+                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                        }
+                    }
+                    canvas.DrawPath(senkouPath, new SKPaint()
+                    {
+                        Style = SKPaintStyle.Fill,
+                        Color = ic.Senkou1LineColor.Color.ToSKColor()
+                    });
+                }
+                else // Normal Mode
+                {
+                    for (int i = StartItemIndex; i < EndItemIndex; i++)
+                    {
+                        var viewIndex = i - StartItemIndex;
+                        if (i < ic.TenkanData.Count && i >= 1)
+                        {
+                            DrawIndicatorLine(canvas, ic.TenkanData[i - 1], ic.TenkanData[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.TenkanLineColor.Color.ToSKColor(), StrokeWidth = ic.TenkanLineWeight.LineWeight.ToStrokeWidth() });
+                        }
+                        if (i < ic.KijunData.Count && i >= 1)
+                        {
+                            DrawIndicatorLine(canvas, ic.KijunData[i - 1], ic.KijunData[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.KijunLineColor.Color.ToSKColor(), StrokeWidth = ic.KijunLineWeight.LineWeight.ToStrokeWidth() });
+                        }
+                        if (i < ic.ChikouData.Count && i >= 1)
+                        {
+                            DrawIndicatorLine(canvas, ic.ChikouData[i - 1], ic.ChikouData[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.ChikouLineColor.Color.ToSKColor(), StrokeWidth = ic.ChikouLineWeight.LineWeight.ToStrokeWidth() });
+                        }
+                        if (i < ic.Senkou1Data.Count && i >= 1)
+                        {
+                            DrawIndicatorLine(canvas, ic.Senkou1Data[i - 1], ic.Senkou1Data[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.Senkou1LineColor.Color.ToSKColor(), StrokeWidth = ic.Senkou1LineWeight.LineWeight.ToStrokeWidth() });
+                        }
+                        if (i < ic.Senkou2Data.Count && i >= 1)
+                        {
+                            DrawIndicatorLine(canvas, ic.Senkou2Data[i - 1], ic.Senkou2Data[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.Senkou2LineColor.Color.ToSKColor(), StrokeWidth = ic.Senkou2LineWeight.LineWeight.ToStrokeWidth() });
+                        }
+                    }
+                }
+            }
+
             // Draw Moving Average, Bollinger Bands, RSI
             for (int i = StartItemIndex; i < EndItemIndex; i++)
             {
@@ -590,72 +675,6 @@ namespace Albedo.Views
                     if (i < rsi.Data.Count && i >= 1)
                     {
                         DrawIndicatorLine(canvas, rsi.Data[i - 1], rsi.Data[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = rsi.LineColor.Color.ToSKColor(), StrokeWidth = rsi.LineWeight.LineWeight.ToStrokeWidth() });
-                    }
-                }
-            }
-
-            // Draw Ichimoku Cloud
-            if (ic.Enable)
-            {
-                if (ic.CloudEnable) // Cloud Mode
-                {
-                    var senkouPath = new SKPath();
-                    var firstSenkou = ic.Senkou1Data[StartItemIndex];
-                    if (firstSenkou.Value != Common.NullValue)
-                    {
-                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
-                    }
-                    for (int i = StartItemIndex; i < EndItemIndex; i++)
-                    {
-                        var viewIndex = i - StartItemIndex;
-                        var senkou = ic.Senkou1Data[i];
-                        if (senkou.Value == Common.NullValue)
-                        {
-                            continue;
-                        }
-                        senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
-                    }
-                    for (int i = EndItemIndex - 1; i >= StartItemIndex; i--)
-                    {
-                        var viewIndex = i - StartItemIndex;
-                        var senkou = ic.Senkou2Data[i];
-                        if (senkou.Value == Common.NullValue)
-                        {
-                            continue;
-                        }
-                        senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
-                    }
-                    canvas.DrawPath(senkouPath, new SKPaint()
-                    {
-                        Style = SKPaintStyle.Fill,
-                        Color = ic.Senkou1LineColor.Color.ToSKColor()
-                    });
-                }
-                else // Normal Mode
-                {
-                    for (int i = StartItemIndex; i < EndItemIndex; i++)
-                    {
-                        var viewIndex = i - StartItemIndex;
-                        if (i < ic.TenkanData.Count && i >= 1)
-                        {
-                            DrawIndicatorLine(canvas, ic.TenkanData[i - 1], ic.TenkanData[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.TenkanLineColor.Color.ToSKColor(), StrokeWidth = ic.TenkanLineWeight.LineWeight.ToStrokeWidth() });
-                        }
-                        if (i < ic.KijunData.Count && i >= 1)
-                        {
-                            DrawIndicatorLine(canvas, ic.KijunData[i - 1], ic.KijunData[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.KijunLineColor.Color.ToSKColor(), StrokeWidth = ic.KijunLineWeight.LineWeight.ToStrokeWidth() });
-                        }
-                        if (i < ic.ChikouData.Count && i >= 1)
-                        {
-                            DrawIndicatorLine(canvas, ic.ChikouData[i - 1], ic.ChikouData[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.ChikouLineColor.Color.ToSKColor(), StrokeWidth = ic.ChikouLineWeight.LineWeight.ToStrokeWidth() });
-                        }
-                        if (i < ic.Senkou1Data.Count && i >= 1)
-                        {
-                            DrawIndicatorLine(canvas, ic.Senkou1Data[i - 1], ic.Senkou1Data[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.Senkou1LineColor.Color.ToSKColor(), StrokeWidth = ic.Senkou1LineWeight.LineWeight.ToStrokeWidth() });
-                        }
-                        if (i < ic.Senkou2Data.Count && i >= 1)
-                        {
-                            DrawIndicatorLine(canvas, ic.Senkou2Data[i - 1], ic.Senkou2Data[i], viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = ic.Senkou2LineColor.Color.ToSKColor(), StrokeWidth = ic.Senkou2LineWeight.LineWeight.ToStrokeWidth() });
-                        }
                     }
                 }
             }
@@ -732,7 +751,10 @@ namespace Albedo.Views
                     var pointingIndicator = CurrentMouseX == -1358 ? ma.Data[EndItemIndex - 1] : ma.Data[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
                     indicatorInfoText.Add(new SKColoredText($"{ma.Type.Type.ToString().ToUpper()} {ma.Period}", DrawingTools.BaseColor));
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), ma.LineColor.Color.ToSKColor()));
+                    if (pointingIndicator.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), ma.LineColor.Color.ToSKColor()));
+                    }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
                 foreach (var bb in SettingsMan.Indicators.Bbs)
@@ -747,9 +769,18 @@ namespace Albedo.Views
                     var pointingIndicatorLower = CurrentMouseX == -1358 ? bb.LowerData[EndItemIndex - 1] : bb.LowerData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
                     indicatorInfoText.Add(new SKColoredText($"BB {bb.Period},{bb.Deviation}", DrawingTools.BaseColor));
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorLower.Value, significantDigit).ToString(), bb.LowerLineColor.Color.ToSKColor(), -4));
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSma.Value, significantDigit).ToString(), bb.SmaLineColor.Color.ToSKColor(), -4));
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorUpper.Value, significantDigit).ToString(), bb.UpperLineColor.Color.ToSKColor(), -4));
+                    if (pointingIndicatorSma.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorLower.Value, significantDigit).ToString(), bb.LowerLineColor.Color.ToSKColor(), -4));
+                    }
+                    if (pointingIndicatorUpper.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSma.Value, significantDigit).ToString(), bb.SmaLineColor.Color.ToSKColor(), -4));
+                    }
+                    if (pointingIndicatorLower.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorUpper.Value, significantDigit).ToString(), bb.UpperLineColor.Color.ToSKColor(), -4));
+                    }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
                 if (ic.Enable)
@@ -761,15 +792,31 @@ namespace Albedo.Views
                         var pointingIndicatorKijun = CurrentMouseX == -1358 ? ic.KijunData[EndItemIndex - 1] : ic.KijunData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
                         var pointingIndicatorChikou = CurrentMouseX == -1358 ? ic.ChikouData[EndItemIndex - 1] : ic.ChikouData[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorTenkan.Value, significantDigit).ToString(), ic.TenkanLineColor.Color.ToSKColor(), -4));
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorKijun.Value, significantDigit).ToString(), ic.KijunLineColor.Color.ToSKColor(), -4));
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorChikou.Value, significantDigit).ToString(), ic.ChikouLineColor.Color.ToSKColor(), -4));
+                        if (pointingIndicatorTenkan.Value != Common.NullValue)
+                        {
+                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorTenkan.Value, significantDigit).ToString(), ic.TenkanLineColor.Color.ToSKColor(), -4));
+                        }
+                        if (pointingIndicatorKijun.Value != Common.NullValue)
+                        {
+                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorKijun.Value, significantDigit).ToString(), ic.KijunLineColor.Color.ToSKColor(), -4));
+                        }
+                        if (pointingIndicatorChikou.Value != Common.NullValue)
+                        {
+                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorChikou.Value, significantDigit).ToString(), ic.ChikouLineColor.Color.ToSKColor(), -4));
+                        }
                     }
+
                     var pointingIndicatorSenkou1 = CurrentMouseX == -1358 ? ic.Senkou1Data[EndItemIndex - 1] : ic.Senkou1Data[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
                     var pointingIndicatorSenkou2 = CurrentMouseX == -1358 ? ic.Senkou2Data[EndItemIndex - 1] : ic.Senkou2Data[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou1.Value, significantDigit).ToString(), ic.Senkou1LineColor.Color.ToSKColor(), -4));
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou2.Value, significantDigit).ToString(), ic.Senkou2LineColor.Color.ToSKColor(), -4));
+                    if (pointingIndicatorSenkou1.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou1.Value, significantDigit).ToString(), ic.Senkou1LineColor.Color.ToSKColor(), -4));
+                    }
+                    if (pointingIndicatorSenkou2.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou2.Value, significantDigit).ToString(), ic.Senkou2LineColor.Color.ToSKColor(), -4));
+                    }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
                 if (rsi.Enable)
@@ -777,7 +824,10 @@ namespace Albedo.Views
                     var pointingIndicator = CurrentMouseX == -1358 ? rsi.Data[EndItemIndex - 1] : rsi.Data[StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth)];
 
                     indicatorInfoText.Add(new SKColoredText($"RSI {rsi.Period}", DrawingTools.BaseColor));
-                    indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), rsi.LineColor.Color.ToSKColor(), -4));
+                    if (pointingIndicator.Value != Common.NullValue)
+                    {
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), rsi.LineColor.Color.ToSKColor(), -4));
+                    }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
                 canvas.DrawColoredText(indicatorInfoText, 3, 33, DrawingTools.CandleInfoFont, -3);
