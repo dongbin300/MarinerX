@@ -925,13 +925,13 @@ namespace MarinerX
             try
             {
                 var result = new List<CommasDealManager>();
-                //var symbols = LocalStorageApi.SymbolNames;
-                var symbols = new List<string> { "SOLUSDT", "MATICUSDT", "BTCDOMUSDT" };
+                var symbols = LocalStorageApi.SymbolNames;
+                //var symbols = new List<string> { "SOLUSDT", "MATICUSDT", "BTCDOMUSDT" };
                 foreach (var symbol in symbols)
                 {
                     try
                     {
-                        var interval = KlineInterval.FiveMinutes;
+                        var interval = KlineInterval.FifteenMinutes;
                         var startDate = DateTime.Parse("2023-01-01");
                         var endDate = DateTime.Parse("2023-03-07");
 
@@ -940,19 +940,16 @@ namespace MarinerX
 
                         // 차트 진행하면서 매매
                         var charts = ChartLoader.GetChartPack(symbol, interval);
-                        charts.CalculateCommasIndicators();
+                        charts.CalculateCommasIndicatorsRobHoffman();
 
-                        for (decimal i = 0.6m; i <= 1m; i += 0.05m)
+                        var dealManager = new CommasDealManager(1.5m, 100);
+                        foreach (var info in charts.Charts)
                         {
-                            var dealManager = new CommasDealManager(i, 100, 100, 10, 2.0m, 1.0m, 1.2m);
-                            foreach (var info in charts.Charts)
-                            {
-                                dealManager.Evaluate(info);
-                            }
-                            // Set latest chart for UPNL
-                            dealManager.ChartInfo = charts.Charts[^1];
-                            result.Add(dealManager);
+                            dealManager.EvaluateRobHoffman(info);
                         }
+                        // Set latest chart for UPNL
+                        dealManager.ChartInfo = charts.Charts[^1];
+                        result.Add(dealManager);
                     }
                     catch (FileNotFoundException)
                     {

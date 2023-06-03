@@ -89,20 +89,56 @@ namespace MarinerX.Charts
             Charts = newChart;
         }
 
+        public decimal GetChartElementValue(IEnumerable<double?> data, int index)
+        {
+            var value = data.ElementAt(index);
+            if (value == null)
+            {
+                return -100000;
+            }
+            else
+            {
+                return (decimal)value.Value;
+            }
+        }
+
+        public void CalculateCommasIndicatorsRobHoffman()
+        {
+            var quotes = Charts.Select(x => x.Quote);
+            var r1 = quotes.GetSma(5).Select(x => x.Sma);
+            var r2 = quotes.GetSma(50).Select(x => x.Sma);
+            var r3 = quotes.GetSma(89).Select(x => x.Sma);
+            var r4 = quotes.GetEma(18).Select(x => x.Ema);
+            var r5 = quotes.GetEma(144).Select(x => x.Ema);
+            for (int i = 0; i < Charts.Count; i++)
+            {
+                var chart = Charts[i];
+                chart.ChartElements.Clear();
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.ma, 
+                    GetChartElementValue(r1, i)));
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.ma2,
+                    GetChartElementValue(r2, i)));
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.ma3,
+                    GetChartElementValue(r3, i)));
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.ema,
+                    GetChartElementValue(r4, i)));
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.ema2,
+                    GetChartElementValue(r5, i)));
+            }
+        }
+
         public void CalculateCommasIndicators()
         {
             var quotes = Charts.Select(x => x.Quote);
-            var rsiResult = quotes.GetRsi().Select(x=>x.Rsi);
-            //var macdResult = quotes.GetMacd().Select(x=>x.Histogram);
-            for (int j = 0; j < Charts.Count; j++)
+            for (int i = 0; i < Charts.Count; i++)
             {
-                var chart = Charts[j];
+                var chart = Charts[i];
                 chart.ChartElements.Clear();
-
-                var rsi = rsiResult.ElementAt(j) == null ? -1 : (decimal)(rsiResult.ElementAt(j) ?? -1);
-                //var macd = macdResult.ElementAt(j) == null ? -100000 : (decimal)(macdResult.ElementAt(j) ?? -100000);
-                chart.ChartElements.Add(new ChartElementResult(ChartElementType.rsi, rsi));
-                //chart.ChartElements.Add(new ChartElementResult(ChartElementType.macd_hist, macd));
             }
         }
 

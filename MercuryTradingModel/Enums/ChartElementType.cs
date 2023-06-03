@@ -21,7 +21,11 @@
         rsi = 2000,
 
         ma = 3000,
+        ma2 = 3001,
+        ma3 = 3002,
         ema = 3010,
+        ema2 = 3011,
+        ema3 = 3012,
         bb = 3100, // bollinger band
         bb_sma = 3101,
         bb_upper = 3102,

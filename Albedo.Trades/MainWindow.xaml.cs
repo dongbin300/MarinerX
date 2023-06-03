@@ -3,7 +3,11 @@
 using Binance.Net.Clients;
 using Binance.Net.Objects;
 
+using MercuryTradingModel.Extensions;
+
 using System;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -16,6 +20,7 @@ namespace Albedo.Trades
     {
         BinanceClient client = default!;
         BinanceSocketClient socketClient = default!;
+        BinanceSocketClient socketClient2 = default!;
 
         void Invoke(Action action) => Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
 
@@ -26,16 +31,12 @@ namespace Albedo.Trades
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            client = new BinanceClient(new BinanceClientOptions
+            var data = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten", "binance_api.txt"));
+            client = new BinanceClient();
+            socketClient = new BinanceSocketClient();
+            socketClient2 = new BinanceSocketClient(new BinanceSocketClientOptions
             {
-                // API Key 없어도 잘 돌아감?
-                //ApiCredentials = new BinanceApiCredentials(Settings.Default.BinanceApiKey, Settings.Default.BinanceSecretKey)
-            });
-
-            socketClient = new BinanceSocketClient(new BinanceSocketClientOptions
-            {
-                // API Key 없어도 잘 돌아감?
-                //ApiCredentials = new BinanceApiCredentials(Settings.Default.BinanceApiKey, Settings.Default.BinanceSecretKey)
+                ApiCredentials = new BinanceApiCredentials(data[0], data[1])
             });
 
             var result = client.UsdFuturesApi.ExchangeData.GetExchangeInfoAsync();
@@ -54,6 +55,8 @@ namespace Albedo.Trades
             TradesDataGrid.Items.Clear();
 
             socketClient.UsdFuturesStreams.UnsubscribeAllAsync();
+            socketClient2.UsdFuturesStreams.UnsubscribeAllAsync();
+
             socketClient.UsdFuturesStreams.SubscribeToTradeUpdatesAsync(symbol, (obj) =>
             {
                 var price = obj.Data.Price;
@@ -79,6 +82,42 @@ namespace Albedo.Trades
                         trade.SetHighlight(highlightFilter);
                         TradesDataGrid.Items.Insert(0, trade);
                     }
+                });
+            });
+
+            socketClient2.UsdFuturesStreams.SubscribeToAllBookTickerUpdatesAsync((obj) =>
+            {
+            });
+            socketClient2.UsdFuturesStreams.SubscribeToBookTickerUpdatesAsync(symbol, (obj) =>
+            {
+            });
+            socketClient2.UsdFuturesStreams.SubscribeToOrderBookUpdatesAsync(symbol, 10, (obj) =>
+            {
+            });
+            socketClient2.UsdFuturesStreams.SubscribeToPartialOrderBookUpdatesAsync(symbol, 10, 250, (obj) =>
+            {
+                Invoke(() =>
+                {
+                    AskPriceText1.Text = obj.Data.Asks.ElementAt(0).Price.ToString();
+                    AskPriceText2.Text = obj.Data.Asks.ElementAt(1).Price.ToString();
+                    AskPriceText3.Text = obj.Data.Asks.ElementAt(2).Price.ToString();
+                    AskPriceText4.Text = obj.Data.Asks.ElementAt(3).Price.ToString();
+                    AskPriceText5.Text = obj.Data.Asks.ElementAt(4).Price.ToString();
+                    AskPriceText6.Text = obj.Data.Asks.ElementAt(5).Price.ToString();
+                    AskPriceText7.Text = obj.Data.Asks.ElementAt(6).Price.ToString();
+                    AskPriceText8.Text = obj.Data.Asks.ElementAt(7).Price.ToString();
+                    AskPriceText9.Text = obj.Data.Asks.ElementAt(8).Price.ToString();
+                    AskPriceText10.Text = obj.Data.Asks.ElementAt(9).Price.ToString();
+                    BidPriceText1.Text = obj.Data.Bids.ElementAt(0).Price.ToString();
+                    BidPriceText2.Text = obj.Data.Bids.ElementAt(1).Price.ToString();
+                    BidPriceText3.Text = obj.Data.Bids.ElementAt(2).Price.ToString();
+                    BidPriceText4.Text = obj.Data.Bids.ElementAt(3).Price.ToString();
+                    BidPriceText5.Text = obj.Data.Bids.ElementAt(4).Price.ToString();
+                    BidPriceText6.Text = obj.Data.Bids.ElementAt(5).Price.ToString();
+                    BidPriceText7.Text = obj.Data.Bids.ElementAt(6).Price.ToString();
+                    BidPriceText8.Text = obj.Data.Bids.ElementAt(7).Price.ToString();
+                    BidPriceText9.Text = obj.Data.Bids.ElementAt(8).Price.ToString();
+                    BidPriceText10.Text = obj.Data.Bids.ElementAt(9).Price.ToString();
                 });
             });
         }

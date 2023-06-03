@@ -21,6 +21,20 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="14" />
         </Style>
+
+        <Style TargetType="{x:Type TextBlock}" x:Key="AskPrice">
+            <Setter Property="Foreground" Value="{StaticResource Short}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <Style TargetType="{x:Type TextBlock}" x:Key="BidPrice">
+            <Setter Property="Foreground" Value="{StaticResource Long}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
         <!--#endregion-->
 
         <!--#region TextBox -->

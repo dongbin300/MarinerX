@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Albedo Trades" Height="1200" Width="400" Loaded="Window_Loaded" Background="#121212">
+        Title="Albedo Trades" Height="800" Width="400" Loaded="Window_Loaded" Background="#121212">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.5*"/>
@@ -28,6 +28,56 @@
                 <TextBlock Style="{StaticResource Description}">HIGHLIGHT FILTER+</TextBlock>
                 <TextBox x:Name="HighlightFilterTextBox">10000</TextBox>
             </StackPanel>
+
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="AskPriceText1" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="AskPriceText2" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="AskPriceText3" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="AskPriceText4" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="AskPriceText5" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="AskPriceText6" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="AskPriceText7" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="7" Grid.Column="1" x:Name="AskPriceText8" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="8" Grid.Column="1" x:Name="AskPriceText9" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="9" Grid.Column="1" x:Name="AskPriceText10" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="10" Grid.Column="1" x:Name="BidPriceText1" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="11" Grid.Column="1" x:Name="BidPriceText2" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="12" Grid.Column="1" x:Name="BidPriceText3" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="13" Grid.Column="1" x:Name="BidPriceText4" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="14" Grid.Column="1" x:Name="BidPriceText5" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="15" Grid.Column="1" x:Name="BidPriceText6" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="16" Grid.Column="1" x:Name="BidPriceText7" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="17" Grid.Column="1" x:Name="BidPriceText8" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="18" Grid.Column="1" x:Name="BidPriceText9" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="19" Grid.Column="1" x:Name="BidPriceText10" Style="{StaticResource BidPrice}"/>
+            </Grid>
         </Grid>
 
         <Grid Grid.Column="1">
