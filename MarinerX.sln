@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Albedo.Test", "Albedo.Test\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Albedo.Trades", "Albedo.Trades\Albedo.Trades.csproj", "{B727DD39-714F-4652-A449-1AC2B00CB6A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarinerXX", "MarinerXX\MarinerXX.csproj", "{26883ED7-EFCC-4DEE-BF9E-5CC5DBB1DEA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerXX", "MarinerXX\MarinerXX.csproj", "{26883ED7-EFCC-4DEE-BF9E-5CC5DBB1DEA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarinerX.Bot", "MarinerX.Bot\MarinerX.Bot.csproj", "{5B2476FF-E635-4BAD-A9C7-D68529375DDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{26883ED7-EFCC-4DEE-BF9E-5CC5DBB1DEA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26883ED7-EFCC-4DEE-BF9E-5CC5DBB1DEA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26883ED7-EFCC-4DEE-BF9E-5CC5DBB1DEA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B2476FF-E635-4BAD-A9C7-D68529375DDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B2476FF-E635-4BAD-A9C7-D68529375DDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2476FF-E635-4BAD-A9C7-D68529375DDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B2476FF-E635-4BAD-A9C7-D68529375DDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
