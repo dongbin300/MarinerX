@@ -1,4 +1,5 @@
 ﻿using MarinerX.Apis;
+using MarinerX.Utils;
 
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,8 @@ namespace MarinerX.Markets
                 if (key.Any())
                 {
                     var maxLeverage = leverageKey.Any() ? leverageKey.First().Value : 0;
-                    Benchmarks.Add(new SymbolBenchmark(marketCap.Symbol, key.First().Value, marketCap.marketCapWon, maxLeverage));
+                    var listingDate = SymbolUtil.GetStartDate(marketCap.Symbol).ToString("yyyy-MM-dd");
+                    Benchmarks.Add(new SymbolBenchmark(marketCap.Symbol, key.First().Value, marketCap.marketCapWon, maxLeverage, listingDate));
                 }
             }
             #endregion

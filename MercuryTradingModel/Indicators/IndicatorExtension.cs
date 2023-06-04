@@ -21,5 +21,46 @@ namespace MercuryTradingModel.Indicators
 
             return result;
         }
+
+        public static IEnumerable<LsmaResult> GetLsma(this IEnumerable<Quote> quotes, int period)
+        {
+            var pl = new List<double>();
+            var result = new List<LsmaResult>();
+            var quoteList = quotes.ToList();
+
+            for (int i = 0; i < quoteList.Count; i++)
+            {
+                pl.Add((double)quoteList[i].Close);
+
+                if (pl.Count >= period)
+                {
+                    double sumX = 0;
+                    double sumY = 0;
+                    double sumXY = 0;
+                    double sumXX = 0;
+                    double sumYY = 0;
+
+                    for (int a = 1; a <= pl.Count; a++)
+                    {
+                        sumX += a;
+                        sumY += pl[a - 1];
+                        sumXY += pl[a - 1] * a;
+                        sumXX += a * a;
+                        sumYY += pl[a - 1] * pl[a - 1];
+                    }
+
+                    double m = (sumXY - sumX * sumY / period) / (sumXX - sumX * sumX / period);
+                    double b = sumY / period - m * sumX / period;
+                    result.Add(new LsmaResult(quoteList[i].Date, m * period + b));
+                    pl = pl.Skip(1).ToList();
+                }
+                else
+                {
+                    result.Add(new LsmaResult(quoteList[i].Date, 0));
+                }
+            }
+
+            return result;
+        }
     }
 }

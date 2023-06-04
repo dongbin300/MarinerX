@@ -115,7 +115,7 @@ namespace MarinerX.Charts
                 var chart = Charts[i];
                 chart.ChartElements.Clear();
                 chart.ChartElements.Add(new ChartElementResult(
-                    ChartElementType.ma, 
+                    ChartElementType.ma,
                     GetChartElementValue(r1, i)));
                 chart.ChartElements.Add(new ChartElementResult(
                     ChartElementType.ma2,
@@ -129,6 +129,28 @@ namespace MarinerX.Charts
                 chart.ChartElements.Add(new ChartElementResult(
                     ChartElementType.ema2,
                     GetChartElementValue(r5, i)));
+            }
+        }
+
+        public void CalculateCommasIndicatorsEveryonesCoin()
+        {
+            var quotes = Charts.Select(x => x.Quote);
+            var r1 = quotes.GetLsma(10).Select(x => x.Lsma);
+            var r2 = quotes.GetLsma(30).Select(x => x.Lsma);
+            var r3 = quotes.GetRsi(14).Select(x => x.Rsi);
+            for (int i = 0; i < Charts.Count; i++)
+            {
+                var chart = Charts[i];
+                chart.ChartElements.Clear();
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.lsma,
+                    GetChartElementValue(r1, i)));
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.lsma2,
+                    GetChartElementValue(r2, i)));
+                chart.ChartElements.Add(new ChartElementResult(
+                    ChartElementType.rsi,
+                    GetChartElementValue(r3, i)));
             }
         }
 

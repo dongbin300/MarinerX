@@ -52,6 +52,7 @@
                 <DataGridTextColumn Header="Market Cap" Binding="{Binding MarketCapWon}" Width="2*"/>
                 <DataGridTextColumn Header="Volatility" Binding="{Binding Volatility}" Width="1*"/>
                 <DataGridTextColumn Header="Score" Binding="{Binding BenchmarkScore}" Width="1*"/>
+                <DataGridTextColumn Header="Listing Date" Binding="{Binding ListingDate}" Width="1*"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -1,4 +1,5 @@
 ﻿using MercuryTradingModel.Charts;
+using MercuryTradingModel.Enums;
 using MercuryTradingModel.Maths;
 
 using System;
@@ -69,7 +70,7 @@ namespace MarinerX.Deals
         public void Evaluate(ChartInfo info)
         {
             var roe = GetCurrentRoe(info);
-            var rsi = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.rsi);
+            var rsi = info.GetChartElementValue(ChartElementType.rsi);
 
             // 포지션이 없고 RSI<30 이면 매수
             if (!IsPositioning && rsi > 0 && rsi < 30)
@@ -81,14 +82,14 @@ namespace MarinerX.Deals
             // 포지션이 있고 추가 매수 지점에 도달하면 추가 매수
             else if (IsPositioning && IsAdditionalOpen(info))
             {
-                var price = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, LatestDeal.BuyAveragePrice, -Deviations[LatestDeal.CurrentSafetyOrderCount]);
+                var price = StockUtil.GetPriceByRoe(PositionSide.Long, LatestDeal.BuyAveragePrice, -Deviations[LatestDeal.CurrentSafetyOrderCount]);
                 var quantity = SafetyOrderVolumes[LatestDeal.CurrentSafetyOrderCount] / price;
                 AdditionalDeal(info, price, quantity);
             }
             // 포지션이 있고 목표 수익률에 도달하면 매도
             else if (IsPositioning && roe >= TargetRoe)
             {
-                CloseDeal(info);
+                CloseDeal(info, TargetRoe);
             }
         }
 
@@ -100,9 +101,9 @@ namespace MarinerX.Deals
         public void Evaluate2(ChartInfo info)
         {
             var roe = GetCurrentRoe(info);
-            var macd = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.macd_hist);
-            var ema = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ema);
-            var ema2 = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ema2);
+            var macd = info.GetChartElementValue(ChartElementType.macd_hist);
+            var ema = info.GetChartElementValue(ChartElementType.ema);
+            var ema2 = info.GetChartElementValue(ChartElementType.ema2);
 
             if(ema.Value < 0 || ema2.Value < 0)
             {
@@ -117,7 +118,7 @@ namespace MarinerX.Deals
                 OpenDeal(info, price, quantity);
                 
                 // 진입 시의 손절비
-                StopLossRoe = StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, price, ema2.Value);
+                StopLossRoe = StockUtil.Roe(PositionSide.Long, price, ema2.Value);
                 // 손절비:익절비 = 1:1.5
                 TakeProfitRoe = StopLossRoe * -SltpRatio;
             }
@@ -147,11 +148,11 @@ namespace MarinerX.Deals
             var ss = rv && q.Low < x && q.Close > x && q.Open > x; // Short Signal
             var li = sl ? y : ss ? x : (x + y) / 2;
             // RH_OS
-            var sls = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ma);
-            var fpt = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ema);
-            var t1 = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ma2);
-            var t2 = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ma3);
-            var t3 = info.GetChartElementValue(MercuryTradingModel.Enums.ChartElementType.ema2);
+            var sls = info.GetChartElementValue(ChartElementType.ma);
+            var fpt = info.GetChartElementValue(ChartElementType.ema);
+            var t1 = info.GetChartElementValue(ChartElementType.ma2);
+            var t2 = info.GetChartElementValue(ChartElementType.ma3);
+            var t3 = info.GetChartElementValue(ChartElementType.ema2);
             var roe = GetCurrentRoe(info);
 
             // 포지션이 없으면 Rob Hoffman 매매 시그널에 의해 매수
@@ -162,7 +163,7 @@ namespace MarinerX.Deals
                 var quantity = BaseOrderSize / price;
                 OpenDeal(info, price, quantity);
 
-                StopLossRoe = StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, price, fpt.Value);
+                StopLossRoe = StockUtil.Roe(PositionSide.Long, price, fpt.Value);
                 TakeProfitRoe = StopLossRoe * -SltpRatio;
             }
             // 포지션이 있고 가격이 Fast Primary Trend 밑으로 떨어지면 손절
@@ -174,6 +175,44 @@ namespace MarinerX.Deals
             else if(IsPositioning && roe >= TakeProfitRoe)
             {
                 CloseDealByTakeProfit(info);
+            }
+        }
+
+        private int everyonesCoinFlag1 = 0;
+        public void EvaluateEveryonesCoin(ChartInfo info, ChartInfo preInfo)
+        {
+            var q = info.Quote;
+            var rsi = info.GetChartElementValue(ChartElementType.rsi);
+            var preRsi = preInfo.GetChartElementValue(ChartElementType.rsi);
+            var lsma10 = info.GetChartElementValue(ChartElementType.lsma);
+            var preLsma10 = preInfo.GetChartElementValue(ChartElementType.lsma);
+            var lsma30 = info.GetChartElementValue(ChartElementType.lsma2);
+            var preLsma30 = preInfo.GetChartElementValue(ChartElementType.lsma2);
+            var roe = GetCurrentRoe(info);
+
+            everyonesCoinFlag1--;
+            // RSI 40 골든 크로스
+            if(preRsi < 40 && rsi >= 40)
+            {
+                everyonesCoinFlag1 = 3;
+            }
+
+            // 포지션이 없고 RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 매수
+            if(!IsPositioning && everyonesCoinFlag1 >= 0 && preLsma10 < preLsma30 && lsma10 > lsma30)
+            {
+                var price = (q.High + q.Low) / 2;
+                var quantity = BaseOrderSize / price;
+                OpenDeal(info, price, quantity);
+            }
+            // 포지션이 있고 목표 수익률의 절반만큼 손실일 경우 손절
+            else if(IsPositioning && roe <= TargetRoe / -2)
+            {
+                CloseDeal(info, TargetRoe / -2);
+            }
+            // 포지션이 있고 목표 수익률에 도달하면 익절
+            else if(IsPositioning && roe >= TargetRoe)
+            {
+                CloseDeal(info, TargetRoe);
             }
         }
 
@@ -218,7 +257,8 @@ namespace MarinerX.Deals
         /// 전량 정리
         /// </summary>
         /// <param name="info"></param>
-        public void CloseDeal(ChartInfo info)
+        /// <param name="roe"></param>
+        public void CloseDeal(ChartInfo info, decimal roe)
         {
             if (LatestDeal == null || LatestDeal.IsClosed)
             {
@@ -226,7 +266,7 @@ namespace MarinerX.Deals
             }
 
             LatestDeal.CloseTransaction.Time = info.DateTime;
-            LatestDeal.CloseTransaction.Price = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, LatestDeal.BuyAveragePrice, TargetRoe); // 정확히 목표ROE 가격에서 매도
+            LatestDeal.CloseTransaction.Price = StockUtil.GetPriceByRoe(PositionSide.Long, LatestDeal.BuyAveragePrice, roe); // 정확히 지정한 ROE 가격에서 매도
             LatestDeal.CloseTransaction.Quantity = LatestDeal.BuyQuantity;
         }
 
@@ -242,7 +282,7 @@ namespace MarinerX.Deals
             }
 
             LatestDeal.CloseTransaction.Time = info.DateTime;
-            LatestDeal.CloseTransaction.Price = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, LatestDeal.BuyAveragePrice, TakeProfitRoe); // 정확히 목표ROE 가격에서 매도
+            LatestDeal.CloseTransaction.Price = StockUtil.GetPriceByRoe(PositionSide.Long, LatestDeal.BuyAveragePrice, TakeProfitRoe); // 정확히 목표ROE 가격에서 매도
             LatestDeal.CloseTransaction.Quantity = LatestDeal.BuyQuantity;
         }
 
@@ -258,7 +298,7 @@ namespace MarinerX.Deals
             }
 
             LatestDeal.CloseTransaction.Time = info.DateTime;
-            LatestDeal.CloseTransaction.Price = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, LatestDeal.BuyAveragePrice, StopLossRoe); // 정확히 손절ROE 가격에서 매도
+            LatestDeal.CloseTransaction.Price = StockUtil.GetPriceByRoe(PositionSide.Long, LatestDeal.BuyAveragePrice, StopLossRoe); // 정확히 손절ROE 가격에서 매도
             LatestDeal.CloseTransaction.Quantity = LatestDeal.BuyQuantity;
         }
 
@@ -310,7 +350,7 @@ namespace MarinerX.Deals
                 return false;
             }
 
-            return StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, LatestDeal.BuyAveragePrice, info.Quote.Low) <= -Deviations[LatestDeal.CurrentSafetyOrderCount];
+            return StockUtil.Roe(PositionSide.Long, LatestDeal.BuyAveragePrice, info.Quote.Low) <= -Deviations[LatestDeal.CurrentSafetyOrderCount];
         }
     }
 }

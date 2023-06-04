@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 using System.Windows;
 
 namespace Albedo.Test
@@ -67,17 +68,6 @@ namespace Albedo.Test
         }
     }
 
-    public static class Extension
-    {
-        public static T ValueOf<T>(this IEnumerable<T> enumerable, int index)
-        {
-            if(enumerable.ElementAtOrDefault(index) == null)
-            {
-
-            }
-        }
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -90,13 +80,6 @@ namespace Albedo.Test
         public MainWindow()
         {
             InitializeComponent();
-
-            var list = new List<string>();
-            list.Add("123");
-            list.Add("123");
-            list.Add("123");
-
-            var a = list.ElementAtOrDefault(6);
         }
 
 

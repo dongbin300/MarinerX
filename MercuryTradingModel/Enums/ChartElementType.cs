@@ -26,6 +26,10 @@
         ema = 3010,
         ema2 = 3011,
         ema3 = 3012,
+        lsma = 3020,
+        lsma2 = 3021,
+        lsma3 = 3022,
+
         bb = 3100, // bollinger band
         bb_sma = 3101,
         bb_upper = 3102,

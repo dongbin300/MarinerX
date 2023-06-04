@@ -925,31 +925,36 @@ namespace MarinerX
             try
             {
                 var result = new List<CommasDealManager>();
-                var symbols = LocalStorageApi.SymbolNames;
-                //var symbols = new List<string> { "SOLUSDT", "MATICUSDT", "BTCDOMUSDT" };
+                //var symbols = LocalStorageApi.SymbolNames;
+                var symbols = new List<string> {
+                    "OCEANUSDT"
+                };
                 foreach (var symbol in symbols)
                 {
                     try
                     {
-                        var interval = KlineInterval.FifteenMinutes;
-                        var startDate = DateTime.Parse("2023-01-01");
-                        var endDate = DateTime.Parse("2023-03-07");
+                        var interval = KlineInterval.FiveMinutes;
+                        var startDate = DateTime.Parse("2023-03-01");
+                        var endDate = DateTime.Parse("2023-03-25");
 
                         // 차트 로드 및 초기화
                         ChartLoader.InitChartsByDate(symbol, interval, new Worker(new Views.Controls.TextProgressBar()), startDate, endDate);
 
                         // 차트 진행하면서 매매
                         var charts = ChartLoader.GetChartPack(symbol, interval);
-                        charts.CalculateCommasIndicatorsRobHoffman();
+                        charts.CalculateCommasIndicatorsEveryonesCoin();
 
-                        var dealManager = new CommasDealManager(1.5m, 100);
-                        foreach (var info in charts.Charts)
+                        //for (decimal r = 0.5m; r <= 2.0m; r += 0.05m)
                         {
-                            dealManager.EvaluateRobHoffman(info);
+                            var dealManager = new CommasDealManager(1.65m, 100, 0, 0, 0, 0, 0);
+                            for (int i = 1; i < charts.Charts.Count; i++)
+                            {
+                                dealManager.EvaluateEveryonesCoin(charts.Charts[i], charts.Charts[i - 1]);
+                            }
+                            // Set latest chart for UPNL
+                            dealManager.ChartInfo = charts.Charts[^1];
+                            result.Add(dealManager);
                         }
-                        // Set latest chart for UPNL
-                        dealManager.ChartInfo = charts.Charts[^1];
-                        result.Add(dealManager);
                     }
                     catch (FileNotFoundException)
                     {
@@ -957,7 +962,12 @@ namespace MarinerX
                     }
                 }
 
-                var etiPlus = result.Where(x => x.EstimatedTotalIncome > 0).ToList();
+                foreach(var d in result)
+                {
+                    var content = $"{d.ChartInfo.Symbol},{d.TargetRoe},{Math.Round(d.EstimatedTotalIncome, 2)}" + Environment.NewLine;
+                    File.AppendAllText(PathUtil.Desktop.Down("EveryonesCoin_Backtest_History.csv"), content);
+                }
+                //var etiPlus = result.Where(x => x.EstimatedTotalIncome > 0).ToList();
             }
             catch (Exception ex)
             {

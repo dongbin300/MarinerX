@@ -8,16 +8,18 @@ namespace MarinerX.Markets
         public decimal Volatility { get; set; } = decimal.Zero;
         public decimal MarketCapWon { get; set; } = decimal.Zero;
         public int MaxLeverage { get; set; } = 0;
+        public string ListingDate { get; set; } = string.Empty;
         public string MaxLeverageString => "X" + MaxLeverage;
         public double BenchmarkScore => CalculateBenchmarkScore();
         public double ForceBenchmarkScore => CalculateForceBenchmarkScore();
 
-        public SymbolBenchmark(string symbol, decimal volatility, decimal marketCapWon, int maxLeverage)
+        public SymbolBenchmark(string symbol, decimal volatility, decimal marketCapWon, int maxLeverage, string listingDate)
         {
             Symbol = symbol;
             Volatility = volatility;
             MarketCapWon = marketCapWon;
             MaxLeverage = maxLeverage;
+            ListingDate = listingDate;
         }
 
         public double CalculateBenchmarkScore()
