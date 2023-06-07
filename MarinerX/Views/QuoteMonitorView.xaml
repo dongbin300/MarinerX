@@ -40,7 +40,8 @@
             </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Symbol" Width="1*" Binding="{Binding Symbol}"/>
-                <DataGridTextColumn Header="U＆D" Width="1*" Binding="{Binding Uad}"/>
+                <DataGridTextColumn Header="RSI" Width="1*" Binding="{Binding Rsi}"/>
+                <!--<DataGridTextColumn Header="U＆D" Width="1*" Binding="{Binding Uad}"/>
                 <DataGridTemplateColumn Header="Volume" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -58,7 +59,7 @@
                             </Rectangle>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                </DataGridTemplateColumn>-->
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

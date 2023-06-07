@@ -2,13 +2,12 @@
 using System.Diagnostics;
 using System.Management;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace MarinerX.Bot.Systems
 {
     public class WindowsMonitor
     {
-        public static async Task<double> MemoryUsage()
+        public static double MemoryUsage()
         {
             try
             {
