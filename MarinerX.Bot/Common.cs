@@ -1,4 +1,6 @@
-﻿using MercuryTradingModel.Extensions;
+﻿using Binance.Net.Enums;
+
+using MercuryTradingModel.Extensions;
 
 using System;
 using System.Windows.Media;
@@ -15,5 +17,8 @@ namespace MarinerX.Bot
 
         public static readonly SolidColorBrush LongColor = new (Color.FromRgb(14, 203, 129));
         public static readonly SolidColorBrush ShortColor = new (Color.FromRgb(246, 70, 93));
+
+        public static readonly KlineInterval BaseInterval = KlineInterval.FiveMinutes;
+        public static readonly int BaseIntervalNumber = 5;
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarinerX.Bot"
         mc:Ignorable="d"
-        Title="MarinerX Bot" Height="600" Width="1024" Background="{StaticResource ChartBackground}">
+        Title="MarinerX Bot" Height="600" Width="1280" Background="{StaticResource ChartBackground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -16,11 +16,14 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Bot Settings">
                 <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
+                    <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>
                     <TextBlock Style="{StaticResource Description}">Long Bot</TextBlock>
                     <CheckBox x:Name="LongBotCheckBox" HorizontalAlignment="Right"/>
                     <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
@@ -43,7 +46,16 @@
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Grid.Column="1" Header="Positions">
+            <GroupBox Grid.Column="1" Header="History">
+                <DataGrid x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Time" Width="1*" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="Text" Width="3*" Binding="{Binding Text}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+            
+            <GroupBox Grid.Column="2" Header="Positions">
                 <DataGrid x:Name="PositionDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="" Width="1" >
@@ -55,7 +67,7 @@
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Symbol" Width="1*" Binding="{Binding Symbol}"/>
                         <DataGridTextColumn Header="Margin" Width="1*" Binding="{Binding Margin}"/>
-                        <DataGridTextColumn Header="PNL" Width="1*" Binding="{Binding Pnl}">
+                        <DataGridTextColumn Header="PNL" Width="1*" Binding="{Binding PnlString}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{Binding PnlColor}" />
@@ -66,7 +78,7 @@
                 </DataGrid>
             </GroupBox>
 
-            <GroupBox Grid.Column="2" Header="Report">
+            <GroupBox Grid.Column="3" Header="Report">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Style="{StaticResource Description}">Balance</TextBlock>
                     <TextBlock x:Name="BalanceText" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold"/>
