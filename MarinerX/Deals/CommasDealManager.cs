@@ -33,6 +33,10 @@ namespace MarinerX.Deals
         private decimal StopLossRoe;
         private decimal TakeProfitRoe;
 
+        public int WinCount { get; set; } = 0;
+        public int LoseCount { get; set; } = 0;
+        public decimal WinRate => (decimal)WinCount / (WinCount + LoseCount) * 100;
+
         public CommasDealManager(decimal targetRoe, decimal baseOrderSize, decimal safetyOrderSize, int maxSafetyOrderCount, decimal deviation, decimal stepScale, decimal volumeScale)
         {
             TargetRoe = targetRoe;
@@ -208,11 +212,13 @@ namespace MarinerX.Deals
             else if(IsPositioning && roe <= TargetRoe / -2)
             {
                 CloseDeal(info, TargetRoe / -2);
+                LoseCount++;
             }
             // 포지션이 있고 목표 수익률에 도달하면 익절
             else if(IsPositioning && roe >= TargetRoe)
             {
                 CloseDeal(info, TargetRoe);
+                WinCount++;
             }
         }
 

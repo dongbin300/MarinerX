@@ -9,7 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\symbol_detail.csv" />
+    <None Remove="Resources\symbol_detail_2023-06-08.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="chart2.ico" />
+    <Content Include="Resources\symbol_detail.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

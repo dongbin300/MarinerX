@@ -5,7 +5,6 @@ using MarinerX.Bot.Systems;
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,6 +35,8 @@ namespace MarinerX.Bot
             {
                 Directory.CreateDirectory("Logs");
             }
+
+            Common.LoadSymbolDetail();
 
             BinanceClients.Init();
 
@@ -122,7 +123,6 @@ namespace MarinerX.Bot
                 longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
                 timer.Start();
-                timer1m.Start();
 
                 Account.AddHistory("Mock Bot On");
             }
@@ -137,7 +137,6 @@ namespace MarinerX.Bot
             try
             {
                 timer.Stop();
-                timer1m.Stop();
 
                 Account.AddHistory("Mock Bot Off");
             }

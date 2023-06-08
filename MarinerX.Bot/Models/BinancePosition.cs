@@ -15,11 +15,11 @@ namespace MarinerX.Bot.Models
         public decimal EntryPrice { get; set; }
         public decimal MarkPrice { get; set; }
         public decimal Quantity { get; set; }
-        public decimal Leverage { get; set; }
+        public int Leverage { get; set; }
         public decimal Margin => Math.Round(Math.Abs(MarkPrice * Quantity / Leverage), 3);
         public decimal Roe => Math.Round(Pnl / Math.Abs(MarkPrice * Quantity / Leverage) * 100, 2);
 
-        public BinancePosition(string symbol, string positionSide, decimal pnl, decimal entryPrice, decimal markPrice, decimal quantity, decimal leverage)
+        public BinancePosition(string symbol, string positionSide, decimal pnl, decimal entryPrice, decimal markPrice, decimal quantity, int leverage)
         {
             Symbol = symbol;
             PositionSide = positionSide;

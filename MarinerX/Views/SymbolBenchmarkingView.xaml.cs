@@ -1,6 +1,8 @@
 ﻿using MarinerX.Markets;
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace MarinerX.Views
@@ -10,6 +12,8 @@ namespace MarinerX.Views
     /// </summary>
     public partial class SymbolBenchmarkingView : Window
     {
+        List<SymbolBenchmark> benchmarks = new();
+
         public SymbolBenchmarkingView()
         {
             InitializeComponent();
@@ -19,6 +23,14 @@ namespace MarinerX.Views
         {
             HistoryDataGrid.ItemsSource = null;
             HistoryDataGrid.ItemsSource = benchmarks;
+            this.benchmarks = benchmarks;
+        }
+
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var data = string.Join(Environment.NewLine, benchmarks.Select(x => x.ToCopyString()));
+            Clipboard.SetText(data);
+            MessageBox.Show("Copied.");
         }
     }
 }

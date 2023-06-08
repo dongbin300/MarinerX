@@ -45,7 +45,12 @@
     </Window.Resources>
 
     <Grid>
-        <DataGrid x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0" x:Name="CopyButton" Content="Copy Data" Click="CopyButton_Click"/>
+        <DataGrid Grid.Row="1" x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="120"/>
                 <DataGridTextColumn Header="Leverage" Binding="{Binding MaxLeverageString}" Width="1*"/>

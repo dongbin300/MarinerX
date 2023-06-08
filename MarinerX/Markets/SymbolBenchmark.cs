@@ -31,5 +31,10 @@ namespace MarinerX.Markets
         {
             return Math.Round((1_000_000 / (Math.Pow((double)MarketCapWon, 0.25) * (double)Volatility)));
         }
+
+        public string ToCopyString()
+        {
+            return $"{Symbol},{Volatility},{MarketCapWon},{MaxLeverageString},{ListingDate},{BenchmarkScore}";
+        }
     }
 }

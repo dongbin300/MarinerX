@@ -17,6 +17,8 @@ namespace MarinerX.Bot
         public static Action<string> AddHistory = default!;
 
         public static List<BinancePosition> MockPositions = new();
+        public static List<BinancePosition> LongMockPositions => MockPositions.Where(p => p.PositionSide.Equals("Long")).ToList();
+        public static List<BinancePosition> ShortMockPositions => MockPositions.Where(p => p.PositionSide.Equals("Short")).ToList();
 
         public static bool IsPositioning(string symbol, PositionSide side)
         {
