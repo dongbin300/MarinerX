@@ -16,6 +16,7 @@ namespace MarinerX.Bot.Bots
         public decimal BaseOrderSize { get; set; }
         public decimal TargetRoe { get; set; }
         public decimal Leverage { get; set; }
+        public int MaxActiveDeals { get; set; }
 
         public LongBot() : this("", "")
         {
@@ -46,7 +47,7 @@ namespace MarinerX.Bot.Bots
                         var position = Account.GetPosition(pairQuote.Symbol, PositionSide.Long);
                         if (position == null)
                         {
-                            return;
+                            continue;
                         }
                         var roe = position.Roe;
                         var quantity = position.Quantity;
@@ -66,6 +67,11 @@ namespace MarinerX.Bot.Bots
                     }
                     else // 포지션이 없으면
                     {
+                        if(Account.LongPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
+                        {
+                            continue;
+                        }
+
                         var c1 = pairQuote.Charts[^2]; // 1봉전 정보
                         var c2 = pairQuote.Charts[^3]; // 2봉전 정보
                         var c3 = pairQuote.Charts[^4]; // 3봉전 정보
@@ -73,10 +79,10 @@ namespace MarinerX.Bot.Bots
 
                         // RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 매수
                         if (c0.Lsma10 > c0.Lsma30 && c1.Lsma10 < c1.Lsma30 &&
-                            ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40) || (c3.Rsi > 40 && c4.Rsi < 40)))
+                            ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40)))
                         {
                             var price = c0.Quote.Close;
-                            var quantity = BaseOrderSize / price;
+                            var quantity = Math.Round(BaseOrderSize / price, 4);
                             await OpenBuy(pairQuote.Symbol, price, quantity).ConfigureAwait(false);
                         }
                     }
@@ -101,9 +107,10 @@ namespace MarinerX.Bot.Bots
                         var position = Account.GetMockPosition(pairQuote.Symbol, PositionSide.Long);
                         if (position == null)
                         {
-                            return;
+                            continue;
                         }
                         position.MarkPrice = pairQuote.CurrentPrice; // Mock 전용
+                        position.Pnl = (position.MarkPrice - position.EntryPrice) * position.Quantity;
                         var roe = position.Roe;
                         var quantity = position.Quantity;
 
@@ -122,6 +129,11 @@ namespace MarinerX.Bot.Bots
                     }
                     else // 포지션이 없으면
                     {
+                        if (Account.LongPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
+                        {
+                            continue;
+                        }
+
                         var c1 = pairQuote.Charts[^2]; // 1봉전 정보
                         var c2 = pairQuote.Charts[^3]; // 2봉전 정보
                         var c3 = pairQuote.Charts[^4]; // 3봉전 정보
@@ -129,10 +141,10 @@ namespace MarinerX.Bot.Bots
 
                         // RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 매수
                         if (c0.Lsma10 > c0.Lsma30 && c1.Lsma10 < c1.Lsma30 &&
-                            ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40) || (c3.Rsi > 40 && c4.Rsi < 40)))
+                            ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40)))
                         {
                             var price = c0.Quote.Close;
-                            var quantity = BaseOrderSize / price;
+                            var quantity = Math.Round(BaseOrderSize / price, 4);
                             MockOpenBuy(pairQuote.Symbol, price, quantity);
                         }
                     }
@@ -194,7 +206,7 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                Account.Positions.Add(new BinancePosition(symbol, "Long", 0, price, price, quantity, Leverage));
+                Account.MockPositions.Add(new BinancePosition(symbol, "Long", 0, price, price, quantity, Leverage));
                 Account.AddHistory($"Open Buy {symbol}, {price}, {quantity}");
             }
             catch (Exception ex)
@@ -207,8 +219,8 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                var position = Account.Positions.Find(a => a.Symbol.Equals(symbol));
-                Account.Positions.Remove(position);
+                var position = Account.MockPositions.Find(a => a.Symbol.Equals(symbol));
+                Account.MockPositions.Remove(position);
                 Account.AddHistory($"Close Sell {symbol}, {price}, {quantity}");
             }
             catch (Exception ex)

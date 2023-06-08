@@ -12,7 +12,9 @@ namespace MarinerX.Bot
     {
         public static List<PairQuote> PairQuotes = new();
         public static List<BinancePosition> Positions = new();
-        public static List<BotHistory> BotHistories = new();
+        public static List<BinancePosition> LongPositions => Positions.Where(p => p.PositionSide.Equals("Long")).ToList();
+        public static List<BinancePosition> ShortPositions => Positions.Where(p => p.PositionSide.Equals("Short")).ToList();
+        public static Action<string> AddHistory = default!;
 
         public static List<BinancePosition> MockPositions = new();
 
@@ -34,11 +36,6 @@ namespace MarinerX.Bot
         public static BinancePosition? GetMockPosition(string symbol, PositionSide side)
         {
             return MockPositions.Find(p => p.Symbol.Equals(symbol) && p.PositionSide.Equals(side.ToString()));
-        }
-
-        public static void AddHistory(string text)
-        {
-            BotHistories.Add(new BotHistory(DateTime.Now, text));
         }
     }
 }

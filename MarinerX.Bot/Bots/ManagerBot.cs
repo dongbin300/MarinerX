@@ -113,7 +113,7 @@ namespace MarinerX.Bot.Bots
                     Account.PairQuotes.Add(new PairQuote(symbol, quotes));
                 }
 
-                Account.AddHistory("Get All Klines");
+                Account.AddHistory("Get All Klines Complete");
             }
             catch (Exception ex)
             {
@@ -125,27 +125,29 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                await BinanceClients.Socket.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
+                foreach(var symbol in MonitorSymbols)
                 {
-                    foreach (var item in obj.Data.Where(item => MonitorSymbols.Contains(item.Symbol)))
+                    await BinanceClients.Socket.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, Common.BaseInterval, (obj) =>
                     {
-                        var pairQuote = Account.PairQuotes.Find(x => x.Symbol.Equals(item.Symbol));
+                        var data = obj.Data.Data;
+                        var pairQuote = Account.PairQuotes.Find(x => x.Symbol.Equals(symbol));
                         var quote = new Quote
                         {
-                            Date = item.OpenTime,
-                            Open = item.OpenPrice,
-                            High = item.HighPrice,
-                            Low = item.LowPrice,
-                            Close = item.LastPrice,
-                            Volume = item.Volume
+                            Date = data.OpenTime,
+                            Open = data.OpenPrice,
+                            High = data.HighPrice,
+                            Low = data.LowPrice,
+                            Close = data.ClosePrice,
+                            Volume = data.Volume
                         };
 
                         pairQuote?.UpdateQuote(quote);
                         pairQuote?.UpdateIndicators();
-                    }
-                }).ConfigureAwait(false);
+                    }).ConfigureAwait(false);
+                }
+                
 
-                Account.AddHistory("Start Binance Futures Ticker");
+                Account.AddHistory("Start Binance Futures Ticker Complete");
             }
             catch (Exception ex)
             {
@@ -159,7 +161,7 @@ namespace MarinerX.Bot.Bots
             {
                 await BinanceClients.Socket.UsdFuturesStreams.UnsubscribeAllAsync().ConfigureAwait(false);
 
-                Account.AddHistory("Stop Binance Futures Ticker");
+                Account.AddHistory("Stop Binance Futures Ticker Complete");
             }
             catch (Exception ex)
             {

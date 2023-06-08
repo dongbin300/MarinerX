@@ -1,5 +1,6 @@
 ﻿using MarinerX.Bot.Bots;
 using MarinerX.Bot.Clients;
+using MarinerX.Bot.Models;
 using MarinerX.Bot.Systems;
 
 using System;
@@ -29,7 +30,7 @@ namespace MarinerX.Bot
             Init();
         }
 
-        private void Init()
+        private async void Init()
         {
             if (!Directory.Exists("Logs"))
             {
@@ -38,10 +39,16 @@ namespace MarinerX.Bot
 
             BinanceClients.Init();
 
-            var kline = manager.GetAllKlines();
-            kline.Wait();
-            var ticker = manager.StartBinanceFuturesTicker();
-            ticker.Wait();
+            Account.AddHistory = (text) =>
+            {
+                DispatcherService.Invoke(() =>
+                {
+                    HistoryDataGrid.Items.Add(new BotHistory(DateTime.Now, text));
+                });
+            };
+
+            await manager.GetAllKlines().ConfigureAwait(false);
+            await manager.StartBinanceFuturesTicker().ConfigureAwait(false);
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += Timer_Tick;
@@ -69,12 +76,6 @@ namespace MarinerX.Bot
         {
             try
             {
-                // 히스토리
-                DispatcherService.Invoke(() =>
-                {
-                    HistoryDataGrid.ItemsSource = Account.BotHistories;
-                });
-
                 /* 포지션 모니터링 */
                 await manager.GetBinancePositions().ConfigureAwait(false);
                 //DispatcherService.Invoke(() =>
@@ -118,6 +119,7 @@ namespace MarinerX.Bot
                 longPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
                 longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
                 longPosition.Leverage = int.Parse(LeverageTextBox.Text);
+                longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
                 timer.Start();
                 timer1m.Start();

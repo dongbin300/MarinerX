@@ -18,7 +18,7 @@ namespace MarinerX.Bot
         public static readonly SolidColorBrush LongColor = new (Color.FromRgb(14, 203, 129));
         public static readonly SolidColorBrush ShortColor = new (Color.FromRgb(246, 70, 93));
 
-        public static readonly KlineInterval BaseInterval = KlineInterval.FiveMinutes;
-        public static readonly int BaseIntervalNumber = 5;
+        public static readonly KlineInterval BaseInterval = KlineInterval.OneMinute;
+        public static readonly int BaseIntervalNumber = 1;
     }
 }

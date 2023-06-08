@@ -62,5 +62,68 @@ namespace MercuryTradingModel.Indicators
 
             return result;
         }
+
+        public static IEnumerable<RsiResult> GetRsiV2(this IEnumerable<Quote> quotes, int period = 14)
+        {
+            var result = new List<RsiResult>();
+            var closeDelta = new List<double>();
+            var quoteList = quotes.ToList();
+
+            for (int i = 0; i < quoteList.Count; i++)
+            {
+                if (i == 0)
+                    closeDelta.Add(0);
+                else
+                    closeDelta.Add((double)(quoteList[i].Close - quoteList[i - 1].Close));
+            }
+
+            var up = new List<double>();
+            var down = new List<double>();
+
+            for (int i = 0; i < closeDelta.Count; i++)
+            {
+                if (closeDelta[i] > 0)
+                {
+                    up.Add(closeDelta[i]);
+                    down.Add(0);
+                }
+                else
+                {
+                    up.Add(0);
+                    down.Add(-1 * closeDelta[i]);
+                }
+            }
+
+            var maUp = new List<double?>();
+            var maDown = new List<double?>();
+
+            maUp = Sma(up, period);
+            maDown = Sma(down, period);
+
+            for (int i = 0; i < maUp.Count; i++)
+            {
+                if (maDown[i] != 0)
+                    result.Add(new RsiResult(quoteList[i].Date) { Rsi = 100 - (100 / (1 + (maUp[i] / maDown[i]))) });
+                else
+                    result.Add(new RsiResult(quoteList[i].Date) { Rsi = 0 });
+            }
+
+            return result;
+        }
+
+        private static List<double?> Sma(List<double> values, int periods)
+        {
+            var sma = new List<double?>();
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (i < periods - 1)
+                    sma.Add(null);
+                else
+                    sma.Add(values.GetRange(i - periods + 1, periods).Average());
+            }
+
+            return sma;
+        }
     }
 }
