@@ -12,24 +12,24 @@ using System.Threading.Tasks;
 
 namespace MarinerX.Bot.Bots
 {
-    public class LongBot : Bot
+    public class ShortBot : Bot
     {
         public decimal BaseOrderSize { get; set; }
         public decimal TargetRoe { get; set; }
         public int Leverage { get; set; }
         public int MaxActiveDeals { get; set; }
 
-        public LongBot() : this("", "")
+        public ShortBot() : this("", "")
         {
 
         }
 
-        public LongBot(string name) : this(name, "")
+        public ShortBot(string name) : this(name, "")
         {
 
         }
 
-        public LongBot(string name, string description)
+        public ShortBot(string name, string description)
         {
             Name = name;
             Description = description;
@@ -41,7 +41,7 @@ namespace MarinerX.Bot.Bots
             {
                 foreach (var pairQuote in Account.PairQuotes)
                 {
-                    if(!Account.IsPositioning(pairQuote.Symbol, PositionSide.Long)) // 포지션이 없으면
+                    if (!Account.IsPositioning(pairQuote.Symbol, PositionSide.Long)) // 포지션이 없으면
                     {
                         if (Account.LongPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
                         {
@@ -54,13 +54,13 @@ namespace MarinerX.Bot.Bots
                         var c3 = pairQuote.Charts[^4]; // 3봉전 정보
                         var c4 = pairQuote.Charts[^5]; // 4봉전 정보
 
-                        // 기법 :: RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 매수
-                        if (c0.Lsma10 > c0.Lsma30 && c1.Lsma10 < c1.Lsma30 &&
-                            ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40)))
+                        // 기법 :: RSI 60라인을 데드 크로스 이후, 3봉 이내에 LSMA 10이 30을 데드 크로스하면 진입
+                        if (c0.Lsma10 < c0.Lsma30 && c1.Lsma10 > c1.Lsma30 &&
+                            ((c0.Rsi < 60 && c1.Rsi > 60) || (c1.Rsi < 60 && c2.Rsi > 60) || (c2.Rsi < 60 && c3.Rsi > 60)))
                         {
                             var price = c0.Quote.Close;
                             var quantity = Math.Round(BaseOrderSize / price, 4);
-                            await OpenBuy(pairQuote.Symbol, price, quantity).ConfigureAwait(false);
+                            await OpenSell(pairQuote.Symbol, price, quantity).ConfigureAwait(false);
                             var takeProfitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, TargetRoe);
                             await SetTakeProfit(pairQuote.Symbol, takeProfitPrice, quantity).ConfigureAwait(false);
                             var stoplossPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, TargetRoe / -2);
@@ -71,7 +71,7 @@ namespace MarinerX.Bot.Bots
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
@@ -133,10 +133,14 @@ namespace MarinerX.Bot.Bots
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
+        /// <summary>
+        /// 아직은 사용하지 않음
+        /// </summary>
+        /// <returns></returns>
         public async Task MonitorOpenOrderTimeout()
         {
             try
@@ -153,44 +157,64 @@ namespace MarinerX.Bot.Bots
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
-        public async Task OpenBuy(string symbol, decimal price, decimal quantity)
+        public async Task OpenSell(string symbol, decimal price, decimal quantity)
         {
             try
             {
                 await BinanceClients.Api.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, Leverage); // 레버리지 설정
-                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, 0.25m).ToValidPrice(symbol); // +0 ~ +0.25%
+                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, -0.25m).ToValidPrice(symbol); // -0 ~ -0.25%
+                var _quantity = quantity.ToValidQuantity(symbol);
                 var result = await BinanceClients.Api.UsdFuturesApi.Trading.PlaceOrderAsync(
-                    symbol, OrderSide.Buy, FuturesOrderType.Limit, 
-                    quantity.ToValidQuantity(symbol),
-                    limitPrice, 
-                    PositionSide.Long, TimeInForce.GoodTillCanceled)
+                    symbol, OrderSide.Sell, FuturesOrderType.Limit,
+                    _quantity,
+                    limitPrice,
+                    PositionSide.Short, TimeInForce.GoodTillCanceled)
                     .ConfigureAwait(false);
+
+                if (result.Success)
+                {
+                    Account.AddHistory($"Open Sell {symbol}, {price}, {_quantity}");
+                }
+                else
+                {
+                    Account.AddHistory($"Open Sell Error: {result.Error?.Message}");
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
-        public async Task CloseSell(string symbol, decimal price, decimal quantity)
+        public async Task CloseBuy(string symbol, decimal price, decimal quantity)
         {
             try
             {
-                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, -1m).ToValidPrice(symbol); // -0 ~ -1%
-                await BinanceClients.Api.UsdFuturesApi.Trading.PlaceOrderAsync(
-                    symbol, OrderSide.Sell, FuturesOrderType.Limit,
-                    quantity.ToValidQuantity(symbol),
+                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var _quantity = quantity.ToValidQuantity(symbol);
+                var result = await BinanceClients.Api.UsdFuturesApi.Trading.PlaceOrderAsync(
+                    symbol, OrderSide.Buy, FuturesOrderType.Limit,
+                    _quantity,
                     limitPrice,
-                    PositionSide.Long, TimeInForce.GoodTillCanceled)
+                    PositionSide.Short, TimeInForce.GoodTillCanceled)
                     .ConfigureAwait(false);
+
+                if (result.Success)
+                {
+                    Account.AddHistory($"Close Buy {symbol}, {price}, {_quantity}");
+                }
+                else
+                {
+                    Account.AddHistory($"Close Buy Error: {result.Error?.Message}");
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
@@ -199,16 +223,26 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var takePrice = price.ToValidPrice(symbol);
-                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, -1m).ToValidPrice(symbol); // -0 ~ -1%
+                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var _quantity = quantity.ToValidQuantity(symbol);
                 var result = await BinanceClients.Api.UsdFuturesApi.Trading.PlaceOrderAsync(
-                    symbol, OrderSide.Sell, FuturesOrderType.TakeProfit,
-                    quantity.ToValidQuantity(symbol),
-                    limitPrice, PositionSide.Long, null, null, null, takePrice)
+                    symbol, OrderSide.Buy, FuturesOrderType.TakeProfit,
+                    _quantity,
+                    limitPrice, PositionSide.Short, null, null, null, takePrice)
                     .ConfigureAwait(false);
+
+                if (result.Success)
+                {
+                    Account.AddHistory($"Set Take Profit {symbol}, {price}, {_quantity}");
+                }
+                else
+                {
+                    Account.AddHistory($"Set Take Profit Error: {result.Error?.Message}");
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
@@ -217,16 +251,26 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var stopPrice = price.ToValidPrice(symbol);
-                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, -1m).ToValidPrice(symbol); // -0 ~ -1%
+                var limitPrice = StockUtil.GetPriceByRoe(MercuryTradingModel.Enums.PositionSide.Long, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var _quantity = quantity.ToValidQuantity(symbol);
                 var result = await BinanceClients.Api.UsdFuturesApi.Trading.PlaceOrderAsync(
-                    symbol, OrderSide.Sell, FuturesOrderType.Stop,
-                    quantity.ToValidQuantity(symbol),
-                    limitPrice, PositionSide.Long, null, null, null, stopPrice)
+                    symbol, OrderSide.Buy, FuturesOrderType.Stop,
+                    _quantity,
+                    limitPrice, PositionSide.Short, null, null, null, stopPrice)
                     .ConfigureAwait(false);
+
+                if (result.Success)
+                {
+                    Account.AddHistory($"Set Stop Loss {symbol}, {price}, {_quantity}");
+                }
+                else
+                {
+                    Account.AddHistory($"Set Stop Loss Error: {result.Error?.Message}");
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
@@ -239,7 +283,7 @@ namespace MarinerX.Bot.Bots
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
 
@@ -253,7 +297,7 @@ namespace MarinerX.Bot.Bots
             }
             catch (Exception ex)
             {
-                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
     }
