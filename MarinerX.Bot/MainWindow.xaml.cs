@@ -45,7 +45,7 @@ namespace MarinerX.Bot
             BinanceClients.Init();
 
             // 봇 히스토리 추가
-            Account.AddHistory = (text) =>
+            Common.AddHistory = (text) =>
             {
                 DispatcherService.Invoke(() =>
                 {
@@ -88,7 +88,7 @@ namespace MarinerX.Bot
                 await manager.GetBinancePositions().ConfigureAwait(false);
                 DispatcherService.Invoke(() =>
                 {
-                    PositionDataGrid.ItemsSource = Account.Positions;
+                    PositionDataGrid.ItemsSource = Common.Positions;
                 });
 
                 /* 자산 모니터링 */
@@ -103,17 +103,20 @@ namespace MarinerX.Bot
                 var todayRealizedPnlHistory = await manager.GetBinanceTodayRealizedPnlHistory();
                 DispatcherService.Invoke(() =>
                 {
-                    TodayPnlText.ToolTip = new TextBlock() { Text = string.Join(Environment.NewLine, todayRealizedPnlHistory.Select(x => x.ToString())), Foreground = new SolidColorBrush(Colors.Black) };
-                    var todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
-                    if (todayPnl >= 0)
+                    if (todayRealizedPnlHistory != null && todayRealizedPnlHistory.Count(x => x == null) == 0)
                     {
-                        TodayPnlText.Foreground = Common.LongColor;
-                        TodayPnlText.Text = $"+{todayPnl} USDT";
-                    }
-                    else
-                    {
-                        TodayPnlText.Foreground = Common.ShortColor;
-                        TodayPnlText.Text = $"{todayPnl} USDT";
+                        TodayPnlText.ToolTip = new TextBlock() { Text = string.Join(Environment.NewLine, todayRealizedPnlHistory.Select(x => x.ToString())), Foreground = new SolidColorBrush(Colors.Black) };
+                        var todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
+                        if (todayPnl >= 0)
+                        {
+                            TodayPnlText.Foreground = Common.LongColor;
+                            TodayPnlText.Text = $"+{todayPnl} USDT";
+                        }
+                        else
+                        {
+                            TodayPnlText.Foreground = Common.ShortColor;
+                            TodayPnlText.Text = $"{todayPnl} USDT";
+                        }
                     }
                 });
 
@@ -137,7 +140,7 @@ namespace MarinerX.Bot
 
                 timer.Start();
 
-                Account.AddHistory("Mock Bot On");
+                Common.AddHistory("Mock Bot On");
             }
             catch (Exception ex)
             {
@@ -151,7 +154,7 @@ namespace MarinerX.Bot
             {
                 timer.Stop();
 
-                Account.AddHistory("Mock Bot Off");
+                Common.AddHistory("Mock Bot Off");
             }
             catch (Exception ex)
             {
@@ -180,7 +183,7 @@ namespace MarinerX.Bot
 
                 timer.Start();
 
-                Account.AddHistory("Short Bot On");
+                Common.AddHistory("Short Bot On");
             }
             catch (Exception ex)
             {
@@ -194,7 +197,7 @@ namespace MarinerX.Bot
             {
                 timer.Stop();
 
-                Account.AddHistory("Short Bot Off");
+                Common.AddHistory("Short Bot Off");
             }
             catch (Exception ex)
             {

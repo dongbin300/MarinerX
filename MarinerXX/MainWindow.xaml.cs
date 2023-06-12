@@ -1,19 +1,14 @@
-﻿using MarinerXX.Apis;
+﻿using CryptoModel;
+using CryptoModel.Backtests;
+using CryptoModel.Charts;
+
+using MarinerXX.Views;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MarinerXX
 {
@@ -22,19 +17,81 @@ namespace MarinerXX
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<SimpleDealManager> dealResult = new ();
+
         public MainWindow()
         {
             InitializeComponent();
+        }
 
-            var symbols = LocalStorageApi.SymbolNames;
-            foreach (var symbol in symbols)
+        private void BacktestButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
             {
-                var quotes = LocalStorageApi.GetQuotes(symbol, DateTime.Parse("2022-01-01"));
+                var symbols = SymbolTextBox.Text.Split(';');
 
-                if(quotes != null)
+                BacktestProgress.Value = 0;
+                BacktestProgress.Maximum = symbols.Length;
+                foreach (var symbol in symbols)
                 {
+                    try
+                    {
+                        BacktestProgress.Value++;
+                        var interval = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m").ToKlineInterval();
+                        var startDate = StartDateTextBox.Text.ToDateTime() > CryptoSymbol.GetStartDate(symbol).AddDays(1) ? StartDateTextBox.Text.ToDateTime() : CryptoSymbol.GetStartDate(symbol).AddDays(1);
+                        var endDate = EndDateTextBox.Text.ToDateTime();
 
+                        // 차트 로드 및 초기화
+                        ChartLoader.InitChartsByDate(symbol, interval, startDate, endDate);
+
+                        // 차트 진행하면서 매매
+                        var charts = ChartLoader.GetChartPack(symbol, interval);
+
+                        CustomStrategy(charts);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        continue;
+                    }
                 }
+
+                foreach (var d in dealResult)
+                {
+                    var content = $"{d.ChartInfo.Symbol},{d.TargetRoe},{d.TotalIncome}" + Environment.NewLine;
+                    File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBox.Text}.csv"), content);
+
+                    if(dealResult.Count == 1)
+                    {
+                        var resultView = new BacktestResultView();
+                        resultView.Init(symbols[0], d);
+                        resultView.Show();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CustomStrategy(ChartPack charts)
+        {
+            // Calculate Indicators
+            charts.CalculateIndicatorsEveryonesCoin();
+
+            // Multiple Target ROE
+            //for (decimal r = 1.0m; r <= 2.0m; r += 0.05m)
+            {
+                var dealManager = new SimpleDealManager(100, 1.75m);
+                for (int i = 1; i < charts.Charts.Count; i++)
+                {
+                    // Evaluate Strategy
+                    dealManager.EvaluateEveryonesCoinShort(charts.Charts[i], charts.Charts[i - 1]);
+                }
+
+                // Set latest chart for UPNL
+                dealManager.ChartInfo = charts.Charts[^1];
+                dealResult.Add(dealManager);
             }
         }
     }

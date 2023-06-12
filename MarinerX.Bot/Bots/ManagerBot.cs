@@ -59,7 +59,7 @@ namespace MarinerX.Bot.Bots
             {
                 var result = await BinanceClients.Api.UsdFuturesApi.Account.GetPositionInformationAsync().ConfigureAwait(false);
                 var positions = result.Data.Where(r => r.Quantity != 0);
-                Account.Positions = positions.Select(p => new BinancePosition(
+                Common.Positions = positions.Select(p => new BinancePosition(
                     p.Symbol,
                     p.PositionSide.ToString(),
                     p.UnrealizedPnl,
@@ -110,10 +110,10 @@ namespace MarinerX.Bot.Bots
                         Volume = x.Volume
                     });
 
-                    Account.PairQuotes.Add(new PairQuote(symbol, quotes));
+                    Common.PairQuotes.Add(new PairQuote(symbol, quotes));
                 }
 
-                Account.AddHistory("Get All Klines Complete");
+                Common.AddHistory("Get All Klines Complete");
             }
             catch (Exception ex)
             {
@@ -130,7 +130,7 @@ namespace MarinerX.Bot.Bots
                     await BinanceClients.Socket.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, Common.BaseInterval, (obj) =>
                     {
                         var data = obj.Data.Data;
-                        var pairQuote = Account.PairQuotes.Find(x => x.Symbol.Equals(symbol));
+                        var pairQuote = Common.PairQuotes.Find(x => x.Symbol.Equals(symbol));
                         var quote = new Quote
                         {
                             Date = data.OpenTime,
@@ -145,9 +145,9 @@ namespace MarinerX.Bot.Bots
                         pairQuote?.UpdateIndicators();
                     }).ConfigureAwait(false);
                 }
-                
 
-                Account.AddHistory("Start Binance Futures Ticker Complete");
+
+                Common.AddHistory("Start Binance Futures Ticker Complete");
             }
             catch (Exception ex)
             {
@@ -161,7 +161,7 @@ namespace MarinerX.Bot.Bots
             {
                 await BinanceClients.Socket.UsdFuturesStreams.UnsubscribeAllAsync().ConfigureAwait(false);
 
-                Account.AddHistory("Stop Binance Futures Ticker Complete");
+                Common.AddHistory("Stop Binance Futures Ticker Complete");
             }
             catch (Exception ex)
             {

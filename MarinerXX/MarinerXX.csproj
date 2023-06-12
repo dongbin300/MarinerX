@@ -5,14 +5,19 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>chart2.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="chart2.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Extensions\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+    <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
   </ItemGroup>
 
 </Project>

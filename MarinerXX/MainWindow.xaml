@@ -5,8 +5,55 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarinerXX"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Mariner XX" Height="500" Width="300" Background="{StaticResource Background}">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="3"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="BySymbolText" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">By Symbol</TextBlock>
+            <Rectangle x:Name="BySymbolRectangle" Grid.Row="1" Grid.Column="0" Fill="{StaticResource Long}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Row="0">
+                <TextBlock Style="{StaticResource Description}">Symbol</TextBlock>
+                <TextBox x:Name="SymbolTextBox" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper"/>
+                <TextBlock Style="{StaticResource Description}">Start Date</TextBlock>
+                <TextBox x:Name="StartDateTextBox" Text="2021-01-01"/>
+                <TextBlock Style="{StaticResource Description}">End Date</TextBlock>
+                <TextBox x:Name="EndDateTextBox" Text="2023-01-01"/>
+                <TextBlock Style="{StaticResource Description}">Interval</TextBlock>
+                <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
+                    <ComboBoxItem>1m</ComboBoxItem>
+                    <ComboBoxItem>3m</ComboBoxItem>
+                    <ComboBoxItem>5m</ComboBoxItem>
+                    <ComboBoxItem>15m</ComboBoxItem>
+                    <ComboBoxItem>30m</ComboBoxItem>
+                    <ComboBoxItem>1H</ComboBoxItem>
+                    <ComboBoxItem>1D</ComboBoxItem>
+                </ComboBox>
+                <TextBlock Style="{StaticResource Description}">File Name</TextBlock>
+                <TextBox x:Name="FileNameTextBox" Text="Test1"/>
+            </StackPanel>
+
+            <ProgressBar Grid.Row="1" x:Name="BacktestProgress" Margin="5 0" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
+            <Button Grid.Row="2" x:Name="BacktestButton" Content="Backtest" Click="BacktestButton_Click"/>
+        </Grid>
     </Grid>
 </Window>

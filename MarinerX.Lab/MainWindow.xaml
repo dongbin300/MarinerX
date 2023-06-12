@@ -8,9 +8,9 @@
         Title="Mariner X Lab." Height="450" Width="800">
     <Grid>
         <UniformGrid Columns="4" Rows="4">
-            <Button x:Name="Lab1Button" Click="Lab1Button_Click">1번 연구</Button>
+            <!--<Button x:Name="Lab1Button" Click="Lab1Button_Click">1번 연구</Button>
             <Button x:Name="Lab2Button" Click="Lab2Button_Click">2번 연구</Button>
-            <Button x:Name="Lab3Button" Click="Lab3Button_Click">3번 연구</Button>
+            <Button x:Name="Lab3Button" Click="Lab3Button_Click">3번 연구</Button>-->
         </UniformGrid>
     </Grid>
 </Window>
