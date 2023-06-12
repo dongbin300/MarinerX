@@ -1,6 +1,7 @@
 ﻿using Binance.Net.Enums;
 
 using CryptoModel.Charts;
+using CryptoModel.Scripts;
 
 namespace CryptoModel.Backtests
 {
@@ -26,13 +27,21 @@ namespace CryptoModel.Backtests
         public int LoseCount { get; set; } = 0;
         public decimal WinRate => (decimal)WinCount / (WinCount + LoseCount) * 100;
 
-        public SimpleDealManager(decimal baseOrderSize, decimal? targetRoe = null, decimal? sltpRatio = null)
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int BacktestDays => (int)(EndDate - StartDate).TotalDays;
+        public decimal IncomePerDay => TotalIncome / BacktestDays;
+
+        public SimpleDealManager(DateTime startDate, DateTime endDate, decimal baseOrderSize, decimal? targetRoe = null, decimal? sltpRatio = null)
         {
             BaseOrderSize = baseOrderSize;
             TargetRoe = targetRoe;
             SltpRatio = sltpRatio;
+            StartDate = startDate;
+            EndDate = endDate;
         }
 
+        #region Everyones Coin
         private int everyonesCoinFlag1 = 0;
         public void EvaluateEveryonesCoinLong(ChartInfo info, ChartInfo preInfo)
         {
@@ -48,6 +57,7 @@ namespace CryptoModel.Backtests
             var preLsma10 = preInfo.Lsma1;
             var lsma30 = info.Lsma2;
             var preLsma30 = preInfo.Lsma2;
+            var side = PositionSide.Long;
             (var minRoe, var maxRoe) = GetCurrentRoe(info);
 
             everyonesCoinFlag1--;
@@ -62,18 +72,18 @@ namespace CryptoModel.Backtests
             {
                 var price = q.Open;
                 var quantity = BaseOrderSize / price;
-                OpenDeal(info, price, quantity, PositionSide.Long);
+                OpenDeal(info, price, quantity, side);
             }
             // 포지션이 있고 목표 수익률의 절반만큼 손실일 경우 손절
             else if (IsPositioning && minRoe <= TargetRoe / -2)
             {
-                CloseDeal(info, TargetRoe.Value / -2);
+                CloseDeal(info, TargetRoe.Value / -2, side);
                 LoseCount++;
             }
             // 포지션이 있고 목표 수익률에 도달하면 익절
             else if (IsPositioning && maxRoe >= TargetRoe)
             {
-                CloseDeal(info, TargetRoe.Value);
+                CloseDeal(info, TargetRoe.Value, side);
                 WinCount++;
             }
         }
@@ -92,6 +102,7 @@ namespace CryptoModel.Backtests
             var preLsma10 = preInfo.Lsma1;
             var lsma30 = info.Lsma2;
             var preLsma30 = preInfo.Lsma2;
+            var side = PositionSide.Short;
             (var minRoe, var maxRoe) = GetCurrentRoe(info);
 
             everyonesCoinFlag1--;
@@ -106,21 +117,59 @@ namespace CryptoModel.Backtests
             {
                 var price = q.Open;
                 var quantity = BaseOrderSize / price;
-                OpenDeal(info, price, quantity, PositionSide.Short);
+                OpenDeal(info, price, quantity, side);
             }
             // 포지션이 있고 목표 수익률의 절반만큼 손실일 경우 손절
             else if (IsPositioning && minRoe <= TargetRoe / -2)
             {
-                CloseDeal(info, TargetRoe.Value / -2);
+                CloseDeal(info, TargetRoe.Value / -2, side);
                 LoseCount++;
             }
             // 포지션이 있고 목표 수익률에 도달하면 익절
             else if (IsPositioning && maxRoe >= TargetRoe)
             {
-                CloseDeal(info, TargetRoe.Value);
+                CloseDeal(info, TargetRoe.Value, side);
                 WinCount++;
             }
         }
+        #endregion
+
+        #region Stefano
+
+        public void EvaluateStefanoLong(ChartInfo info, ChartInfo preInfo)
+        {
+            var q = info.Quote;
+
+            
+
+            var ema12 = info.Ema1;
+            var ema26 = info.Ema2;
+            var preEma12 = preInfo.Ema2;
+            var preEma26 = preInfo.Ema2;
+            var side = PositionSide.Long;
+            (var minRoe, var maxRoe) = GetCurrentRoe(info);
+
+            // 포지션이 없고 EMA 12가 26을 골든 크로스하면 진입
+            if (!IsPositioning && preEma12 < preEma26 && ema12 > ema26)
+            {
+                var price = q.Open;
+                var quantity = BaseOrderSize / price;
+                OpenDeal(info, price, quantity, side);
+            }
+            // 포지션이 있고 목표 수익률의 절반만큼 손실일 경우 손절
+            else if (IsPositioning && minRoe <= TargetRoe / -2)
+            {
+                CloseDeal(info, TargetRoe.Value / -2, side);
+                LoseCount++;
+            }
+            // 포지션이 있고 목표 수익률에 도달하면 익절
+            else if (IsPositioning && maxRoe >= TargetRoe)
+            {
+                CloseDeal(info, TargetRoe.Value, side);
+                WinCount++;
+            }
+        }
+        #endregion
 
         /// <summary>
         /// 포지션 진입
@@ -148,7 +197,7 @@ namespace CryptoModel.Backtests
         /// </summary>
         /// <param name="info"></param>
         /// <param name="roe"></param>
-        public void CloseDeal(ChartInfo info, decimal roe)
+        public void CloseDeal(ChartInfo info, decimal roe, PositionSide side)
         {
             if (LatestDeal == null || LatestDeal.IsClosed)
             {
@@ -156,7 +205,7 @@ namespace CryptoModel.Backtests
             }
 
             LatestDeal.CloseTransaction.Time = info.DateTime;
-            LatestDeal.CloseTransaction.Price = Calculator.TargetPrice(Binance.Net.Enums.PositionSide.Long, LatestDeal.OpenTransaction.Price, roe); // 정확히 지정한 ROE 가격에서 매도
+            LatestDeal.CloseTransaction.Price = Calculator.TargetPrice(side, LatestDeal.OpenTransaction.Price, roe); // 정확히 지정한 ROE 가격에서 매도
             LatestDeal.CloseTransaction.Quantity = LatestDeal.OpenTransaction.Quantity;
         }
 
@@ -164,7 +213,7 @@ namespace CryptoModel.Backtests
         /// 전량 익절
         /// </summary>
         /// <param name="info"></param>
-        public void CloseDealByTakeProfit(ChartInfo info)
+        public void CloseDealByTakeProfit(ChartInfo info, PositionSide side)
         {
             if (LatestDeal == null || LatestDeal.IsClosed)
             {
@@ -172,7 +221,7 @@ namespace CryptoModel.Backtests
             }
 
             LatestDeal.CloseTransaction.Time = info.DateTime;
-            LatestDeal.CloseTransaction.Price = Calculator.TargetPrice(Binance.Net.Enums.PositionSide.Long, LatestDeal.OpenTransaction.Price, TakeProfitRoe); // 정확히 목표ROE 가격에서 매도
+            LatestDeal.CloseTransaction.Price = Calculator.TargetPrice(side, LatestDeal.OpenTransaction.Price, TakeProfitRoe); // 정확히 목표ROE 가격에서 매도
             LatestDeal.CloseTransaction.Quantity = LatestDeal.OpenTransaction.Quantity;
         }
 
@@ -180,7 +229,7 @@ namespace CryptoModel.Backtests
         /// 전량 손절
         /// </summary>
         /// <param name="info"></param>
-        public void CloseDealByStopLoss(ChartInfo info)
+        public void CloseDealByStopLoss(ChartInfo info, PositionSide side)
         {
             if (LatestDeal == null || LatestDeal.IsClosed)
             {
@@ -188,7 +237,7 @@ namespace CryptoModel.Backtests
             }
 
             LatestDeal.CloseTransaction.Time = info.DateTime;
-            LatestDeal.CloseTransaction.Price = Calculator.TargetPrice(Binance.Net.Enums.PositionSide.Long, LatestDeal.OpenTransaction.Price, StopLossRoe); // 정확히 손절ROE 가격에서 매도
+            LatestDeal.CloseTransaction.Price = Calculator.TargetPrice(side, LatestDeal.OpenTransaction.Price, StopLossRoe); // 정확히 손절ROE 가격에서 매도
             LatestDeal.CloseTransaction.Quantity = LatestDeal.OpenTransaction.Quantity;
         }
 

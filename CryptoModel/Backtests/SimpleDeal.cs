@@ -11,9 +11,9 @@ namespace CryptoModel.Backtests
         public PositionSide Side { get; set; }
         public bool IsClosed => CloseTransaction.Time >= new DateTime(2000, 1, 1);
         public TimeSpan TakenTime => CloseTransaction.Time - OpenTransaction.Time;
-        public decimal Income => (CloseTransaction.Price - OpenTransaction.Price) * CloseTransaction.Quantity - Fee;
+        public decimal Income => Calculator.Pnl(Side, OpenTransaction.Price, CloseTransaction.Price, CloseTransaction.Quantity) - Fee;
         public decimal Roe => Calculator.Roe(Side, OpenTransaction.Price, CloseTransaction.Price);
-        public decimal Fee => (OpenTransaction.Price * OpenTransaction.Quantity + CloseTransaction.Price * CloseTransaction.Quantity) * CustomFee;
+        public decimal Fee => Calculator.Fee(OpenTransaction.Price, OpenTransaction.Quantity, CloseTransaction.Price, CloseTransaction.Quantity, CustomFee);
         public readonly decimal CustomFee = 0.0005m; // 0.05%
 
         public override string ToString()

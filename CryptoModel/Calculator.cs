@@ -58,5 +58,20 @@ namespace CryptoModel
                 _ => 0
             };
         }
+
+        /// <summary>
+        /// Calculate Fee
+        /// Fee: 0.04% => feeRate 0.0004
+        /// </summary>
+        /// <param name="entryPrice"></param>
+        /// <param name="entryQuantity"></param>
+        /// <param name="exitPrice"></param>
+        /// <param name="exitQuantity"></param>
+        /// <param name="feeRate"></param>
+        /// <returns></returns>
+        public static decimal Fee(decimal entryPrice, decimal entryQuantity, decimal exitPrice, decimal exitQuantity, decimal feeRate)
+        {
+            return (entryPrice * entryQuantity + exitPrice * exitQuantity) * feeRate;
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace CryptoModel.Charts
         public double Lsma2 { get; set; }
         public double Lsma3 { get; set; }
         public double Rsi { get; set; }
+        public double JmaSlope { get; set; }
 
         public ChartInfo(string symbol, Quote quote)
         {

@@ -33,11 +33,11 @@
             </Grid.RowDefinitions>
             <StackPanel Orientation="Vertical" Grid.Row="0">
                 <TextBlock Style="{StaticResource Description}">Symbol</TextBlock>
-                <TextBox x:Name="SymbolTextBox" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper"/>
+                <TextBox x:Name="SymbolTextBox" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper" />
                 <TextBlock Style="{StaticResource Description}">Start Date</TextBlock>
-                <TextBox x:Name="StartDateTextBox" Text="2021-01-01"/>
+                <TextBox x:Name="StartDateTextBox" Text="2022-01-01"/>
                 <TextBlock Style="{StaticResource Description}">End Date</TextBlock>
-                <TextBox x:Name="EndDateTextBox" Text="2023-01-01"/>
+                <TextBox x:Name="EndDateTextBox" Text="2023-06-07"/>
                 <TextBlock Style="{StaticResource Description}">Interval</TextBlock>
                 <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
                     <ComboBoxItem>1m</ComboBoxItem>
