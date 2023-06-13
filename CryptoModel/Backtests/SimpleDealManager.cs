@@ -136,15 +136,17 @@ namespace CryptoModel.Backtests
 
         #region Stefano
 
-        public void EvaluateStefanoLong(ChartInfo info, ChartInfo preInfo)
+        public void EvaluateStefanoLong(ChartInfo info, ChartInfo preInfo, decimal slSafeThreshold, decimal slSafeRate)
         {
+            if (SltpRatio == null)
+            {
+                return;
+            }
+
             var q = info.Quote;
-
-            
-
             var ema12 = info.Ema1;
             var ema26 = info.Ema2;
-            var preEma12 = preInfo.Ema2;
+            var preEma12 = preInfo.Ema1;
             var preEma26 = preInfo.Ema2;
             var side = PositionSide.Long;
             (var minRoe, var maxRoe) = GetCurrentRoe(info);
@@ -154,18 +156,70 @@ namespace CryptoModel.Backtests
             {
                 var price = q.Open;
                 var quantity = BaseOrderSize / price;
+                // 손절가: 진입가와 EMA 26 차이가 임계값 이상일 경우 EMA 26, 임계값 미만일 경우 EMA 26보다 조금 아래
+                var stopLossPrice =
+                    Calculator.Roe(PositionSide.Short, price, (decimal)ema26) >= slSafeThreshold ?
+                    (decimal)ema26 :
+                    Calculator.TargetPrice(PositionSide.Short, (decimal)ema26, slSafeRate);
+                StopLossRoe = Calculator.Roe(PositionSide.Long, price, stopLossPrice);
+                TakeProfitRoe = StopLossRoe * -SltpRatio.Value;
+
                 OpenDeal(info, price, quantity, side);
             }
-            // 포지션이 있고 목표 수익률의 절반만큼 손실일 경우 손절
-            else if (IsPositioning && minRoe <= TargetRoe / -2)
+            // 포지션이 있고 손절가에 도달할 경우 손절
+            else if (IsPositioning && minRoe <= StopLossRoe)
             {
-                CloseDeal(info, TargetRoe.Value / -2, side);
+                CloseDealByStopLoss(info, side);
                 LoseCount++;
             }
             // 포지션이 있고 목표 수익률에 도달하면 익절
-            else if (IsPositioning && maxRoe >= TargetRoe)
+            else if (IsPositioning && maxRoe >= TakeProfitRoe)
             {
-                CloseDeal(info, TargetRoe.Value, side);
+                CloseDealByTakeProfit(info, side);
+                WinCount++;
+            }
+        }
+
+        public void EvaluateStefanoShort(ChartInfo info, ChartInfo preInfo, decimal slSafeThreshold, decimal slSafeRate)
+        {
+            if (SltpRatio == null)
+            {
+                return;
+            }
+
+            var q = info.Quote;
+            var ema12 = info.Ema1;
+            var ema26 = info.Ema2;
+            var preEma12 = preInfo.Ema1;
+            var preEma26 = preInfo.Ema2;
+            var side = PositionSide.Short;
+            (var minRoe, var maxRoe) = GetCurrentRoe(info);
+
+            // 포지션이 없고 EMA 12가 26을 데드 크로스하면 진입
+            if (!IsPositioning && preEma12 > preEma26 && ema12 < ema26)
+            {
+                var price = q.Open;
+                var quantity = BaseOrderSize / price;
+                // 손절가: 진입가와 EMA 26 차이가 임계값 이상일 경우 EMA 26, 임계값 미만일 경우 EMA 26보다 조금 위
+                var stopLossPrice =
+                    Calculator.Roe(PositionSide.Long, price, (decimal)ema26) >= slSafeThreshold ?
+                    (decimal)ema26 :
+                    Calculator.TargetPrice(PositionSide.Long, (decimal)ema26, slSafeRate);
+                StopLossRoe = Calculator.Roe(PositionSide.Short, price, stopLossPrice);
+                TakeProfitRoe = StopLossRoe * -SltpRatio.Value;
+
+                OpenDeal(info, price, quantity, side);
+            }
+            // 포지션이 있고 손절가에 도달할 경우 손절
+            else if (IsPositioning && minRoe <= StopLossRoe)
+            {
+                CloseDealByStopLoss(info, side);
+                LoseCount++;
+            }
+            // 포지션이 있고 목표 수익률에 도달하면 익절
+            else if (IsPositioning && maxRoe >= TakeProfitRoe)
+            {
+                CloseDealByTakeProfit(info, side);
                 WinCount++;
             }
         }

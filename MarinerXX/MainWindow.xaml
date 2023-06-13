@@ -1,11 +1,10 @@
 ﻿<Window x:Class="MarinerXX.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MarinerXX"
         mc:Ignorable="d"
-        Title="Mariner XX" Height="500" Width="300" Background="{StaticResource Background}">
+        Title="Mariner XX" Height="600" Width="300" Background="{StaticResource Background}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -50,6 +49,12 @@
                 </ComboBox>
                 <TextBlock Style="{StaticResource Description}">File Name</TextBlock>
                 <TextBox x:Name="FileNameTextBox" Text="Test1"/>
+                <TextBlock Style="{StaticResource Description}">Parameter 1</TextBlock>
+                <TextBox x:Name="Parameter1TextBox" Text="0"/>
+                <TextBlock Style="{StaticResource Description}">Parameter 2</TextBlock>
+                <TextBox x:Name="Parameter2TextBox" Text="0"/>
+                <TextBlock Style="{StaticResource Description}">Parameter 3</TextBlock>
+                <TextBox x:Name="Parameter3TextBox" Text="0"/>
             </StackPanel>
 
             <ProgressBar Grid.Row="1" x:Name="BacktestProgress" Margin="5 0" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>

@@ -22,14 +22,30 @@ namespace MarinerXX
         public MainWindow()
         {
             InitializeComponent();
+
+            SymbolTextBox.Text = Settings.Default.Symbol;
+            StartDateTextBox.Text = Settings.Default.StartDate;
+            EndDateTextBox.Text = Settings.Default.EndDate;
+            FileNameTextBox.Text = Settings.Default.FileName;
         }
 
         private void BacktestButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                Settings.Default.Symbol = SymbolTextBox.Text;
+                Settings.Default.StartDate = StartDateTextBox.Text;
+                Settings.Default.EndDate = EndDateTextBox.Text;
+                Settings.Default.FileName = FileNameTextBox.Text;
+                Settings.Default.Save();
+
+                var p1 = Parameter1TextBox.Text.ToDecimal();
+                var p2 = Parameter2TextBox.Text.ToDecimal();
+                var p3 = Parameter3TextBox.Text.ToDecimal();
+
                 dealResult.Clear();
                 var symbols = SymbolTextBox.Text.Split(';');
+                var interval = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m").ToKlineInterval();
 
                 BacktestProgress.Value = 0;
                 BacktestProgress.Maximum = symbols.Length;
@@ -38,7 +54,6 @@ namespace MarinerXX
                     try
                     {
                         BacktestProgress.Value++;
-                        var interval = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m").ToKlineInterval();
                         var startDate = StartDateTextBox.Text.ToDateTime() > CryptoSymbol.GetStartDate(symbol).AddDays(1) ? StartDateTextBox.Text.ToDateTime() : CryptoSymbol.GetStartDate(symbol).AddDays(1);
                         var endDate = EndDateTextBox.Text.ToDateTime();
 
@@ -48,12 +63,15 @@ namespace MarinerXX
                         }
 
                         // 차트 로드 및 초기화
-                        ChartLoader.InitChartsByDate(symbol, interval, startDate, endDate);
+                        if (ChartLoader.GetChartPack(symbol, interval) == null)
+                        {
+                            ChartLoader.InitChartsByDate(symbol, interval, startDate, endDate);
+                        }
 
                         // 차트 진행하면서 매매
                         var charts = ChartLoader.GetChartPack(symbol, interval);
 
-                        StrategyStefano(charts);
+                        StrategyEv(charts, p1);
                     }
                     catch (FileNotFoundException)
                     {
@@ -80,25 +98,26 @@ namespace MarinerXX
             }
         }
 
-        private void StrategyEv(ChartPack charts)
+        private void StrategyEv(ChartPack charts, decimal p1)
         {
-            // Calculate Indicators
             charts.CalculateIndicatorsEveryonesCoin();
 
-            // Multiple Target ROE
-            //for (decimal r = 1.0m; r <= 2.0m; r += 0.05m)
+            var dealManager = new SimpleDealManager(charts.Charts[0].DateTime, charts.Charts[^1].DateTime, 100, 1.75m);
+            for (int i = 1; i < charts.Charts.Count; i++)
             {
-                var dealManager = new SimpleDealManager(charts.Charts[0].DateTime, charts.Charts[^1].DateTime, 100, 1.75m);
-                for (int i = 1; i < charts.Charts.Count; i++)
+                if (p1 == 0)
                 {
-                    // Evaluate Strategy
                     dealManager.EvaluateEveryonesCoinShort(charts.Charts[i], charts.Charts[i - 1]);
                 }
-
-                // Set latest chart for UPNL
-                dealManager.ChartInfo = charts.Charts[^1];
-                dealResult.Add(dealManager);
+                else if (p1 == 1)
+                {
+                    dealManager.EvaluateEveryonesCoinLong(charts.Charts[i], charts.Charts[i - 1]);
+                }
             }
+
+            // Set latest chart for UPNL
+            dealManager.ChartInfo = charts.Charts[^1];
+            dealResult.Add(dealManager);
         }
 
         private void StrategyStefano(ChartPack charts)
@@ -108,7 +127,7 @@ namespace MarinerXX
             var dealManager = new SimpleDealManager(charts.Charts[0].DateTime, charts.Charts[^1].DateTime, 100, null, 2.0m);
             for (int i = 1; i < charts.Charts.Count; i++)
             {
-                dealManager.EvaluateStefanoLong(charts.Charts[i], charts.Charts[i - 1]);
+                dealManager.EvaluateStefanoLong(charts.Charts[i], charts.Charts[i - 1], 0.2m, 0.5m);
             }
             dealManager.ChartInfo = charts.Charts[^1];
             dealResult.Add(dealManager);

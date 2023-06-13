@@ -97,13 +97,13 @@ namespace CryptoModel.Charts
             var quotes = Charts.Select(x => x.Quote);
             var r1 = quotes.GetEma(12).Select(x=>x.Ema);
             var r2 = quotes.GetEma(26).Select(x=>x.Ema);
-            var r3 = quotes.GetJmaSlope(14).Select(x => x.JmaSlope);
+            //var r3 = quotes.GetJmaSlope(14).Select(x => x.JmaSlope);
             for (int i = 0; i < Charts.Count; i++)
             {
                 var chart = Charts[i];
                 chart.Ema1 = r1.ElementAt(i) ?? 0;
                 chart.Ema2 = r2.ElementAt(i) ?? 0;
-                chart.JmaSlope = r3.ElementAt(i) ?? 0;
+                //chart.JmaSlope = r3.ElementAt(i) ?? 0;
             }
         }
 
