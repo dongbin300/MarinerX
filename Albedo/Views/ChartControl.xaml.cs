@@ -312,7 +312,7 @@ namespace Albedo.Views
         #region Zoom
         private void UserControl_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var unit = (ViewEndPosition - ViewStartPosition) * 0.1f;
+            var unit = (ViewEndPosition - ViewStartPosition) * 0.15f;
             if (e.Delta > 0) // Zoom-in
             {
                 if (ViewItemCount <= ViewCountMin)
@@ -321,7 +321,6 @@ namespace Albedo.Views
                 }
 
                 ViewStartPosition += unit;
-                ViewEndPosition -= unit;
             }
             else // Zoom-out
             {
@@ -331,7 +330,6 @@ namespace Albedo.Views
                 }
 
                 ViewStartPosition = Math.Max(0, ViewStartPosition - unit);
-                ViewEndPosition = Math.Min(ChartWidth, ViewEndPosition + unit);
             }
 
             Render();
