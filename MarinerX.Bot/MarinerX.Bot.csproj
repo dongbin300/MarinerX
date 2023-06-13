@@ -22,11 +22,10 @@
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="7.0.1" />
-    <PackageReference Include="WebSocket4Net" Version="0.15.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+    <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
   </ItemGroup>
 
 </Project>

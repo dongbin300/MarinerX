@@ -1,8 +1,8 @@
 ﻿using Binance.Net.Enums;
 
-using MarinerX.Bot.Models;
+using CryptoModel;
 
-using MercuryTradingModel.Extensions;
+using MarinerX.Bot.Models;
 
 using System;
 using System.Collections.Generic;
@@ -64,7 +64,7 @@ namespace MarinerX.Bot
         public static List<BinancePosition> Positions = new();
         public static List<BinancePosition> LongPositions => Positions.Where(p => p.PositionSide.Equals("Long")).ToList();
         public static List<BinancePosition> ShortPositions => Positions.Where(p => p.PositionSide.Equals("Short")).ToList();
-        public static Action<string> AddHistory = default!;
+        public static Action<string, string> AddHistory = default!;
 
         public static List<BinancePosition> MockPositions = new();
         public static List<BinancePosition> LongMockPositions => MockPositions.Where(p => p.PositionSide.Equals("Long")).ToList();

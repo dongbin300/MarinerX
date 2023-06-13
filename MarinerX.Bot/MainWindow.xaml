@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarinerX.Bot"
         mc:Ignorable="d"
-        Title="MarinerX Bot" Height="600" Width="1280" Background="{StaticResource ChartBackground}">
+        Title="MarinerX Bot" Height="610" Width="1400" Background="{StaticResource ChartBackground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -14,10 +14,10 @@
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="8*"/>
+                <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Bot Settings">
@@ -29,28 +29,31 @@
                     <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
                     <CheckBox x:Name="ShortBotCheckBox" HorizontalAlignment="Right" Checked="ShortBotCheckBox_Checked" Unchecked="ShortBotCheckBox_Unchecked"/>
                     <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
-                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="100"/>
+                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="100" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
-                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="10"/>
+                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="LeverageTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage Type</TextBlock>
                     <ComboBox x:Name="LeverageTypeComboBox" SelectedIndex="0">
                         <ComboBoxItem>Cross</ComboBoxItem>
                         <ComboBoxItem>Isolated</ComboBoxItem>
                     </ComboBox>
                     <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="25"/>
+                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="25" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
                     <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.75"/>
                     <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
-                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.87"/>
+                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.875"/>
+                    <TextBlock Style="{StaticResource Description}">Require Asset</TextBlock>
+                    <TextBlock x:Name="RequireAssetText" HorizontalAlignment="Right" Foreground="{StaticResource Long}"/>
                 </StackPanel>
             </GroupBox>
 
             <GroupBox Grid.Column="1" Header="Histories">
                 <DataGrid x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Time" Width="1*" Binding="{Binding Time}"/>
-                        <DataGridTextColumn Header="Text" Width="2*" Binding="{Binding Text}"/>
+                        <DataGridTextColumn Header="Time" Width="3*" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="Subject" Width="2*" Binding="{Binding Subject}"/>
+                        <DataGridTextColumn Header="Text" Width="8*" Binding="{Binding Text}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>

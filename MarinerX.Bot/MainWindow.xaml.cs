@@ -1,4 +1,6 @@
-﻿using MarinerX.Bot.Bots;
+﻿using CryptoModel;
+
+using MarinerX.Bot.Bots;
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Models;
 using MarinerX.Bot.Systems;
@@ -45,11 +47,11 @@ namespace MarinerX.Bot
             BinanceClients.Init();
 
             // 봇 히스토리 추가
-            Common.AddHistory = (text) =>
+            Common.AddHistory = (subject, text) =>
             {
                 DispatcherService.Invoke(() =>
                 {
-                    var history = new BotHistory(DateTime.Now, text);
+                    var history = new BotHistory(DateTime.Now, subject, text);
                     HistoryDataGrid.Items.Add(history);
                     Logger.LogHistory(history);
                 });
@@ -60,6 +62,7 @@ namespace MarinerX.Bot
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += Timer_Tick;
+            timer.Start();
 
             //timer1m.Interval = TimeSpan.FromMinutes(1);
             //timer1m.Tick += Timer1m_Tick;
@@ -71,7 +74,7 @@ namespace MarinerX.Bot
             {
                 await Task.Delay(5);
 
-                /* 주문 모니터링 - 5분이 넘도록 체결이 안되는 주문 취소 */
+                /* 주문 모니터링 - 5분이 넘도록 체결이 안되는 주문 취소 (이 부분은 좀 더 테스트 필요) */
                 //await longPosition.MonitorOpenOrderTimeout().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -120,8 +123,15 @@ namespace MarinerX.Bot
                     }
                 });
 
-                await shortPosition.Evaluate().ConfigureAwait(false);
-                //await longPosition.MockEvaluate().ConfigureAwait(false);
+                if (longPosition.IsRunning)
+                {
+                    await longPosition.Evaluate().ConfigureAwait(false);
+                }
+
+                if (shortPosition.IsRunning)
+                {
+                    await shortPosition.Evaluate().ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -129,6 +139,7 @@ namespace MarinerX.Bot
             }
         }
 
+        #region Mock
         private void MockBotCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             try
@@ -140,7 +151,7 @@ namespace MarinerX.Bot
 
                 timer.Start();
 
-                Common.AddHistory("Mock Bot On");
+                Common.AddHistory("Master", "Mock Bot On");
             }
             catch (Exception ex)
             {
@@ -154,7 +165,26 @@ namespace MarinerX.Bot
             {
                 timer.Stop();
 
-                Common.AddHistory("Mock Bot Off");
+                Common.AddHistory("Master", "Mock Bot Off");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
+        }
+        #endregion
+
+        private void LongBotCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                longPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
+                longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
+                longPosition.Leverage = int.Parse(LeverageTextBox.Text);
+                longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
+
+                Common.AddHistory("Master", "Long Bot On");
+                longPosition.IsRunning = true;
             }
             catch (Exception ex)
             {
@@ -162,14 +192,17 @@ namespace MarinerX.Bot
             }
         }
 
-        private void LongBotCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void LongBotCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                Common.AddHistory("Master", "Long Bot Off");
+                longPosition.IsRunning = false;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
         }
 
         private void ShortBotCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -181,9 +214,8 @@ namespace MarinerX.Bot
                 shortPosition.Leverage = int.Parse(LeverageTextBox.Text);
                 shortPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
-                timer.Start();
-
-                Common.AddHistory("Short Bot On");
+                Common.AddHistory("Master", "Short Bot On");
+                shortPosition.IsRunning = true;
             }
             catch (Exception ex)
             {
@@ -195,14 +227,60 @@ namespace MarinerX.Bot
         {
             try
             {
-                timer.Stop();
-
-                Common.AddHistory("Short Bot Off");
+                Common.AddHistory("Master", "Short Bot Off");
+                shortPosition.IsRunning = false;
             }
             catch (Exception ex)
             {
                 Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
             }
+        }
+
+        private int CalculateRequireAsset()
+        {
+            try
+            {
+                if (MaxActiveDealsTextBox == null || BaseOrderSizeTextBox == null || LeverageTextBox == null)
+                {
+                    return 0;
+                }
+
+                return (int)(MaxActiveDealsTextBox.Text.ToInt() * BaseOrderSizeTextBox.Text.ToDecimal() / LeverageTextBox.Text.ToInt());
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void BaseOrderSizeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (RequireAssetText == null)
+            {
+                return;
+            }
+
+            RequireAssetText.Text = $"{CalculateRequireAsset():N} USDT";
+        }
+
+        private void LeverageTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (RequireAssetText == null)
+            {
+                return;
+            }
+
+            RequireAssetText.Text = $"{CalculateRequireAsset():N} USDT";
+        }
+
+        private void MaxActiveDealsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (RequireAssetText == null)
+            {
+                return;
+            }
+
+            RequireAssetText.Text = $"{CalculateRequireAsset():N} USDT";
         }
     }
 }

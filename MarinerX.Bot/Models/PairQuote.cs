@@ -1,4 +1,4 @@
-﻿using MercuryTradingModel.Indicators;
+﻿using CryptoModel;
 
 using Skender.Stock.Indicators;
 

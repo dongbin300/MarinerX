@@ -113,7 +113,7 @@ namespace MarinerX.Bot.Bots
                     Common.PairQuotes.Add(new PairQuote(symbol, quotes));
                 }
 
-                Common.AddHistory("Get All Klines Complete");
+                Common.AddHistory("Manager Bot", "Get All Klines Complete");
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace MarinerX.Bot.Bots
                 }
 
 
-                Common.AddHistory("Start Binance Futures Ticker Complete");
+                Common.AddHistory("Manager Bot", "Start Binance Futures Ticker Complete");
             }
             catch (Exception ex)
             {
@@ -161,7 +161,7 @@ namespace MarinerX.Bot.Bots
             {
                 await BinanceClients.Socket.UsdFuturesStreams.UnsubscribeAllAsync().ConfigureAwait(false);
 
-                Common.AddHistory("Stop Binance Futures Ticker Complete");
+                Common.AddHistory("Manager Bot", "Stop Binance Futures Ticker Complete");
             }
             catch (Exception ex)
             {
