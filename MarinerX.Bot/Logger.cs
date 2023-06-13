@@ -19,7 +19,7 @@ namespace MarinerX.Bot
 
         public static void LogHistory(BotHistory botHistory)
         {
-            File.AppendAllText($"Logs/{DateTime.Today:yyyyMMdd}_history.log", $"[{botHistory.DateTime:HH:mm:ss.fff}] {botHistory.Text}" + Environment.NewLine);
+            File.AppendAllText($"Logs/{DateTime.Today:yyyyMMdd}_history.log", $"[{botHistory.DateTime:HH:mm:ss.fff}] [{botHistory.Subject}] {botHistory.Text}" + Environment.NewLine);
         }
     }
 }
