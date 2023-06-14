@@ -112,7 +112,7 @@ namespace MarinerX.Bot
                 {
                     if (todayRealizedPnlHistory != null && !todayRealizedPnlHistory.Any(x => x == null))
                     {
-                        TodayPnlText.ToolTip = new TextBlock() { Text = string.Join(Environment.NewLine, todayRealizedPnlHistory.Select(x => x.ToString())), Foreground = new SolidColorBrush(Colors.Black) };
+                        //TodayPnlText.ToolTip = new TextBlock() { Text = string.Join(Environment.NewLine, todayRealizedPnlHistory.Select(x => x.ToString())), Foreground = new SolidColorBrush(Colors.Black) };
                         var todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
                         if (todayPnl >= 0)
                         {

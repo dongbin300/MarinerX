@@ -15,6 +15,10 @@ namespace MarinerX.Bot.Bots
 {
     public class ManagerBot : Bot
     {
+        private double preTotal = 0;
+        private double preAvbl = 0;
+        private double preBnb = 0;
+
         public ManagerBot() : this("", "")
         {
 
@@ -47,11 +51,15 @@ namespace MarinerX.Bot.Bots
                 var total = (double)Math.Round(usdt, 3);
                 var bnb = (double)Math.Round(balance.First(b => b.Asset.Equals("BNB")).WalletBalance, 4);
 
+                preTotal = total;
+                preAvbl = availableUsdt;
+                preBnb = bnb;
+
                 return (total, availableUsdt, bnb);
             }
             catch
             {
-                return (Common.NullDoubleValue, Common.NullDoubleValue, Common.NullDoubleValue);
+                return (preTotal, preAvbl, preBnb);
             }
         }
 
@@ -106,7 +114,7 @@ namespace MarinerX.Bot.Bots
             {
                 foreach (var symbol in MonitorSymbols)
                 {
-                    var result = await BinanceClients.Api.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, Common.BaseInterval, null, null, 31).ConfigureAwait(false);
+                    var result = await BinanceClients.Api.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, Common.BaseInterval, null, null, 40).ConfigureAwait(false);
                     var quotes = result.Data.Select(x => new Quote
                     {
                         Date = x.OpenTime,
