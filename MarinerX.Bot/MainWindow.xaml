@@ -28,16 +28,16 @@
                     <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
                     <CheckBox x:Name="ShortBotCheckBox" HorizontalAlignment="Right" Checked="ShortBotCheckBox_Checked" Unchecked="ShortBotCheckBox_Unchecked"/>
                     <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
-                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="100" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
+                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
-                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="LeverageTextBox_TextChanged"/>
+                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="15" TextChanged="LeverageTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage Type</TextBlock>
                     <ComboBox x:Name="LeverageTypeComboBox" SelectedIndex="0">
                         <ComboBoxItem>Cross</ComboBoxItem>
                         <ComboBoxItem>Isolated</ComboBoxItem>
                     </ComboBox>
                     <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="25" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
+                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="10" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
                     <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.75"/>
                     <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>

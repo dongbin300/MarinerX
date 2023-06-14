@@ -60,6 +60,11 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var result = await BinanceClients.Api.UsdFuturesApi.Account.GetPositionInformationAsync().ConfigureAwait(false);
+                if (result.Data == null)
+                {
+                    return;
+                }
+
                 var positions = result.Data.Where(r => r.Quantity != 0);
                 Common.Positions = positions.Select(p => new BinancePosition(
                     p.Symbol,
@@ -180,8 +185,26 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var result = await BinanceClients.Api.UsdFuturesApi.Trading.GetOpenOrdersAsync().ConfigureAwait(false);
+
+                if (result.Data == null)
+                {
+                    return;
+                }
+
                 foreach (var order in result.Data)
                 {
+                    // 해당 주문의 생성시간이 10초가 안 지났으면 스킵
+                    if((DateTime.UtcNow - order.CreateTime).TotalSeconds < 10)
+                    {
+                        continue;
+                    }
+
+                    // 해당 주문이 TP/SL이 아니면 스킵
+                    if (order.Type != FuturesOrderType.TakeProfit && order.Type != FuturesOrderType.Stop)
+                    {
+                        continue;
+                    }
+
                     // 해당 TP/SL 주문의 오리지널 포지션이 존재하면 주문취소하지 않음
                     if (Common.Positions.Any(x => x.Symbol.Equals(order.Symbol) && x.PositionSide.Equals(order.PositionSide.ToString())))
                     {
