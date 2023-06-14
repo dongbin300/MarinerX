@@ -1,4 +1,6 @@
-﻿using MarinerX.Bot.Clients;
+﻿using Binance.Net.Enums;
+
+using MarinerX.Bot.Clients;
 using MarinerX.Bot.Models;
 
 using Skender.Stock.Indicators;
@@ -67,7 +69,7 @@ namespace MarinerX.Bot.Bots
                     p.MarkPrice,
                     p.Quantity,
                     p.Leverage
-                    )).ToList();
+                    )).OrderByDescending(x => x.Pnl).ToList();
             }
             catch (Exception ex)
             {
@@ -97,7 +99,7 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                foreach(var symbol in MonitorSymbols)
+                foreach (var symbol in MonitorSymbols)
                 {
                     var result = await BinanceClients.Api.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, Common.BaseInterval, null, null, 31).ConfigureAwait(false);
                     var quotes = result.Data.Select(x => new Quote
@@ -125,7 +127,7 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                foreach(var symbol in MonitorSymbols)
+                foreach (var symbol in MonitorSymbols)
                 {
                     await BinanceClients.Socket.UsdFuturesStreams.SubscribeToKlineUpdatesAsync(symbol, Common.BaseInterval, (obj) =>
                     {
@@ -162,6 +164,50 @@ namespace MarinerX.Bot.Bots
                 await BinanceClients.Socket.UsdFuturesStreams.UnsubscribeAllAsync().ConfigureAwait(false);
 
                 Common.AddHistory("Manager Bot", "Stop Binance Futures Ticker Complete");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ManagerBot), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
+        }
+
+        /// <summary>
+        /// 딜이 완료된 포지션에서 주문취소가 안된 주문 찾아서 취소
+        /// </summary>
+        /// <returns></returns>
+        public async Task MonitorOpenOrderClosedDeal()
+        {
+            try
+            {
+                var result = await BinanceClients.Api.UsdFuturesApi.Trading.GetOpenOrdersAsync().ConfigureAwait(false);
+                foreach (var order in result.Data)
+                {
+                    // 해당 TP/SL 주문의 오리지널 포지션이 존재하면 주문취소하지 않음
+                    if (Common.Positions.Any(x => x.Symbol.Equals(order.Symbol) && x.PositionSide.Equals(order.PositionSide.ToString())))
+                    {
+                        continue;
+                    }
+
+                    // 오리지널 포지션이 없으면 주문취소
+                    var cancelOrderResult = await BinanceClients.Api.UsdFuturesApi.Trading.CancelOrderAsync(order.Symbol, order.Id).ConfigureAwait(false);
+                    if (cancelOrderResult.Success)
+                    {
+                        // SL 처리되고 TP 남았으면
+                        if (order.Type == FuturesOrderType.TakeProfit)
+                        {
+                            Common.AddHistory("Manager Bot", $"Stop Loss {order.Symbol}");
+                        }
+                        // TP 처리되고 SL 남았으면
+                        else if (order.Type == FuturesOrderType.Stop)
+                        {
+                            Common.AddHistory("Manager Bot", $"Take Profit {order.Symbol}");
+                        }
+                    }
+                    else
+                    {
+                        Common.AddHistory("Manager Bot", $"Cancel Order Error: {result.Error?.Message}");
+                    }
+                }
             }
             catch (Exception ex)
             {

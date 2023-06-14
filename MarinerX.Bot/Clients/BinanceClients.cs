@@ -82,7 +82,7 @@ namespace MarinerX.Bot.Clients
             return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.Limit, quantity, price, PositionSide.Long).ConfigureAwait(false);
         }
 
-        public static async Task<WebCallResult<BinanceFuturesPlacedOrder>> SetLongTakeProfit(string symbol, decimal price, decimal quantity , decimal takePrice)
+        public static async Task<WebCallResult<BinanceFuturesPlacedOrder>> SetLongTakeProfit(string symbol, decimal price, decimal quantity, decimal takePrice)
         {
             return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.TakeProfit, quantity, price, PositionSide.Long, null, null, null, takePrice).ConfigureAwait(false);
         }

@@ -21,8 +21,8 @@ namespace MarinerX.Bot
 
         public static readonly string BinanceApiKeyPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten", "binance_api.txt");
 
-        public static readonly SolidColorBrush LongColor = new (Color.FromRgb(14, 203, 129));
-        public static readonly SolidColorBrush ShortColor = new (Color.FromRgb(246, 70, 93));
+        public static readonly SolidColorBrush LongColor = new(Color.FromRgb(14, 203, 129));
+        public static readonly SolidColorBrush ShortColor = new(Color.FromRgb(246, 70, 93));
 
         public static readonly KlineInterval BaseInterval = KlineInterval.OneMinute;
         public static readonly int BaseIntervalNumber = 1;
@@ -77,7 +77,7 @@ namespace MarinerX.Bot
 
         public static bool IsLongPositioning(string symbol)
         {
-            return LongPositions.Any(p=>p.Symbol.Equals(symbol));
+            return LongPositions.Any(p => p.Symbol.Equals(symbol));
         }
 
         public static bool IsShortPositioning(string symbol)

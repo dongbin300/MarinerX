@@ -23,9 +23,9 @@ namespace MarinerX.Bot
     public partial class MainWindow : Window
     {
         DispatcherTimer timer = new();
+        DispatcherTimer timer5s = new();
         DispatcherTimer timer1m = new();
         ManagerBot manager = new("매니저 봇", "심볼 모니터링, 포지션 모니터링, 자산 모니터링 등등 전반적인 시스템을 관리하는 봇입니다.");
-        ChartBot chart = new("차트 봇", "차트와 관련된 계산을 하는 봇입니다.");
         LongBot longPosition = new("롱 봇", "롱 포지션 매매를 하는 봇입니다.");
         ShortBot shortPosition = new("숏 봇", "숏 포지션 매매를 하는 봇입니다.");
 
@@ -63,6 +63,10 @@ namespace MarinerX.Bot
             timer.Interval = TimeSpan.FromMilliseconds(1000);
             timer.Tick += Timer_Tick;
             timer.Start();
+
+            timer5s.Interval = TimeSpan.FromSeconds(5);
+            timer5s.Tick += Timer5s_Tick;
+            timer5s.Start();
 
             //timer1m.Interval = TimeSpan.FromMinutes(1);
             //timer1m.Tick += Timer1m_Tick;
@@ -106,7 +110,7 @@ namespace MarinerX.Bot
                 var todayRealizedPnlHistory = await manager.GetBinanceTodayRealizedPnlHistory();
                 DispatcherService.Invoke(() =>
                 {
-                    if (todayRealizedPnlHistory != null && todayRealizedPnlHistory.Count(x => x == null) == 0)
+                    if (todayRealizedPnlHistory != null && !todayRealizedPnlHistory.Any(x => x == null))
                     {
                         TodayPnlText.ToolTip = new TextBlock() { Text = string.Join(Environment.NewLine, todayRealizedPnlHistory.Select(x => x.ToString())), Foreground = new SolidColorBrush(Colors.Black) };
                         var todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
@@ -131,6 +135,22 @@ namespace MarinerX.Bot
                 if (shortPosition.IsRunning)
                 {
                     await shortPosition.Evaluate().ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
+        }
+
+        private async void Timer5s_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                /* 주문 검수 */
+                if (longPosition.IsRunning || shortPosition.IsRunning)
+                {
+                    await manager.MonitorOpenOrderClosedDeal().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
