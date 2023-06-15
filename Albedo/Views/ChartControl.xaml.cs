@@ -672,7 +672,7 @@ namespace Albedo.Views
                 {
                     if (i < rsi.Data.Count && i >= 1)
                     {
-                        DrawIndicatorLine(canvas, rsi.Data.ValueOf(i - 1), rsi.Data.ValueOf(i), viewIndex, actualItemFullWidth, actualHeight, yMax, yMin, new SKPaint() { Color = rsi.LineColor.Color.ToSKColor(), StrokeWidth = rsi.LineWeight.LineWeight.ToStrokeWidth() });
+                        DrawIndicatorLine(canvas, rsi.Data.ValueOf(i - 1), rsi.Data.ValueOf(i), viewIndex, actualItemFullWidth, actualHeight, 100, 0, new SKPaint() { Color = rsi.LineColor.Color.ToSKColor(), StrokeWidth = rsi.LineWeight.LineWeight.ToStrokeWidth() });
                     }
                 }
             }
