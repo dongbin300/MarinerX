@@ -224,6 +224,13 @@ namespace Albedo.Mappers
             { "GMX", "지엠엑스" },
             { "SFP", "세이프팔" },
             { "REP", "어거" },
+            { "WNCG", "랩트 나인 크로니클 골드" },
+            { "FLOKI", "플로키" },
+            { "PEPE", "페페" },
+            { "STX", "스택스" },
+            { "EVER", "에버스케일" },
+            { "AGIX", "싱귤래리티넷" },
+            { "FET", "페치" },
 
             // BTC 코인
             { "ROA", "로아코어" },
@@ -237,7 +244,8 @@ namespace Albedo.Mappers
             { "GRND", "슈퍼워크" },
             { "BERRY", "베리" },
             { "KSP", "클레이스왑" },
-            { "AHT", "아하토큰" }
+            { "AHT", "아하토큰" },
+            { "FNSA", "핀시아" }
         };
 
         public static List<string> Symbols = new()

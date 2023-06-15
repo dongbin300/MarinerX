@@ -4,6 +4,8 @@ using Binance.Net.Enums;
 
 using Bithumb.Net.Enums;
 
+using Bybit.Net.Enums;
+
 using Upbit.Net.Enums;
 
 namespace Albedo.Extensions
@@ -22,19 +24,40 @@ namespace Albedo.Extensions
         /// </summary>
         /// <param name="interval"></param>
         /// <returns></returns>
-        public static KlineInterval ToBinanceInterval(this CandleInterval interval) => interval switch
+        public static Binance.Net.Enums.KlineInterval ToBinanceInterval(this CandleInterval interval) => interval switch
         {
-            CandleInterval.OneMinute => KlineInterval.OneMinute,
-            CandleInterval.ThreeMinutes => KlineInterval.ThreeMinutes,
-            CandleInterval.FiveMinutes => KlineInterval.FiveMinutes,
-            CandleInterval.TenMinutes => KlineInterval.FiveMinutes,
-            CandleInterval.FifteenMinutes => KlineInterval.FifteenMinutes,
-            CandleInterval.ThirtyMinutes => KlineInterval.ThirtyMinutes,
-            CandleInterval.OneHour => KlineInterval.OneHour,
-            CandleInterval.OneDay => KlineInterval.OneDay,
-            CandleInterval.OneWeek => KlineInterval.OneWeek,
-            CandleInterval.OneMonth => KlineInterval.OneMonth,
-            _ => KlineInterval.OneMinute
+            CandleInterval.OneMinute => Binance.Net.Enums.KlineInterval.OneMinute,
+            CandleInterval.ThreeMinutes => Binance.Net.Enums.KlineInterval.ThreeMinutes,
+            CandleInterval.FiveMinutes => Binance.Net.Enums.KlineInterval.FiveMinutes,
+            CandleInterval.TenMinutes => Binance.Net.Enums.KlineInterval.FiveMinutes,
+            CandleInterval.FifteenMinutes => Binance.Net.Enums.KlineInterval.FifteenMinutes,
+            CandleInterval.ThirtyMinutes => Binance.Net.Enums.KlineInterval.ThirtyMinutes,
+            CandleInterval.OneHour => Binance.Net.Enums.KlineInterval.OneHour,
+            CandleInterval.OneDay => Binance.Net.Enums.KlineInterval.OneDay,
+            CandleInterval.OneWeek => Binance.Net.Enums.KlineInterval.OneWeek,
+            CandleInterval.OneMonth => Binance.Net.Enums.KlineInterval.OneMonth,
+            _ => Binance.Net.Enums.KlineInterval.OneMinute
+        };
+
+        /// <summary>
+        /// 바이비트 인터벌 - 1, 3, 5, 15, 30m, 1h, 1d, 1w, 1M
+        /// 10m = 5m * 2
+        /// </summary>
+        /// <param name="interval"></param>
+        /// <returns></returns>
+        public static Bybit.Net.Enums.KlineInterval ToBybitInterval(this CandleInterval interval) => interval switch
+        {
+            CandleInterval.OneMinute => Bybit.Net.Enums.KlineInterval.OneMinute,
+            CandleInterval.ThreeMinutes => Bybit.Net.Enums.KlineInterval.ThreeMinutes,
+            CandleInterval.FiveMinutes => Bybit.Net.Enums.KlineInterval.FiveMinutes,
+            CandleInterval.TenMinutes => Bybit.Net.Enums.KlineInterval.FiveMinutes,
+            CandleInterval.FifteenMinutes => Bybit.Net.Enums.KlineInterval.FifteenMinutes,
+            CandleInterval.ThirtyMinutes => Bybit.Net.Enums.KlineInterval.ThirtyMinutes,
+            CandleInterval.OneHour => Bybit.Net.Enums.KlineInterval.OneHour,
+            CandleInterval.OneDay => Bybit.Net.Enums.KlineInterval.OneDay,
+            CandleInterval.OneWeek => Bybit.Net.Enums.KlineInterval.OneWeek,
+            CandleInterval.OneMonth => Bybit.Net.Enums.KlineInterval.OneMonth,
+            _ => Bybit.Net.Enums.KlineInterval.OneMinute
         };
 
         /// <summary>

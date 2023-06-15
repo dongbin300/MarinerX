@@ -7,6 +7,9 @@ using Binance.Net.Clients;
 
 using Bithumb.Net.Clients;
 
+using Bybit.Net.Clients;
+using Bybit.Net.Enums;
+
 using Skender.Stock.Indicators;
 
 using System;
@@ -19,7 +22,7 @@ namespace Albedo.Managers
 {
     public class ChartMan
     {
-        #region Refresh Chart (Binance Refresh+Update / Upbit Refresh / Bithumb Refresh+Update)
+        #region Refresh Chart (Binance Refresh+Update / Bybit Refresh+Update / Upbit Refresh / Bithumb Refresh+Update)
         public static (ChartControl, int) RefreshBinanceChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId, PairMarketType marketType) => marketType switch
         {
             PairMarketType.Spot => RefreshBinanceSpotChart(binanceClient, binanceSocketClient, subId),
@@ -27,7 +30,6 @@ namespace Albedo.Managers
             PairMarketType.CoinFutures => RefreshBinanceCoinFuturesChart(binanceClient, binanceSocketClient, subId),
             _ => (new ChartControl(), 0)
         };
-
         private static (ChartControl, int) RefreshBinanceSpotChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
@@ -98,7 +100,6 @@ namespace Albedo.Managers
                 return default!;
             }
         }
-
         private static (ChartControl, int) RefreshBinanceFuturesChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
@@ -169,7 +170,6 @@ namespace Albedo.Managers
                 return default!;
             }
         }
-
         private static (ChartControl, int) RefreshBinanceCoinFuturesChart(BinanceClient binanceClient, BinanceSocketClient binanceSocketClient, int subId)
         {
             try
@@ -224,6 +224,299 @@ namespace Albedo.Managers
                                     Low = obj.Data.Data.LowPrice,
                                     Close = obj.Data.Data.ClosePrice,
                                     Volume = obj.Data.Data.Volume
+                                });
+                                break;
+                        }
+                    });
+                });
+                klineUpdateResult.Wait();
+                subId = klineUpdateResult.Result.Data.Id;
+
+                return (chartControl, subId);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+                return default!;
+            }
+        }
+
+        public static (ChartControl, int) RefreshBybitChart(BybitClient bybitClient, BybitSocketClient bybitSocketClient, int subId, PairMarketType marketType) => marketType switch
+        {
+            PairMarketType.Spot => RefreshBybitSpotChart(bybitClient, bybitSocketClient, subId),
+            PairMarketType.Linear => RefreshBybitLinearChart(bybitClient, bybitSocketClient, subId),
+            PairMarketType.Inverse => RefreshBybitInverseChart(bybitClient, bybitSocketClient, subId),
+            PairMarketType.Option => RefreshBybitOptionChart(bybitClient, bybitSocketClient, subId),
+            _ => (new ChartControl(), 0)
+        };
+        private static (ChartControl, int) RefreshBybitSpotChart(BybitClient bybitClient, BybitSocketClient bybitSocketClient, int subId)
+        {
+            try
+            {
+                var chartControl = new ChartControl();
+
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Spot, symbol, interval, null, null, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.Init(quotes);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+
+                bybitSocketClient.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5SpotStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                {
+                    DispatcherService.Invoke(() =>
+                    {
+                        var updateQuote = obj.Data.First();
+                        switch (Common.ChartInterval)
+                        {
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.StartTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.StartTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                });
+                                break;
+                        }
+                    });
+                });
+                klineUpdateResult.Wait();
+                subId = klineUpdateResult.Result.Data.Id;
+
+                return (chartControl, subId);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+                return default!;
+            }
+        }
+        private static (ChartControl, int) RefreshBybitLinearChart(BybitClient bybitClient, BybitSocketClient bybitSocketClient, int subId)
+        {
+            try
+            {
+                var chartControl = new ChartControl();
+
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Linear, symbol, interval, null, null, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.Init(quotes);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+
+                bybitSocketClient.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5LinearStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                {
+                    DispatcherService.Invoke(() =>
+                    {
+                        var updateQuote = obj.Data.First();
+                        switch (Common.ChartInterval)
+                        {
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.StartTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.StartTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                });
+                                break;
+                        }
+                    });
+                });
+                klineUpdateResult.Wait();
+                subId = klineUpdateResult.Result.Data.Id;
+
+                return (chartControl, subId);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+                return default!;
+            }
+        }
+        private static (ChartControl, int) RefreshBybitInverseChart(BybitClient bybitClient, BybitSocketClient bybitSocketClient, int subId)
+        {
+            try
+            {
+                var chartControl = new ChartControl();
+
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Inverse, symbol, interval, null, null, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.Init(quotes);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+
+                bybitSocketClient.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.InversePerpetualStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                {
+                    DispatcherService.Invoke(() =>
+                    {
+                        var updateQuote = obj.Data.First();
+                        switch (Common.ChartInterval)
+                        {
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.OpenTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.OpenTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                });
+                                break;
+                        }
+                    });
+                });
+                klineUpdateResult.Wait();
+                subId = klineUpdateResult.Result.Data.Id;
+
+                return (chartControl, subId);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+                return default!;
+            }
+        }
+        private static (ChartControl, int) RefreshBybitOptionChart(BybitClient bybitClient, BybitSocketClient bybitSocketClient, int subId)
+        {
+            try
+            {
+                var chartControl = new ChartControl();
+
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Option, symbol, interval, null, null, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.Init(quotes);
+                chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
+
+                bybitSocketClient.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5OptionsStreams.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                {
+                    DispatcherService.Invoke(() =>
+                    {
+                        var updateQuote = obj.Data.First();
+                        switch (Common.ChartInterval)
+                        {
+                            case CandleInterval.TenMinutes:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.StartTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
+                                }, Common.ChartInterval);
+                                break;
+
+                            default:
+                                chartControl.UpdateQuote(new Quote
+                                {
+                                    Date = updateQuote.StartTime,
+                                    Open = updateQuote.OpenPrice,
+                                    High = updateQuote.HighPrice,
+                                    Low = updateQuote.LowPrice,
+                                    Close = updateQuote.ClosePrice,
+                                    Volume = updateQuote.Volume
                                 });
                                 break;
                         }
@@ -387,7 +680,7 @@ namespace Albedo.Managers
         }
         #endregion
 
-        #region Additional Chart (Binance, Upbit)
+        #region Additional Chart (Binance, Bybit, Upbit)
         public static void LoadAdditionalBinanceChart(BinanceClient binanceClient, ChartControl chartControl, PairMarketType marketType)
         {
             switch (marketType)
@@ -408,7 +701,6 @@ namespace Albedo.Managers
                     break;
             }
         }
-
         private static void LoadAdditionalBinanceSpotChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
@@ -441,7 +733,6 @@ namespace Albedo.Managers
                 Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
         }
-
         private static void LoadAdditionalBinanceFuturesChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
@@ -474,7 +765,6 @@ namespace Albedo.Managers
                 Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
             }
         }
-
         private static void LoadAdditionalBinanceCoinFuturesChart(BinanceClient binanceClient, ChartControl chartControl)
         {
             try
@@ -486,6 +776,159 @@ namespace Albedo.Managers
                 var quotes = klineResult.Result.Data.Select(x => new Quote
                 {
                     Date = x.OpenTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (quotes.Count <= 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
+        }
+
+        public static void LoadAdditionalBybitChart(BybitClient bybitClient, ChartControl chartControl, PairMarketType marketType)
+        {
+            switch (marketType)
+            {
+                case PairMarketType.Spot:
+                    LoadAdditionalBybitSpotChart(bybitClient, chartControl);
+                    break;
+
+                case PairMarketType.Linear:
+                    LoadAdditionalBybitLinearChart(bybitClient, chartControl);
+                    break;
+
+                case PairMarketType.Inverse:
+                    LoadAdditionalBybitInverseChart(bybitClient, chartControl);
+                    break;
+
+                case PairMarketType.Option:
+                    LoadAdditionalBybitOptionChart(bybitClient, chartControl);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        private static void LoadAdditionalBybitSpotChart(BybitClient bybitClient, ChartControl chartControl)
+        {
+            try
+            {
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Spot, symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (quotes.Count <= 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
+        }
+        private static void LoadAdditionalBybitLinearChart(BybitClient bybitClient, ChartControl chartControl)
+        {
+            try
+            {
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Linear, symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (quotes.Count <= 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
+        }
+        private static void LoadAdditionalBybitInverseChart(BybitClient bybitClient, ChartControl chartControl)
+        {
+            try
+            {
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Inverse, symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
+                    Open = x.OpenPrice,
+                    High = x.HighPrice,
+                    Low = x.LowPrice,
+                    Close = x.ClosePrice,
+                    Volume = x.Volume,
+                }).ToList();
+                if (quotes.Count <= 1)
+                {
+                    Common.ChartAdditionalComplete = true;
+                }
+                if (Common.ChartInterval == CandleInterval.TenMinutes)
+                {
+                    quotes = quotes.Merge(CandleInterval.TenMinutes);
+                }
+                chartControl.ConcatenateQuotes(quotes);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ChartMan), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
+            }
+        }
+        private static void LoadAdditionalBybitOptionChart(BybitClient bybitClient, ChartControl chartControl)
+        {
+            try
+            {
+                var symbol = Common.Pair.Symbol;
+                var interval = Common.ChartInterval.ToBybitInterval();
+                var klineResult = bybitClient.V5Api.ExchangeData.GetKlinesAsync(Category.Option, symbol, interval, null, chartControl.Quotes[0].Date, Common.ChartLoadLimit);
+                klineResult.Wait();
+                var quotes = klineResult.Result.Data.List.Select(x => new Quote
+                {
+                    Date = x.StartTime,
                     Open = x.OpenPrice,
                     High = x.HighPrice,
                     Low = x.LowPrice,

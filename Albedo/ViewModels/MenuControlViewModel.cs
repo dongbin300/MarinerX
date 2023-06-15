@@ -322,6 +322,10 @@ namespace Albedo.ViewModels
             {
                 PairMarkets.Add(new PairMarketModel(PairMarket.Bithumb, "빗썸", "Resources/bithumb.png"));
             }
+            if (Common.SupportedMarket.HasFlag(PairMarket.Bybit))
+            {
+                PairMarkets.Add(new PairMarketModel(PairMarket.Bybit, "바이비트", "Resources/bybit.png"));
+            }
             if (PairMarkets.Count > 0)
             {
                 SelectedPairMarketIndex = 0;
@@ -345,6 +349,13 @@ namespace Albedo.ViewModels
                     PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Spot, "현물"));
                     PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Futures, "선물"));
                     PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.CoinFutures, "코인 선물"));
+                    break;
+
+                case PairMarket.Bybit:
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Spot, "현물"));
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Linear, "선물"));
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Inverse, "선물 인버스"));
+                    PairMarketTypes.Add(new PairMarketTypeModel(PairMarketType.Option, "옵션"));
                     break;
 
                 case PairMarket.Upbit:
@@ -417,6 +428,31 @@ namespace Albedo.ViewModels
                             break;
 
                         case PairMarketType.CoinFutures:
+                            break;
+                    }
+                    break;
+
+                case PairMarket.Bybit:
+                    switch (Common.CurrentSelectedPairMarketType.PairMarketType)
+                    {
+                        case PairMarketType.Spot:
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USDT, "USDT"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.USDC, "USDC"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.DAI, "DAI"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.EUR, "EUR"));
+                            break;
+
+                        case PairMarketType.Linear:
+                            break;
+
+                        case PairMarketType.Inverse:
+                            break;
+
+                        case PairMarketType.Option:
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.BTC, "BTC"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.ETH, "ETH"));
+                            PairQuoteAssets.Add(new PairQuoteAssetModel(PairQuoteAsset.SOL, "SOL"));
                             break;
                     }
                     break;

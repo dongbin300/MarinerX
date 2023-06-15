@@ -9,6 +9,7 @@ namespace Albedo.Enums
         Favorites,
         Binance,
         Upbit,
-        Bithumb
+        Bithumb,
+        Bybit
     }
 }

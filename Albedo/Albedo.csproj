@@ -24,6 +24,7 @@
     <None Remove="Resources\az.png" />
     <None Remove="Resources\binance.png" />
     <None Remove="Resources\bithumb.png" />
+    <None Remove="Resources\bybit.png" />
     <None Remove="Resources\eye.png" />
     <None Remove="Resources\favorites-off.png" />
     <None Remove="Resources\favorites-on.png" />
@@ -54,6 +55,9 @@
     <Content Include="Resources\bithumb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\bybit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\eye.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -82,6 +86,7 @@
 
   <ItemGroup>
     <PackageReference Include="Bithumb.Net" Version="1.0.0" />
+    <PackageReference Include="Bybit.Net" Version="2.0.4" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.3" />
     <PackageReference Include="Upbit.Net" Version="1.0.0" />

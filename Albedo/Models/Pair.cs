@@ -52,6 +52,7 @@ namespace Albedo.Models
         public string MarketKorean => Market switch
         {
             PairMarket.Binance => "바이낸스",
+            PairMarket.Bybit => "바이비트",
             PairMarket.Upbit => "업비트",
             PairMarket.Bithumb => "빗썸",
             _ => ""
@@ -61,11 +62,15 @@ namespace Albedo.Models
             PairMarketType.Spot => "현물",
             PairMarketType.Futures => "선물",
             PairMarketType.CoinFutures => "코인 선물",
+            PairMarketType.Linear => "선물",
+            PairMarketType.Inverse => "선물 인버스",
+            PairMarketType.Option => "옵션",
             _ => ""
         };
         public string SymbolKorean => Market switch
         {
             PairMarket.Binance => Symbol,
+            PairMarket.Bybit => Symbol,
             PairMarket.Upbit => UpbitSymbolMapper.GetKoreanName(Symbol),
             PairMarket.Bithumb => BithumbSymbolMapper.GetKoreanName(Symbol),
             _ => Symbol
@@ -75,6 +80,7 @@ namespace Albedo.Models
         public BitmapImage MarketIcon => new (new Uri("pack://application:,,,/Albedo;component/Resources/" + Market switch
         {
             PairMarket.Binance => "binance.png",
+            PairMarket.Bybit => "bybit.png",
             PairMarket.Upbit => "upbit.png",
             PairMarket.Bithumb => "bithumb.png",
             _ => ""

@@ -14,33 +14,33 @@ namespace Albedo.Views.Settings
         {
             InitializeComponent();
 
-            BinanceApiSecretKeyPassword.Visibility = Visibility.Visible;
+            //BinanceApiSecretKeyPassword.Visibility = Visibility.Visible;
             UpbitApiSecretKeyPassword.Visibility = Visibility.Visible;
-            BithumbApiSecretKeyPassword.Visibility = Visibility.Visible;
-            BinanceApiSecretKeyText.Visibility = Visibility.Collapsed;
+            //BithumbApiSecretKeyPassword.Visibility = Visibility.Visible;
+            //BinanceApiSecretKeyText.Visibility = Visibility.Collapsed;
             UpbitApiSecretKeyText.Visibility = Visibility.Collapsed;
-            BithumbApiSecretKeyText.Visibility = Visibility.Collapsed;
+            //BithumbApiSecretKeyText.Visibility = Visibility.Collapsed;
 
-            BinanceApiKeyText.Text = Albedo.Settings.Default.BinanceApiKey;
-            BinanceApiSecretKeyText.Text = BinanceApiSecretKeyPassword.Password = Albedo.Settings.Default.BinanceSecretKey;
+            //BinanceApiKeyText.Text = Albedo.Settings.Default.BinanceApiKey;
+            //BinanceApiSecretKeyText.Text = BinanceApiSecretKeyPassword.Password = Albedo.Settings.Default.BinanceSecretKey;
             UpbitApiKeyText.Text = Albedo.Settings.Default.UpbitApiKey;
             UpbitApiSecretKeyText.Text = UpbitApiSecretKeyPassword.Password = Albedo.Settings.Default.UpbitSecretKey;
-            BithumbApiKeyText.Text = Albedo.Settings.Default.BithumbApiKey;
-            BithumbApiSecretKeyText.Text = BithumbApiSecretKeyPassword.Password = Albedo.Settings.Default.BithumbSecretKey;
+            //BithumbApiKeyText.Text = Albedo.Settings.Default.BithumbApiKey;
+            //BithumbApiSecretKeyText.Text = BithumbApiSecretKeyPassword.Password = Albedo.Settings.Default.BithumbSecretKey;
         }
 
         private void BinanceEyeImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (BinanceApiSecretKeyPassword.Visibility == Visibility.Visible)
-            {
-                BinanceApiSecretKeyPassword.Visibility = Visibility.Collapsed;
-                BinanceApiSecretKeyText.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                BinanceApiSecretKeyPassword.Visibility = Visibility.Visible;
-                BinanceApiSecretKeyText.Visibility = Visibility.Collapsed;
-            }
+            //if (BinanceApiSecretKeyPassword.Visibility == Visibility.Visible)
+            //{
+            //    BinanceApiSecretKeyPassword.Visibility = Visibility.Collapsed;
+            //    BinanceApiSecretKeyText.Visibility = Visibility.Visible;
+            //}
+            //else
+            //{
+            //    BinanceApiSecretKeyPassword.Visibility = Visibility.Visible;
+            //    BinanceApiSecretKeyText.Visibility = Visibility.Collapsed;
+            //}
         }
 
         private void UpbitEyeImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -59,16 +59,16 @@ namespace Albedo.Views.Settings
 
         private void BithumbEyeImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (BithumbApiSecretKeyPassword.Visibility == Visibility.Visible)
-            {
-                BithumbApiSecretKeyPassword.Visibility = Visibility.Collapsed;
-                BithumbApiSecretKeyText.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                BithumbApiSecretKeyPassword.Visibility = Visibility.Visible;
-                BithumbApiSecretKeyText.Visibility = Visibility.Collapsed;
-            }
+            //if (BithumbApiSecretKeyPassword.Visibility == Visibility.Visible)
+            //{
+            //    BithumbApiSecretKeyPassword.Visibility = Visibility.Collapsed;
+            //    BithumbApiSecretKeyText.Visibility = Visibility.Visible;
+            //}
+            //else
+            //{
+            //    BithumbApiSecretKeyPassword.Visibility = Visibility.Visible;
+            //    BithumbApiSecretKeyText.Visibility = Visibility.Collapsed;
+            //}
         }
 
         private void SecretKey_TextChanged(object sender, TextChangedEventArgs e)
@@ -79,9 +79,9 @@ namespace Albedo.Views.Settings
             }
 
             isChanging = true;
-            BinanceApiSecretKeyPassword.Password = BinanceApiSecretKeyText.Text;
+            //BinanceApiSecretKeyPassword.Password = BinanceApiSecretKeyText.Text;
             UpbitApiSecretKeyPassword.Password = UpbitApiSecretKeyText.Text;
-            BithumbApiSecretKeyPassword.Password = BithumbApiSecretKeyText.Text;
+            //BithumbApiSecretKeyPassword.Password = BithumbApiSecretKeyText.Text;
             isChanging = false;
         }
 
@@ -93,9 +93,9 @@ namespace Albedo.Views.Settings
             }
 
             isChanging = true;
-            BinanceApiSecretKeyText.Text = BinanceApiSecretKeyPassword.Password;
+            //BinanceApiSecretKeyText.Text = BinanceApiSecretKeyPassword.Password;
             UpbitApiSecretKeyText.Text = UpbitApiSecretKeyPassword.Password;
-            BithumbApiSecretKeyText.Text = BithumbApiSecretKeyPassword.Password;
+            //BithumbApiSecretKeyText.Text = BithumbApiSecretKeyPassword.Password;
             isChanging = false;
         }
     }

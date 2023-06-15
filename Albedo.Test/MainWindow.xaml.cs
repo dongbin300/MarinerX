@@ -5,6 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
 using System.Windows;
+using Bybit.Net.Clients;
+using Bybit.Net.Enums;
+using System.IO;
 
 namespace Albedo.Test
 {
@@ -73,6 +76,7 @@ namespace Albedo.Test
     /// </summary>
     public partial class MainWindow : Window
     {
+        BybitClient bybitClient;
         SKFont font = new SKFont(SKTypeface.FromFamilyName("Meiryo UI"), 12);
         SKPaint paint = new SKPaint() { Color = SKColors.White };
         SKPaint pathPaint = new SKPaint() { Style = SKPaintStyle.Fill, Color = SKColors.White };
@@ -80,6 +84,12 @@ namespace Albedo.Test
         public MainWindow()
         {
             InitializeComponent();
+
+            var data = File.ReadAllLines(@"C:\Users\Gaten\AppData\Roaming\Gaten\bybit_api.txt");
+            bybitClient = new BybitClient(new Bybit.Net.Objects.BybitClientOptions()
+            {
+                ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(data[0], data[1])
+            });
         }
 
 

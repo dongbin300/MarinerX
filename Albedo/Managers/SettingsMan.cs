@@ -47,12 +47,12 @@ namespace Albedo.Managers
 
         public static void Load()
         {
-            BinanceApiKey = Settings.Default.BinanceApiKey;
-            BinanceSecretKey = Settings.Default.BinanceSecretKey;
+            //BinanceApiKey = Settings.Default.BinanceApiKey;
+            //BinanceSecretKey = Settings.Default.BinanceSecretKey;
             UpbitApiKey = Settings.Default.UpbitApiKey;
             UpbitSecretKey = Settings.Default.UpbitSecretKey;
-            BithumbApiKey = Settings.Default.BithumbApiKey;
-            BithumbSecretKey = Settings.Default.BithumbSecretKey;
+            //BithumbApiKey = Settings.Default.BithumbApiKey;
+            //BithumbSecretKey = Settings.Default.BithumbSecretKey;
             SimpleListCount = Settings.Default.DefaultPairCount;
             DefaultCandleCount = Settings.Default.DefaultCandleCount;
             Indicators = JsonConvert.DeserializeObject<IndicatorsModel>(Settings.Default.IndicatorString) ?? new IndicatorsModel();
@@ -61,12 +61,12 @@ namespace Albedo.Managers
 
         public static void Save()
         {
-            Settings.Default.BinanceApiKey = BinanceApiKey;
-            Settings.Default.BinanceSecretKey = BinanceSecretKey;
+            //Settings.Default.BinanceApiKey = BinanceApiKey;
+            //Settings.Default.BinanceSecretKey = BinanceSecretKey;
             Settings.Default.UpbitApiKey = UpbitApiKey;
             Settings.Default.UpbitSecretKey = UpbitSecretKey;
-            Settings.Default.BithumbApiKey = BithumbApiKey;
-            Settings.Default.BithumbSecretKey = BithumbSecretKey;
+            //Settings.Default.BithumbApiKey = BithumbApiKey;
+            //Settings.Default.BithumbSecretKey = BithumbSecretKey;
             Settings.Default.DefaultPairCount = SimpleListCount;
             Settings.Default.DefaultCandleCount = DefaultCandleCount;
             Settings.Default.IndicatorString = JsonConvert.SerializeObject(Indicators);

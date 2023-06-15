@@ -10,8 +10,12 @@ using Binance.Net.Objects;
 using Bithumb.Net.Clients;
 using Bithumb.Net.Enums;
 
+using Bybit.Net.Clients;
+using Bybit.Net.Enums;
+
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -36,6 +40,8 @@ namespace Albedo
         int subId = 0;
         BinanceClient binanceClient = new();
         BinanceSocketClient binanceSocketClient = new();
+        BybitClient bybitClient = new();
+        BybitSocketClient bybitSocketClient = new();
         BithumbClient bithumbClient = new();
         BithumbSocketClient bithumbSocketClient = new(); // for ticker
         BithumbSocketClient bithumbSocketClient2 = new(); // for transaction
@@ -50,7 +56,6 @@ namespace Albedo
                 InitializeComponent();
                 InitSettings();
 
-                InitBinanceClient();
                 InitBithumbClient();
                 InitUpbitClient();
 
@@ -176,70 +181,10 @@ namespace Albedo
             }
         }
 
-        void InitBinanceClient()
-        {
-            try
-            {
-                try
-                {
-                    binanceClient = new BinanceClient(new BinanceClientOptions
-                    {
-                        // API Key 없어도 잘 돌아감?
-                        //ApiCredentials = new BinanceApiCredentials(Settings.Default.BinanceApiKey, Settings.Default.BinanceSecretKey)
-                    });
-                }
-                catch
-                {
-                    MessageBox.Show("바이낸스 API 오류입니다.\n다시 시도해 주세요.");
-                    throw;
-                }
-
-                try
-                {
-                    binanceSocketClient = new BinanceSocketClient(new BinanceSocketClientOptions
-                    {
-                        // API Key 없어도 잘 돌아감?
-                        //ApiCredentials = new BinanceApiCredentials(Settings.Default.BinanceApiKey, Settings.Default.BinanceSecretKey)
-                    });
-                }
-                catch
-                {
-                    MessageBox.Show("바이낸스 소켓 오류입니다.\n다시 시도해 주세요.");
-                    throw;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex.ToString());
-            }
-        }
-
         void InitBithumbClient()
         {
             try
             {
-                try
-                {
-                    // API Key 없어도 잘 돌아감?
-                    //bithumbClient = new BithumbClient(Settings.Default.BithumbApiKey, Settings.Default.BithumbSecretKey);
-                    bithumbClient = new BithumbClient("", "");
-                }
-                catch
-                {
-                    MessageBox.Show("빗썸 API 오류입니다.\n다시 시도해 주세요.");
-                    throw;
-                }
-
-                try
-                {
-                    bithumbSocketClient = new BithumbSocketClient();
-                }
-                catch
-                {
-                    MessageBox.Show("빗썸 소켓 오류입니다.\n다시 시도해 주세요.");
-                    throw;
-                }
                 var krwSymbols = bithumbClient.Public.GetAllTickersAsync(BithumbPaymentCurrency.KRW);
                 krwSymbols.Wait();
                 foreach (var krwSymbol in krwSymbols.Result.data?.coins ?? default!)
@@ -301,9 +246,15 @@ namespace Albedo
                             switch (Common.Pair.Market)
                             {
                                 case PairMarket.Binance:
-                                    (var _chartControl, var _newSubId) = ChartMan.RefreshBinanceChart(binanceClient, binanceSocketClient, subId, Common.Pair.MarketType);
-                                    subId = _newSubId;
-                                    Chart.Content = _chartControl;
+                                    (var _binanceChartControl, var _binanceNewSubId) = ChartMan.RefreshBinanceChart(binanceClient, binanceSocketClient, subId, Common.Pair.MarketType);
+                                    subId = _binanceNewSubId;
+                                    Chart.Content = _binanceChartControl;
+                                    break;
+
+                                case PairMarket.Bybit:
+                                    (var _bybitChartControl, var _bybitNewSubId) = ChartMan.RefreshBybitChart(bybitClient, bybitSocketClient, subId, Common.Pair.MarketType);
+                                    subId = _bybitNewSubId;
+                                    Chart.Content = _bybitChartControl;
                                     break;
 
                                 case PairMarket.Upbit:
@@ -319,9 +270,15 @@ namespace Albedo
                             break;
 
                         case PairMarket.Binance: // 바이낸스
-                            (var chartControl, var newSubId) = ChartMan.RefreshBinanceChart(binanceClient, binanceSocketClient, subId, Common.CurrentSelectedPairMarketType.PairMarketType);
-                            subId = newSubId;
-                            Chart.Content = chartControl;
+                            (var binanceChartControl, var binanceNewSubId) = ChartMan.RefreshBinanceChart(binanceClient, binanceSocketClient, subId, Common.CurrentSelectedPairMarketType.PairMarketType);
+                            subId = binanceNewSubId;
+                            Chart.Content = binanceChartControl;
+                            break;
+
+                        case PairMarket.Bybit: // 바이비트
+                            (var bybitChartControl, var bybitNewSubId) = ChartMan.RefreshBybitChart(bybitClient, bybitSocketClient, subId, Common.CurrentSelectedPairMarketType.PairMarketType);
+                            subId = bybitNewSubId;
+                            Chart.Content = bybitChartControl;
                             break;
 
                         case PairMarket.Upbit: // 업비트
@@ -358,6 +315,10 @@ namespace Albedo
                                     ChartMan.LoadAdditionalBinanceChart(binanceClient, chartControl, Common.Pair.MarketType);
                                     break;
 
+                                case PairMarket.Bybit:
+                                    ChartMan.LoadAdditionalBybitChart(bybitClient, chartControl, Common.Pair.MarketType);
+                                    break;
+
                                 case PairMarket.Upbit:
                                     ChartMan.LoadAdditionalUpbitSpotChart(upbitClient, chartControl);
                                     break;
@@ -370,6 +331,10 @@ namespace Albedo
 
                         case PairMarket.Binance: // 바이낸스
                             ChartMan.LoadAdditionalBinanceChart(binanceClient, chartControl, Common.CurrentSelectedPairMarketType.PairMarketType);
+                            break;
+
+                        case PairMarket.Bybit: // 바이비트
+                            ChartMan.LoadAdditionalBybitChart(bybitClient, chartControl, Common.CurrentSelectedPairMarketType.PairMarketType);
                             break;
 
                         case PairMarket.Upbit: // 업비트
@@ -401,6 +366,23 @@ namespace Albedo
                 TickerMan.UpdateBinanceSpotTicker(binanceSocketClient, Menu);
                 TickerMan.UpdateBinanceFuturesTicker(binanceSocketClient, Menu);
                 TickerMan.UpdateBinanceCoinFuturesTicker(binanceSocketClient, Menu);
+
+                var bybitSpotSymbolResult = bybitClient.V5Api.ExchangeData.GetSpotSymbolsAsync();
+                var bybitLinearSymbolResult = bybitClient.V5Api.ExchangeData.GetLinearInverseSymbolsAsync(Category.Linear);
+                var bybitInverseSymbolResult = bybitClient.V5Api.ExchangeData.GetLinearInverseSymbolsAsync(Category.Inverse);
+                var bybitOptionSymbolResult = bybitClient.V5Api.ExchangeData.GetOptionSymbolsAsync();
+                bybitSpotSymbolResult.Wait();
+                bybitLinearSymbolResult.Wait();
+                bybitInverseSymbolResult.Wait();
+                bybitOptionSymbolResult.Wait();
+                var bybitSpotSymbol = bybitSpotSymbolResult.Result.Data.List.Select(x=>x.Name);
+                var bybitLinearSymbol = bybitLinearSymbolResult.Result.Data.List.Select(x=>x.Name);
+                var bybitInverseSymbol = bybitInverseSymbolResult.Result.Data.List.Select(x=>x.Name);
+                var bybitOptionSymbol = bybitOptionSymbolResult.Result.Data.List.Select(x=>x.Name);
+                TickerMan.UpdateBybitSpotTicker(bybitSocketClient, Menu, bybitSpotSymbol);
+                TickerMan.UpdateBybitLinearTicker(bybitSocketClient, Menu, bybitLinearSymbol);
+                TickerMan.UpdateBybitInverseTicker(bybitSocketClient, Menu, bybitInverseSymbol);
+                TickerMan.UpdateBybitOptionTicker(bybitSocketClient, Menu, bybitOptionSymbol);
             }
             catch (Exception ex)
             {

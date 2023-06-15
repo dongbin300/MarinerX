@@ -31,6 +31,7 @@
         PLN,
         RON,
         ARS,
-        USD
+        USD,
+        SOL
     }
 }

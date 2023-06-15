@@ -168,12 +168,12 @@ namespace Albedo.Views
                     (LineWeightModel)chartControl.RsiLineWeightCombo.SelectedItem);
 
                 // Market
-                SettingsMan.BinanceApiKey = marketControl.BinanceApiKeyText.Text;
-                SettingsMan.BinanceSecretKey = marketControl.BinanceApiSecretKeyText.Text;
+                //SettingsMan.BinanceApiKey = marketControl.BinanceApiKeyText.Text;
+                //SettingsMan.BinanceSecretKey = marketControl.BinanceApiSecretKeyText.Text;
                 SettingsMan.UpbitApiKey = marketControl.UpbitApiKeyText.Text;
                 SettingsMan.UpbitSecretKey = marketControl.UpbitApiSecretKeyText.Text;
-                SettingsMan.BithumbApiKey = marketControl.BithumbApiKeyText.Text;
-                SettingsMan.BithumbSecretKey = marketControl.BithumbApiSecretKeyText.Text;
+                //SettingsMan.BithumbApiKey = marketControl.BithumbApiKeyText.Text;
+                //SettingsMan.BithumbSecretKey = marketControl.BithumbApiSecretKeyText.Text;
 
                 // Pair
                 SettingsMan.SimpleListCount = int.Parse(pairControl.SimpleListCountText.Text);

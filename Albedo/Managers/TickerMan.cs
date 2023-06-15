@@ -10,6 +10,10 @@ using Binance.Net.Clients;
 using Bithumb.Net.Clients;
 using Bithumb.Net.Enums;
 
+using Bybit.Net.Clients;
+
+using System.Collections.Generic;
+
 using Upbit.Net.Clients;
 
 namespace Albedo.Managers
@@ -62,7 +66,6 @@ namespace Albedo.Managers
                 }
             });
         }
-
         public static void UpdateBinanceFuturesTicker(BinanceSocketClient client, MenuControl menu)
         {
             client.UsdFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
@@ -108,7 +111,6 @@ namespace Albedo.Managers
                 }
             });
         }
-
         public static void UpdateBinanceCoinFuturesTicker(BinanceSocketClient client, MenuControl menu)
         {
             client.CoinFuturesStreams.SubscribeToAllTickerUpdatesAsync((obj) =>
@@ -144,6 +146,192 @@ namespace Albedo.Managers
                             PairMarketType.CoinFutures,
                             PairQuoteAsset.USDT,
                             item.Symbol, item.LastPrice, item.PriceChangePercent));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+            });
+        }
+        #endregion
+
+        #region Bybit
+        public static void UpdateBybitSpotTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
+        {
+            client.V5SpotStreams.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            {
+                var item = obj.Data;
+                var quoteAsset = BybitSymbolMapper.GetPairQuoteAsset(item.Symbol);
+
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
+                {
+                    var pairId = $"Bybit_Spot_{item.Symbol}";
+                    if (SettingsMan.FavoritesList.Contains(pairId))
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                           PairMarket.Bybit,
+                           PairMarketType.Spot,
+                           quoteAsset,
+                           item.Symbol, item.LastPrice, item.PricePercentage24h));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+                else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bybit && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Spot) // 바이비트 현물
+                {
+                    if (quoteAsset == Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset)
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                            PairMarket.Bybit,
+                            PairMarketType.Spot,
+                            quoteAsset,
+                            item.Symbol, item.LastPrice, item.PricePercentage24h));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+            });
+        }
+        public static void UpdateBybitLinearTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
+        {
+            client.V5LinearStreams.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            {
+                var item = obj.Data;
+                decimal price = 0;
+                decimal change = 0;
+                if (item.LastPrice != null && item.PricePercentage24h != null)
+                {
+                    price = item.LastPrice.Value;
+                    change = item.PricePercentage24h.Value;
+                }
+                else
+                {
+                    return;
+                }
+                var quoteAsset = BybitSymbolMapper.GetPairQuoteAsset(item.Symbol);
+
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
+                {
+                    var pairId = $"Bybit_Linear_{item.Symbol}";
+                    if (SettingsMan.FavoritesList.Contains(pairId))
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                           PairMarket.Bybit,
+                           PairMarketType.Linear,
+                           quoteAsset,
+                           item.Symbol, price, change));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+                else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bybit && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Linear) // 바이비트 선물
+                {
+                    if (quoteAsset == Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset)
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                            PairMarket.Bybit,
+                            PairMarketType.Linear,
+                            quoteAsset,
+                            item.Symbol, price, change));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+            });
+        }
+        public static void UpdateBybitInverseTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
+        {
+            client.InversePerpetualStreams.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            {
+                var item = obj.Data;
+                decimal price = 0;
+                decimal change = 0;
+                if (item.LastPrice != null && item.PriceChangePercentage24H != null)
+                {
+                    price = item.LastPrice.Value;
+                    change = item.PriceChangePercentage24H.Value;
+                }
+                else
+                {
+                    return;
+                }
+                var quoteAsset = BybitSymbolMapper.GetPairQuoteAsset(item.Symbol);
+
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
+                {
+                    var pairId = $"Bybit_Inverse_{item.Symbol}";
+                    if (SettingsMan.FavoritesList.Contains(pairId))
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                           PairMarket.Bybit,
+                           PairMarketType.Inverse,
+                           quoteAsset,
+                           item.Symbol, price, change));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+                else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bybit && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Inverse) // 바이비트 선물 인버스
+                {
+                    if (quoteAsset == Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset)
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                            PairMarket.Bybit,
+                            PairMarketType.Inverse,
+                            quoteAsset,
+                            item.Symbol, price, change));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+            });
+        }
+        public static void UpdateBybitOptionTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
+        {
+            client.V5OptionsStreams.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            {
+                if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
+                {
+                    var item = obj.Data;
+                    var quoteAsset = BybitSymbolMapper.GetPairQuoteAsset(item.Symbol);
+                    var pairId = $"Bybit_Option_{item.Symbol}";
+                    if (SettingsMan.FavoritesList.Contains(pairId))
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                           PairMarket.Bybit,
+                           PairMarketType.Option,
+                           quoteAsset,
+                           item.Symbol, item.LastPrice, item.Change24h));
+                        });
+                    }
+                    Common.ArrangePairs();
+                }
+                else if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Bybit && Common.CurrentSelectedPairMarketType.PairMarketType == PairMarketType.Option) // 바이비트 옵션
+                {
+                    var item = obj.Data;
+                    var quoteAsset = BybitSymbolMapper.GetPairQuoteAsset(item.Symbol);
+                    if (quoteAsset == Common.CurrentSelectedPairQuoteAsset.PairQuoteAsset)
+                    {
+                        DispatcherService.Invoke(() =>
+                        {
+                            menu.viewModel.UpdatePairInfo(new Pair(
+                            PairMarket.Bybit,
+                            PairMarketType.Option,
+                            quoteAsset,
+                            item.Symbol, item.LastPrice, item.Change24h));
                         });
                     }
                     Common.ArrangePairs();

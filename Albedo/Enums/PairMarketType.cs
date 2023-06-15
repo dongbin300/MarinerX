@@ -5,6 +5,9 @@
         None,
         Spot,
         Futures,
-        CoinFutures
+        CoinFutures,
+        Linear,
+        Inverse,
+        Option
     }
 }
