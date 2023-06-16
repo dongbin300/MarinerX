@@ -4,15 +4,17 @@ using MarinerX.Bot.Bots;
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Models;
 using MarinerX.Bot.Systems;
+using MarinerX.Bot.Views;
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace MarinerX.Bot
@@ -28,6 +30,8 @@ namespace MarinerX.Bot
         ManagerBot manager = new("매니저 봇", "심볼 모니터링, 포지션 모니터링, 자산 모니터링 등등 전반적인 시스템을 관리하는 봇입니다.");
         LongBot longPosition = new("롱 봇", "롱 포지션 매매를 하는 봇입니다.");
         ShortBot shortPosition = new("숏 봇", "숏 포지션 매매를 하는 봇입니다.");
+
+        IEnumerable<BinanceRealizedPnlHistory> todayRealizedPnlHistory = default!;
 
         public MainWindow()
         {
@@ -107,12 +111,11 @@ namespace MarinerX.Bot
                 });
 
                 /* 수익 모니터링 */
-                var todayRealizedPnlHistory = await manager.GetBinanceTodayRealizedPnlHistory();
+                todayRealizedPnlHistory = await manager.GetBinanceTodayRealizedPnlHistory();
                 DispatcherService.Invoke(() =>
                 {
                     if (todayRealizedPnlHistory != null && !todayRealizedPnlHistory.Any(x => x == null))
                     {
-                        //TodayPnlText.ToolTip = new TextBlock() { Text = string.Join(Environment.NewLine, todayRealizedPnlHistory.Select(x => x.ToString())), Foreground = new SolidColorBrush(Colors.Black) };
                         var todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
                         if (todayPnl >= 0)
                         {
@@ -194,6 +197,7 @@ namespace MarinerX.Bot
         }
         #endregion
 
+        #region Bot Activate
         private void LongBotCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             try
@@ -255,7 +259,9 @@ namespace MarinerX.Bot
                 Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
             }
         }
+        #endregion
 
+        #region Require Asset
         private int CalculateRequireAsset()
         {
             try
@@ -301,6 +307,22 @@ namespace MarinerX.Bot
             }
 
             RequireAssetText.Text = $"{CalculateRequireAsset():N} USDT";
+        }
+        #endregion
+
+
+        private void TodayPnlText_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                var pnlWindow = new RealizedPnlWindow();
+                pnlWindow.Init(todayRealizedPnlHistory);
+                pnlWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ using MarinerX.Bot.Extensions;
 using MarinerX.Bot.Models;
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -21,6 +21,8 @@ namespace MarinerX.Bot.Bots
         public decimal TargetRoe { get; set; }
         public int Leverage { get; set; }
         public int MaxActiveDeals { get; set; }
+
+        private List<string> DealingSymbols = new();
 
         public LongBot() : this("", "")
         {
@@ -51,28 +53,39 @@ namespace MarinerX.Bot.Bots
                 foreach (var pairQuote in Common.PairQuotes)
                 {
                     var symbol = pairQuote.Symbol;
-                    if (!Common.IsLongPositioning(symbol)) // 포지션이 없으면
+                    if (!Common.IsLongPositioning(symbol) && !DealingSymbols.Contains(symbol)) // 포지션이 없으면
                     {
-                        var c0 = pairQuote.Charts[^1]; // 현재 정보
-                        var c1 = pairQuote.Charts[^2]; // 1봉전 정보
-                        var c2 = pairQuote.Charts[^3]; // 2봉전 정보
-                        var c3 = pairQuote.Charts[^4]; // 3봉전 정보
-                        var c4 = pairQuote.Charts[^5]; // 4봉전 정보
+                        DealingSymbols.Add(symbol);
 
-                        // 기법 :: RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 진입
-                        if (c0.Lsma10 > c0.Lsma30 && c1.Lsma10 < c1.Lsma30 &&
-                            ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40)))
+                        try
                         {
-                            var price = c0.Quote.Close;
-                            var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
-                            if (await OpenBuy(symbol, price, quantity).ConfigureAwait(false))
+                            var c0 = pairQuote.Charts[^1]; // 현재 정보
+                            var c1 = pairQuote.Charts[^2]; // 1봉전 정보
+                            var c2 = pairQuote.Charts[^3]; // 2봉전 정보
+                            var c3 = pairQuote.Charts[^4]; // 3봉전 정보
+                            var c4 = pairQuote.Charts[^5]; // 4봉전 정보
+
+                            // 기법 :: RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 진입
+                            if (c0.Lsma10 > c0.Lsma30 && c1.Lsma10 < c1.Lsma30 &&
+                                ((c0.Rsi > 40 && c1.Rsi < 40) || (c1.Rsi > 40 && c2.Rsi < 40) || (c2.Rsi > 40 && c3.Rsi < 40)))
                             {
-                                var takeProfitPrice = Calculator.TargetPrice(PositionSide.Long, price, TargetRoe);
-                                await SetTakeProfit(symbol, takeProfitPrice, quantity).ConfigureAwait(false);
-                                var stoplossPrice = Calculator.TargetPrice(PositionSide.Long, price, TargetRoe / -2);
-                                await SetStopLoss(symbol, stoplossPrice, quantity).ConfigureAwait(false);
+                                var price = c0.Quote.Close;
+                                var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
+                                if (await OpenBuy(symbol, price, quantity).ConfigureAwait(false))
+                                {
+                                    var takeProfitPrice = Calculator.TargetPrice(PositionSide.Long, price, TargetRoe);
+                                    await SetTakeProfit(symbol, takeProfitPrice, quantity).ConfigureAwait(false);
+                                    var stoplossPrice = Calculator.TargetPrice(PositionSide.Long, price, TargetRoe / -2);
+                                    await SetStopLoss(symbol, stoplossPrice, quantity).ConfigureAwait(false);
+                                }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                        }
+
+                        DealingSymbols.Remove(symbol);
                     }
                 }
             }
@@ -99,7 +112,7 @@ namespace MarinerX.Bot.Bots
                         }
                         else
                         {
-                            Common.AddHistory("Long Bot", $"Cancel Order Error: {result.Error?.Message}");
+                            Common.AddHistory("Long Bot", $"Cancel Order {order.Symbol}, Error: {result.Error?.Message}");
                         }
                     }
                 }
@@ -125,7 +138,7 @@ namespace MarinerX.Bot.Bots
                 }
                 else
                 {
-                    Common.AddHistory("Long Bot", $"Open Buy Error: {result.Error?.Message}");
+                    Common.AddHistory("Long Bot", $"Open Buy {symbol}, Error: {result.Error?.Message}");
                     return false;
                 }
             }
@@ -149,7 +162,7 @@ namespace MarinerX.Bot.Bots
                 }
                 else
                 {
-                    Common.AddHistory("Long Bot", $"Close Sell Error: {result.Error?.Message}");
+                    Common.AddHistory("Long Bot", $"Close Sell {symbol}, Error: {result.Error?.Message}");
                 }
             }
             catch (Exception ex)
@@ -172,7 +185,7 @@ namespace MarinerX.Bot.Bots
                 }
                 else
                 {
-                    Common.AddHistory("Long Bot", $"Set Take Profit Error: {result.Error?.Message}");
+                    Common.AddHistory("Long Bot", $"Set Take Profit {symbol}, Error: {result.Error?.Message}");
                 }
             }
             catch (Exception ex)
@@ -195,7 +208,7 @@ namespace MarinerX.Bot.Bots
                 }
                 else
                 {
-                    Common.AddHistory("Long Bot", $"Set Stop Loss Error: {result.Error?.Message}");
+                    Common.AddHistory("Long Bot", $"Set Stop Loss {symbol}, Error: {result.Error?.Message}");
                 }
             }
             catch (Exception ex)

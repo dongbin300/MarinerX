@@ -8,6 +8,8 @@ using System.Windows;
 using Bybit.Net.Clients;
 using Bybit.Net.Enums;
 using System.IO;
+using Binance.Net.Clients;
+using System;
 
 namespace Albedo.Test
 {
@@ -76,7 +78,6 @@ namespace Albedo.Test
     /// </summary>
     public partial class MainWindow : Window
     {
-        BybitClient bybitClient;
         SKFont font = new SKFont(SKTypeface.FromFamilyName("Meiryo UI"), 12);
         SKPaint paint = new SKPaint() { Color = SKColors.White };
         SKPaint pathPaint = new SKPaint() { Style = SKPaintStyle.Fill, Color = SKColors.White };
@@ -85,11 +86,14 @@ namespace Albedo.Test
         {
             InitializeComponent();
 
-            var data = File.ReadAllLines(@"C:\Users\Gaten\AppData\Roaming\Gaten\bybit_api.txt");
-            bybitClient = new BybitClient(new Bybit.Net.Objects.BybitClientOptions()
+            var data = File.ReadAllLines(@"C:\Users\Gaten\AppData\Roaming\Gaten\binance_api.txt");
+            BinanceClient client = new BinanceClient(new Binance.Net.Objects.BinanceClientOptions
             {
-                ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(data[0], data[1])
+                ApiCredentials = new Binance.Net.Objects.BinanceApiCredentials(data[0], data[1])
             });
+            var result = client.UsdFuturesApi.Account.GetIncomeHistoryAsync(null, "REALIZED_PNL", DateTime.UtcNow.Date.AddDays(-1), DateTime.UtcNow.Date.AddDays(0), 1000);
+            result.Wait();
+            var __data = result.Result.Data;
         }
 
 

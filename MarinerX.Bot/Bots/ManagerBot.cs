@@ -94,7 +94,7 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                var result = await BinanceClients.Api.UsdFuturesApi.Account.GetIncomeHistoryAsync(null, "REALIZED_PNL", DateTime.UtcNow.Date).ConfigureAwait(false);
+                var result = await BinanceClients.Api.UsdFuturesApi.Account.GetIncomeHistoryAsync(null, "REALIZED_PNL", DateTime.UtcNow.Date, null, 1000).ConfigureAwait(false);
                 var data = result.Data;
                 return data.Select(d => new BinanceRealizedPnlHistory(
                     d.Timestamp,
@@ -236,7 +236,7 @@ namespace MarinerX.Bot.Bots
                     }
                     else
                     {
-                        Common.AddHistory("Manager Bot", $"Cancel Order Error: {result.Error?.Message}");
+                        Common.AddHistory("Manager Bot", $"Cancel Order {order.Symbol}, Error: {result.Error?.Message}");
                     }
                 }
             }

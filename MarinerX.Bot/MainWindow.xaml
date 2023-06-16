@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MarinerX Bot 230614" Height="610" Width="1400" Background="{StaticResource ChartBackground}">
+        Title="MarinerX Bot 230616" Height="610" Width="1400" Background="{StaticResource ChartBackground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -30,14 +30,14 @@
                     <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
                     <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
-                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="15" TextChanged="LeverageTextBox_TextChanged"/>
+                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="LeverageTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage Type</TextBlock>
                     <ComboBox x:Name="LeverageTypeComboBox" SelectedIndex="0">
                         <ComboBoxItem>Cross</ComboBoxItem>
                         <ComboBoxItem>Isolated</ComboBoxItem>
                     </ComboBox>
                     <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="10" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
+                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="50" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
                     <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.75"/>
                     <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
@@ -87,7 +87,7 @@
                     <TextBlock Style="{StaticResource Description}">BNB</TextBlock>
                     <TextBlock x:Name="BnbText" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold" Foreground="{StaticResource Binance}"/>
                     <TextBlock Style="{StaticResource Description}">Today PNL</TextBlock>
-                    <TextBlock x:Name="TodayPnlText" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock x:Name="TodayPnlText" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold" MouseLeftButtonDown="TodayPnlText_MouseLeftButtonDown"/>
                 </StackPanel>
             </GroupBox>
         </Grid>
