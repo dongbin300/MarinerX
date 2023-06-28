@@ -10,6 +10,7 @@ using Bybit.Net.Enums;
 using System.IO;
 using Binance.Net.Clients;
 using System;
+using System.Threading;
 
 namespace Albedo.Test
 {
@@ -82,18 +83,112 @@ namespace Albedo.Test
         SKPaint paint = new SKPaint() { Color = SKColors.White };
         SKPaint pathPaint = new SKPaint() { Style = SKPaintStyle.Fill, Color = SKColors.White };
 
+        List<string> MonitorSymbols { get; set; } = new()
+        {
+            "AAVEUSDT",
+            "ALGOUSDT",
+            "ALICEUSDT",
+            "ALPHAUSDT",
+            "ANKRUSDT",
+            "ANTUSDT",
+            "APEUSDT",
+            "API3USDT",
+            "ARPAUSDT",
+            "ARUSDT",
+            "ATAUSDT",
+            "AUDIOUSDT",
+            "AVAXUSDT",
+            "AXSUSDT",
+            "BAKEUSDT",
+            "BALUSDT",
+            "BELUSDT",
+            "BLZUSDT",
+            "C98USDT",
+            "CHRUSDT",
+            "CHZUSDT",
+            "COMPUSDT",
+            "COTIUSDT",
+            "CRVUSDT",
+            "CTSIUSDT",
+            "DARUSDT",
+            "DASHUSDT",
+            "DUSKUSDT",
+            "DYDXUSDT",
+            "ENJUSDT",
+            "ENSUSDT",
+            "ETCUSDT",
+            "FILUSDT",
+            "FTMUSDT",
+            "GALAUSDT",
+            "GALUSDT",
+            "GMTUSDT",
+            "GRTUSDT",
+            "GTCUSDT",
+            "IMXUSDT",
+            "JASMYUSDT",
+            "KNCUSDT",
+            "LINAUSDT",
+            "LITUSDT",
+            "LPTUSDT",
+            "LRCUSDT",
+            "MANAUSDT",
+            "MASKUSDT",
+            "MKRUSDT",
+            "NKNUSDT",
+            "OCEANUSDT",
+            "OGNUSDT",
+            "OMGUSDT",
+            "ONEUSDT",
+            "OPUSDT",
+            "PEOPLEUSDT",
+            "REEFUSDT",
+            "RENUSDT",
+            "RLCUSDT",
+            "ROSEUSDT",
+            "RSRUSDT",
+            "RUNEUSDT",
+            "RVNUSDT",
+            "SANDUSDT",
+            "SFPUSDT",
+            "SKLUSDT",
+            "SNXUSDT",
+            "SOLUSDT",
+            "STORJUSDT",
+            "SUSHIUSDT",
+            "THETAUSDT",
+            "TOMOUSDT",
+            "TRBUSDT",
+            "UNFIUSDT",
+            "WAVESUSDT",
+            "WOOUSDT",
+            "ZECUSDT",
+            "ZENUSDT",
+            "ZILUSDT",
+            "ZRXUSDT"
+        };
+
+        public record Pnl(string symbol, decimal pnl);
+
         public MainWindow()
         {
             InitializeComponent();
+            List<Pnl> pnls = new List<Pnl>();
 
             var data = File.ReadAllLines(@"C:\Users\Gaten\AppData\Roaming\Gaten\binance_api.txt");
             BinanceClient client = new BinanceClient(new Binance.Net.Objects.BinanceClientOptions
             {
                 ApiCredentials = new Binance.Net.Objects.BinanceApiCredentials(data[0], data[1])
             });
-            var result = client.UsdFuturesApi.Account.GetIncomeHistoryAsync(null, "REALIZED_PNL", DateTime.UtcNow.Date.AddDays(-1), DateTime.UtcNow.Date.AddDays(0), 1000);
-            result.Wait();
-            var __data = result.Result.Data;
+            foreach(var symbol in MonitorSymbols)
+            {
+                Thread.Sleep(250);
+                var result = client.UsdFuturesApi.Account.GetIncomeHistoryAsync(symbol, "REALIZED_PNL", DateTime.Parse("2023-06-14"), null, 1000);
+                result.Wait();
+                var d = result.Result.Data;
+                var pnl = Math.Round(d.Sum(x => x.Income), 2);
+                pnls.Add(new Pnl(symbol, pnl));
+            }
+            
         }
 
 

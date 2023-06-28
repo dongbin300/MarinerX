@@ -1,6 +1,7 @@
-﻿using MarinerX.Utils;
+﻿using CryptoModel;
 
-using MercuryTradingModel.Extensions;
+using MarinerX.Utils;
+
 using MercuryTradingModel.Trades;
 
 using System.Collections.Generic;

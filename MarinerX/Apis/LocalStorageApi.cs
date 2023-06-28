@@ -4,7 +4,7 @@ using Binance.Net.Objects.Models.Spot;
 using MarinerX.Markets;
 using MarinerX.Utils;
 
-using MercuryTradingModel.Extensions;
+using CryptoModel;
 
 using Skender.Stock.Indicators;
 

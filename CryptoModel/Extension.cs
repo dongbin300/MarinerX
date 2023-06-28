@@ -29,5 +29,47 @@
                 Directory.CreateDirectory(path);
             }
         }
+        public static string GetDirectory(this string path)
+        {
+            string[] data = path.Split('\\');
+            return path.Replace(data[^1], "");
+        }
+        public static string GetFileName(this string path)
+        {
+            string[] data = path.Split('\\');
+            return data[^1];
+        }
+        public static string GetExtension(this string path)
+        {
+            return path[path.LastIndexOf('.')..];
+        }
+        public static string GetOnlyFileName(this string path)
+        {
+            string data = GetFileName(path);
+            return data.Replace(GetExtension(path), "");
+        }
+        public static long DateTimeToTimeStamp(this DateTime value)
+        {
+            return ((DateTimeOffset)value).ToUnixTimeSeconds();
+        }
+
+        public static long DateTimeToTimeStampMilliseconds(this DateTime value)
+        {
+            return ((DateTimeOffset)value).ToUnixTimeMilliseconds();
+        }
+
+        public static DateTime TimeStampToDateTime(this long value)
+        {
+            var dt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dt = dt.AddSeconds(value).ToLocalTime();
+            return dt;
+        }
+
+        public static DateTime TimeStampMillisecondsToDateTime(this long value)
+        {
+            var dt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dt = dt.AddMilliseconds(value).ToLocalTime();
+            return dt;
+        }
     }
 }

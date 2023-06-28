@@ -5,8 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarinerX.Macro"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
-    <Grid>
+        Title="MainWindow" Height="300" Width="300" Loaded="Window_Loaded">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+        </Style>
 
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Margin" Value="5" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Height" Value="40" />
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock>심볼(USDT 제외)</TextBlock>
+            <TextBox x:Name="SymbolTextBox" CharacterCasing="Upper"></TextBox>
+            <TextBlock>시작날짜</TextBlock>
+            <TextBox x:Name="YearTextBox" Text="2020"></TextBox>
+            <TextBox x:Name="MonthTextBox" Text="1"></TextBox>
+            <TextBox x:Name="DayTextBox" Text="1"></TextBox>
+            <Button x:Name="DownloadButton" Click="DownloadButton_Click">AggTrades 파일 다운로드</Button>
+            <Button x:Name="ConvertToPriceChangesButton" Click="ConvertToPriceChangesButton_Click">AggTrades -> PriceChanges</Button>
+        </StackPanel>
     </Grid>
 </Window>

@@ -11,18 +11,21 @@ namespace MarinerX.Apis
     {
         public static List<SymbolMarketCap>? GetSymbolMarketCap()
         {
-            string url = "https://www.binance.com/exchange-api/v2/public/asset-service/product/get-products";
+            return null;
+            // Not Available Now
 
-            WebCrawler.Open(url);
-            var obj = JsonConvert.DeserializeObject<GetProducts_Json>(WebCrawler.Source);
+            //string url = "https://www.binance.com/exchange-api/v2/public/asset-service/product/get-products";
 
-            if(obj == null)
-            {
-                return null;
-            }
+            //WebCrawler.Open(url);
+            //var obj = JsonConvert.DeserializeObject<GetProducts_Json>(WebCrawler.Source);
 
-            var usdt = obj.data.Where(x => x.s.EndsWith("USDT") && x.marketCapWon > 100_000_000).ToList();
-            return usdt.Select(x => new SymbolMarketCap() { Symbol = x.s, marketCapWon = x.marketCapWon, marketCapWonString = x.marketCapWonString }).ToList();
+            //if(obj == null)
+            //{
+            //    return null;
+            //}
+
+            //var usdt = obj.data.Where(x => x.s.EndsWith("USDT") && x.marketCapWon > 100_000_000).ToList();
+            //return usdt.Select(x => new SymbolMarketCap() { Symbol = x.s, marketCapWon = x.marketCapWon, marketCapWonString = x.marketCapWonString }).ToList();
         }
 
         public class SymbolMarketCap

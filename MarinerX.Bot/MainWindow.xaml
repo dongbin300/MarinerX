@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MarinerX Bot 230616" Height="610" Width="1400" Background="{StaticResource ChartBackground}">
+        Title="MarinerX Bot 230621" Height="610" Width="1400" Background="{StaticResource ChartBackground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -15,7 +15,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="15*"/>
-                <ColumnDefinition Width="8*"/>
+                <ColumnDefinition Width="9*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
 
@@ -37,11 +37,11 @@
                         <ComboBoxItem>Isolated</ComboBoxItem>
                     </ComboBox>
                     <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="50" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
+                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="25" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
-                    <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.75"/>
+                    <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.85"/>
                     <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
-                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.875"/>
+                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.925"/>
                     <TextBlock Style="{StaticResource Description}">Require Asset</TextBlock>
                     <TextBlock x:Name="RequireAssetText" HorizontalAlignment="Right" Foreground="{StaticResource Long}"/>
                 </StackPanel>
@@ -50,9 +50,9 @@
             <GroupBox Grid.Column="1" Header="Histories">
                 <DataGrid x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Time" Width="3*" Binding="{Binding Time}"/>
-                        <DataGridTextColumn Header="Subject" Width="2*" Binding="{Binding Subject}"/>
-                        <DataGridTextColumn Header="Text" Width="8*" Binding="{Binding Text}"/>
+                        <DataGridTextColumn Header="Time" Width="150" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="Subject" Width="100" Binding="{Binding Subject}"/>
+                        <DataGridTextColumn Header="Text" Width="1*" Binding="{Binding Text}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>
@@ -67,9 +67,9 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Symbol" Width="1*" Binding="{Binding Symbol}"/>
-                        <DataGridTextColumn Header="Margin" Width="0.8*" Binding="{Binding Margin}"/>
-                        <DataGridTextColumn Header="PNL" Width="1.5*" Binding="{Binding PnlString}">
+                        <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}"/>
+                        <DataGridTextColumn Header="Margin" Width="90" Binding="{Binding Margin}"/>
+                        <DataGridTextColumn Header="PNL" Width="1*" Binding="{Binding PnlString}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{Binding PnlColor}" />

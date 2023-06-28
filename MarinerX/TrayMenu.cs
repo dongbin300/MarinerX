@@ -1,5 +1,6 @@
-﻿using Binance.Net.Clients;
-using Binance.Net.Enums;
+﻿using Binance.Net.Enums;
+
+using CryptoModel;
 
 using MarinaX.Utils;
 
@@ -26,7 +27,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Forms;
 
@@ -114,6 +114,15 @@ namespace MarinerX
             menu1.DropDownItems.Add("Binance 심볼 데이터 수집", null, new EventHandler(GetBinanceSymbolDataEvent));
             menu1.DropDownItems.Add("Binance 1분봉 데이터 수집", null, new EventHandler(GetBinanceCandleDataEvent));
             menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
+            menu1.DropDownItems.Add("Binance 5분봉 데이터 추출", null, new EventHandler(Extract5mCandleEvent));
+            menu1.DropDownItems.Add("Binance 15분봉 데이터 추출", null, new EventHandler(Extract15mCandleEvent));
+            menu1.DropDownItems.Add("Binance 30분봉 데이터 추출", null, new EventHandler(Extract30mCandleEvent));
+            menu1.DropDownItems.Add("Binance 1시간봉 데이터 추출", null, new EventHandler(Extract1hCandleEvent));
+            menu1.DropDownItems.Add(new ToolStripSeparator());
+            menu1.DropDownItems.Add("Binance 5분봉 지표값 추출", null, new EventHandler(Extract5mIndicatorTs1Event));
+            menu1.DropDownItems.Add("Binance 15분봉 지표값 추출", null, new EventHandler(Extract15mIndicatorTs1Event));
+            menu1.DropDownItems.Add("Binance 30분봉 지표값 추출", null, new EventHandler(Extract30mIndicatorTs1Event));
+            menu1.DropDownItems.Add("Binance 1시간봉 지표값 추출", null, new EventHandler(Extract1hIndicatorTs1Event));
             menu1.DropDownItems.Add(new ToolStripSeparator());
             menu1.DropDownItems.Add("Binance 1분봉 데이터 체크", null, new EventHandler(GetBinanceCandleDataCheckEvent));
             menu1.DropDownItems.Add("Binance 1분봉 매뉴얼 데이터 수집", null, new EventHandler(GetBinanceCandleDataManualEvent));
@@ -388,10 +397,218 @@ namespace MarinerX
         {
             try
             {
-                ChartLoader.ExtractCandle(KlineInterval.OneDay, worker);
+                ChartLoader.Extract1DCandle(worker);
                 DispatcherService.Invoke(progressView.Hide);
 
                 MessageBox.Show("바이낸스 1일봉 데이터 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract5mCandleEvent(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract5mCandle
+            };
+            worker.Start();
+        }
+
+        public static void Extract5mCandle(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractCandle(worker, KlineInterval.FiveMinutes, "5m");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 5분봉 데이터 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract15mCandleEvent(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract15mCandle
+            };
+            worker.Start();
+        }
+
+        public static void Extract15mCandle(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractCandle(worker, KlineInterval.FifteenMinutes, "15m");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 15분봉 데이터 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract30mCandleEvent(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract30mCandle
+            };
+            worker.Start();
+        }
+
+        public static void Extract30mCandle(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractCandle(worker, KlineInterval.ThirtyMinutes, "30m");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 30분봉 데이터 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract1hCandleEvent(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract1hCandle
+            };
+            worker.Start();
+        }
+
+        public static void Extract1hCandle(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractCandle(worker, KlineInterval.OneHour, "1h");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 1시간봉 데이터 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract5mIndicatorTs1Event(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract5mIndicatorTs1
+            };
+            worker.Start();
+        }
+
+        public static void Extract5mIndicatorTs1(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.FiveMinutes, "5m");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 5분봉 TS2 지표값 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract15mIndicatorTs1Event(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract15mIndicatorTs1
+            };
+            worker.Start();
+        }
+
+        public static void Extract15mIndicatorTs1(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.FifteenMinutes, "15m");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 15분봉 TS2 지표값 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract30mIndicatorTs1Event(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract30mIndicatorTs1
+            };
+            worker.Start();
+        }
+
+        public static void Extract30mIndicatorTs1(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.ThirtyMinutes, "30m");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 30분봉 TS2 지표값 추출 완료");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public static void Extract1hIndicatorTs1Event(object? sender, EventArgs e)
+        {
+            progressView.Show();
+            var worker = new Worker()
+            {
+                ProgressBar = progressView.ProgressBar,
+                Action = Extract1hIndicatorTs1
+            };
+            worker.Start();
+        }
+
+        public static void Extract1hIndicatorTs1(Worker worker, object? obj)
+        {
+            try
+            {
+                ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.OneHour, "1h");
+                DispatcherService.Invoke(progressView.Hide);
+
+                MessageBox.Show("바이낸스 1시간봉 TS2 지표값 추출 완료");
             }
             catch (Exception ex)
             {

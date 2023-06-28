@@ -95,8 +95,8 @@ namespace CryptoModel.Charts
         public void CalculateIndicatorsStefano()
         {
             var quotes = Charts.Select(x => x.Quote);
-            var r1 = quotes.GetEma(12).Select(x=>x.Ema);
-            var r2 = quotes.GetEma(26).Select(x=>x.Ema);
+            var r1 = quotes.GetEma(12).Select(x => x.Ema);
+            var r2 = quotes.GetEma(26).Select(x => x.Ema);
             //var r3 = quotes.GetJmaSlope(14).Select(x => x.JmaSlope);
             for (int i = 0; i < Charts.Count; i++)
             {
@@ -138,5 +138,10 @@ namespace CryptoModel.Charts
             });
 
         public ChartInfo GetChart(DateTime dateTime) => Charts.First(x => x.DateTime.Equals(dateTime));
+
+        public List<ChartInfo> GetCharts(DateTime startTime, DateTime endTime)
+        {
+            return Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime).ToList();
+        }
     }
 }

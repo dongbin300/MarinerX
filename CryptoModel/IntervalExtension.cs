@@ -23,5 +23,25 @@ namespace CryptoModel
             "1M" => KlineInterval.OneMonth,
             _ => KlineInterval.OneMinute
         };
+
+        public static string ToIntervalString(this KlineInterval interval) => interval switch
+        { 
+            KlineInterval.OneMinute => "1m",
+            KlineInterval.ThreeMinutes => "3m",
+            KlineInterval.FiveMinutes => "5m",
+            KlineInterval.FifteenMinutes => "15m",
+            KlineInterval.ThirtyMinutes => "30m",
+            KlineInterval.OneHour => "1H",
+            KlineInterval.TwoHour => "2H",
+            KlineInterval.FourHour => "4H",
+            KlineInterval.SixHour => "6H",
+            KlineInterval.EightHour => "8H",
+            KlineInterval.TwelveHour => "12H",
+            KlineInterval.OneDay => "1D",
+            KlineInterval.ThreeDay => "3D",
+            KlineInterval.OneWeek => "1W",
+            KlineInterval.OneMonth => "1M",
+            _ => "1m"
+        };
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Binance.Net.Enums;
 
 using CryptoModel.Charts;
-using CryptoModel.Scripts;
 
 namespace CryptoModel.Backtests
 {

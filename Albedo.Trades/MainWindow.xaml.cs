@@ -3,7 +3,7 @@
 using Binance.Net.Clients;
 using Binance.Net.Objects;
 
-using MercuryTradingModel.Extensions;
+using CryptoModel;
 
 using System;
 using System.IO;

@@ -1,4 +1,6 @@
-﻿using MarinaX.Utils;
+﻿using CryptoModel;
+
+using MarinaX.Utils;
 
 using MarinerX.Apis;
 using MarinerX.Charts;
@@ -11,7 +13,6 @@ using MercuryTradingModel.Orders;
 using MercuryTradingModel.Trades;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;

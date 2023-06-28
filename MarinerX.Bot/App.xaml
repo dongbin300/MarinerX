@@ -12,6 +12,7 @@
         <SolidColorBrush x:Key="Background" Color="#24292E"/>
         <SolidColorBrush x:Key="SelectedBackground" Color="#444D56"/>
         <SolidColorBrush x:Key="Separator" Color="#141414"/>
+        <SolidColorBrush x:Key="Cool" Color="#00A2E8"/>
         <SolidColorBrush x:Key="Long" Color="#0ECB81"/>
         <SolidColorBrush x:Key="Short" Color="#F6465D"/>
         <SolidColorBrush x:Key="Binance" Color="#F0B90B"/>
@@ -44,10 +45,10 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="BorderBrush" Value="#666" />
             <Setter Property="BorderThickness" Value="0 0 0 1" />
-            <Setter Property="CaretBrush" Value="{StaticResource Long}" />
+            <Setter Property="CaretBrush" Value="{StaticResource Cool}" />
             <Style.Triggers>
                 <Trigger Property="TextBox.IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource Long}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource Cool}" />
                 </Trigger>
                 <Trigger Property="TextBox.IsMouseOver" Value="False">
                     <Setter Property="BorderBrush" Value="#666" />
@@ -63,10 +64,10 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="BorderBrush" Value="#666" />
             <Setter Property="BorderThickness" Value="0 0 0 1" />
-            <Setter Property="CaretBrush" Value="{StaticResource Long}" />
+            <Setter Property="CaretBrush" Value="{StaticResource Cool}" />
             <Style.Triggers>
                 <Trigger Property="TextBox.IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource Long}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource Cool}" />
                 </Trigger>
                 <Trigger Property="TextBox.IsMouseOver" Value="False">
                     <Setter Property="BorderBrush" Value="#666" />
@@ -250,8 +251,8 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="_ellipse" Property="HorizontalAlignment" Value="Right" />
-                                <Setter TargetName="_ellipse" Property="Fill" Value="{StaticResource Long}" />
-                                <Setter TargetName="_border" Property="Background" Value="{StaticResource Long}" />
+                                <Setter TargetName="_ellipse" Property="Fill" Value="{StaticResource Cool}" />
+                                <Setter TargetName="_border" Property="Background" Value="{StaticResource Cool}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -372,12 +373,12 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" BorderThickness="1" BorderBrush="{StaticResource Long}" Background="{StaticResource Long}">
+                            <Border Grid.Row="0" BorderThickness="1" BorderBrush="{StaticResource Cool}" Background="{StaticResource Cool}">
                                 <Label Foreground="White" Height="28" FontWeight="Bold">
                                     <ContentPresenter ContentSource="Header" RecognizesAccessKey="True"/>
                                 </Label>
                             </Border>
-                            <Border Grid.Row="1" BorderThickness="3,0,3,3" BorderBrush="{StaticResource Long}">
+                            <Border Grid.Row="1" BorderThickness="3,0,3,3" BorderBrush="{StaticResource Cool}">
                                 <ContentPresenter Margin="4" />
                             </Border>
                         </Grid>

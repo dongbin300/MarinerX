@@ -19,6 +19,11 @@ namespace CryptoModel.Charts
         public double Lsma3 { get; set; }
         public double Rsi { get; set; }
         public double JmaSlope { get; set; }
+        public double K { get; set; }
+        public double D { get; set; }
+        public double Supertrend1 { get; set; }
+        public double Supertrend2 { get; set; }
+        public double Supertrend3 { get; set; }
 
         public ChartInfo(string symbol, Quote quote)
         {

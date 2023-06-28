@@ -6,7 +6,7 @@ using MarinerX.Accounts;
 using MarinerX.Markets;
 using MarinerX.Utils;
 
-using MercuryTradingModel.Extensions;
+using CryptoModel;
 
 using Skender.Stock.Indicators;
 

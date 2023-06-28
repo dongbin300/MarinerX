@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
   </ItemGroup>
 

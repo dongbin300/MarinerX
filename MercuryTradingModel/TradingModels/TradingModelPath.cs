@@ -1,4 +1,6 @@
-﻿using MercuryTradingModel.Extensions;
+﻿using CryptoModel;
+
+using MercuryTradingModel.Extensions;
 
 namespace MercuryTradingModel.TradingModels
 {

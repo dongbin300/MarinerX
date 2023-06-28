@@ -48,7 +48,7 @@ namespace MarinerX.Bot.Models
         {
             try
             {
-                var rsiValues = Charts.Select(x => x.Quote).GetRsi(14);
+                var rsiValues = Charts.Select(x => x.Quote).GetRsiV2(14);
                 var lsma10Values = Charts.Select(x => x.Quote).GetLsma(10);
                 var lsma30Values = Charts.Select(x => x.Quote).GetLsma(30);
 

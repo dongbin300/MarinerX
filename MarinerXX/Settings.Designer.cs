@@ -70,5 +70,53 @@ namespace MarinerXX {
                 this["FileName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SymbolPB {
+            get {
+                return ((string)(this["SymbolPB"]));
+            }
+            set {
+                this["SymbolPB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string StartDatePB {
+            get {
+                return ((string)(this["StartDatePB"]));
+            }
+            set {
+                this["StartDatePB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EndDatePB {
+            get {
+                return ((string)(this["EndDatePB"]));
+            }
+            set {
+                this["EndDatePB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FileNamePB {
+            get {
+                return ((string)(this["FileNamePB"]));
+            }
+            set {
+                this["FileNamePB"] = value;
+            }
+        }
     }
 }

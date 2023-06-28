@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="TALib.NETCore" Version="0.4.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
     <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using MarinerX.Utils;
 
-using MercuryTradingModel.Extensions;
+using CryptoModel;
 
 using OfficeOpenXml;
 
