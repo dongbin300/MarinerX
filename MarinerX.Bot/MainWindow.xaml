@@ -21,8 +21,8 @@
 
             <GroupBox Grid.Column="0" Header="Bot Settings">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
-                    <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>
+                    <!--<TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
+                    <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>-->
                     <TextBlock Style="{StaticResource Description}">Long Bot</TextBlock>
                     <CheckBox x:Name="LongBotCheckBox" HorizontalAlignment="Right" Checked="LongBotCheckBox_Checked" Unchecked="LongBotCheckBox_Unchecked"/>
                     <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
@@ -30,18 +30,18 @@
                     <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
                     <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
-                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="20" TextChanged="LeverageTextBox_TextChanged"/>
+                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="10" TextChanged="LeverageTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage Type</TextBlock>
                     <ComboBox x:Name="LeverageTypeComboBox" SelectedIndex="0">
                         <ComboBoxItem>Cross</ComboBoxItem>
                         <ComboBoxItem>Isolated</ComboBoxItem>
                     </ComboBox>
                     <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="25" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
-                    <TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
+                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="5" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
+                    <!--<TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
                     <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.85"/>
                     <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
-                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.925"/>
+                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.925"/>-->
                     <TextBlock Style="{StaticResource Description}">Require Asset</TextBlock>
                     <TextBlock x:Name="RequireAssetText" HorizontalAlignment="Right" Foreground="{StaticResource Long}"/>
                 </StackPanel>

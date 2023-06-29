@@ -60,7 +60,7 @@ namespace MarinerX.Bot
                 });
             };
 
-            await manager.GetAllKlines().ConfigureAwait(false);
+            await manager.GetAllKlines(60).ConfigureAwait(false);
             await manager.StartBinanceFuturesTicker().ConfigureAwait(false);
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -167,7 +167,7 @@ namespace MarinerX.Bot
             try
             {
                 longPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
-                longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
+                //longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
                 longPosition.Leverage = int.Parse(LeverageTextBox.Text);
                 longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
@@ -202,7 +202,7 @@ namespace MarinerX.Bot
             try
             {
                 longPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
-                longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
+                //longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
                 longPosition.Leverage = int.Parse(LeverageTextBox.Text);
                 longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
@@ -233,7 +233,7 @@ namespace MarinerX.Bot
             try
             {
                 shortPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
-                shortPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
+                //shortPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
                 shortPosition.Leverage = int.Parse(LeverageTextBox.Text);
                 shortPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 

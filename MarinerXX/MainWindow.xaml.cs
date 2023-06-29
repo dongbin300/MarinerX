@@ -48,6 +48,7 @@ namespace MarinerXX
             StrategyComboBoxPB.Items.Add("LSMA All");
             StrategyComboBoxPB.Items.Add("LSMA Single");
             StrategyComboBoxPB.Items.Add("TS2 All");
+            StrategyComboBoxPB.Items.Add("TS2 Single");
             StrategyComboBoxPB.SelectedIndex = 4;
 
             PrecisionBacktestText_MouseLeftButtonDown(null, null);
@@ -211,6 +212,10 @@ namespace MarinerXX
 
                     case 4:
                         Strategy5(symbols, interval, startDate, endDate);
+                        break;
+
+                    case 5:
+                        Strategy6(symbols, interval, startDate, endDate);
                         break;
                 }
             }
@@ -463,7 +468,7 @@ namespace MarinerXX
             File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), headerContent);
             ChartLoader.SelectCharts();
             int i = 1;
-            for (; i < 5; i++)
+            for (; i < 20; i++)
             {
                 var nextCharts = ChartLoader.NextCharts();
                 dealManager.ConcatenateChart(nextCharts);
@@ -473,15 +478,15 @@ namespace MarinerXX
                 var nextCharts = ChartLoader.NextCharts();
                 dealManager.ConcatenateChart(nextCharts);
 
-                if (dealManager.Charts[symbols[0]].Count >= 220)
+                if (dealManager.Charts[symbols[0]].Count >= 200)
                 {
                     dealManager.RemoveOldChart();
                 }
 
-                dealManager.EvaluateTs2LongSimple();
-                dealManager.EvaluateTs2ShortSimple();
+                dealManager.EvaluateTs2LongBit();
+                dealManager.EvaluateTs2ShortBit();
 
-                if (i % 96 == 0)
+                if (i % 720 == 0)
                 {
                     var content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine;
                     File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), content);
@@ -491,16 +496,70 @@ namespace MarinerXX
             var _content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine + Environment.NewLine;
             File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), _content);
 
+            var hi = 1;
             foreach (var h in dealManager.PositionHistories)
             {
                 File.AppendAllText(CryptoPath.Desktop.Down($"PH-TS2.csv"),
-                    $"{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result},{h.Income}" + Environment.NewLine
+                    $"{hi++},{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result},{h.Income}" + Environment.NewLine
                     );
             }
 
             var resultChartView = new BacktestResultChartView();
             resultChartView.Init(dealManager.PositionHistories, interval);
             resultChartView.Show();
+        }
+
+        /// <summary>
+        /// TS2 개별 테스트
+        /// </summary>
+        /// <param name="symbols"></param>
+        /// <param name="interval"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="takeProfitRoe"></param>
+        private void Strategy6(string[] symbols, KlineInterval interval, DateTime startDate, DateTime endDate)
+        {
+            foreach (var symbol in symbols)
+            {
+                try
+                {
+                    ChartLoader.Charts.Clear();
+                    ChartLoader.InitChartsAndTs2IndicatorsByDate(symbol, interval, startDate, endDate);
+                }
+                catch
+                {
+                }
+
+                var dealManager = new PrecisionBacktestDealManager(startDate, endDate, 25, 1.0m, 1.0m, 100)
+                {
+                    MonitoringSymbols = new List<string>() { symbol }
+                };
+                var evaluateCount = (int)((endDate - startDate).TotalMinutes / ((int)interval / 60));
+
+                ChartLoader.SelectCharts();
+                int i = 1;
+                for (; i < 20; i++)
+                {
+                    var nextCharts = ChartLoader.NextCharts();
+                    dealManager.ConcatenateChart(nextCharts);
+                }
+                for (; i < evaluateCount; i++)
+                {
+                    var nextCharts = ChartLoader.NextCharts();
+                    dealManager.ConcatenateChart(nextCharts);
+
+                    if (dealManager.Charts[symbol].Count >= 200)
+                    {
+                        dealManager.RemoveOldChart();
+                    }
+
+                    dealManager.EvaluateTs2LongBit();
+                    dealManager.EvaluateTs2ShortBit();
+                }
+
+                var _content = $"{symbol},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine;
+                File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), _content);
+            }
         }
     }
 }

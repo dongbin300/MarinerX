@@ -65,6 +65,28 @@
         }
 
         /// <summary>
+        /// Get previous change value
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static double[] Change(double[] values)
+        {
+            var result = new double[values.Length];
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (i == 0)
+                {
+                    result[i] = NA;
+                    continue;
+                }
+
+                result[i] = values[i] - values[i - 1];
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Simple average of values[0]~values[count-1]
         /// </summary>
         /// <param name="values"></param>
@@ -179,15 +201,7 @@
             return result;
         }
 
-        /// <summary>
-        /// Average True Range
-        /// </summary>
-        /// <param name="high"></param>
-        /// <param name="low"></param>
-        /// <param name="close"></param>
-        /// <param name="period"></param>
-        /// <returns></returns>
-        public static double[] Atr(double[] high, double[] low, double[] close, int period)
+        public static double[] Tr(double[] high, double[] low, double[] close)
         {
             var tr = new double[high.Length];
 
@@ -206,6 +220,20 @@
                         );
             }
 
+            return tr;
+        }
+
+        /// <summary>
+        /// Average True Range
+        /// </summary>
+        /// <param name="high"></param>
+        /// <param name="low"></param>
+        /// <param name="close"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public static double[] Atr(double[] high, double[] low, double[] close, int period)
+        {
+            var tr = Tr(high, low, close);
             return Rma(tr, period);
         }
 

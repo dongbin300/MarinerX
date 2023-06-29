@@ -48,15 +48,13 @@ namespace MarinerX.Bot.Models
         {
             try
             {
-                var rsiValues = Charts.Select(x => x.Quote).GetRsiV2(14);
-                var lsma10Values = Charts.Select(x => x.Quote).GetLsma(10);
-                var lsma30Values = Charts.Select(x => x.Quote).GetLsma(30);
+                var ts = Charts.Select(x => x.Quote).GetTripleSupertrend(10,1.2, 10,3, 10,10);
 
                 for (int i = 0; i < Charts.Count; i++)
                 {
-                    Charts[i].Rsi = rsiValues.ElementAt(i).Rsi ?? 0;
-                    Charts[i].Lsma10 = lsma10Values.ElementAt(i).Lsma ?? 0;
-                    Charts[i].Lsma30 = lsma30Values.ElementAt(i).Lsma ?? 0;
+                    Charts[i].Supertrend1 = ts.ElementAt(i).Supertrend1;
+                    Charts[i].Supertrend2 = ts.ElementAt(i).Supertrend2;
+                    Charts[i].Supertrend3 = ts.ElementAt(i).Supertrend3;
                 }
             }
             catch (Exception ex)

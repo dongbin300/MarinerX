@@ -33,7 +33,7 @@ namespace CryptoModel.Backtests
 
         public decimal Money = 10000;
         public decimal BaseOrderSize = 100;
-        public decimal FeeSize = 0.2m;
+        public decimal FeeSize = 0.02m;
         public decimal EstimatedMoney => Money
             + Positions.Where(x => x.Side.Equals(PositionSide.Long)).Sum(x => x.EntryPrice * x.Quantity)
             - Positions.Where(x => x.Side.Equals(PositionSide.Short)).Sum(x => x.EntryPrice * x.Quantity);
@@ -474,6 +474,25 @@ namespace CryptoModel.Backtests
             }
         }
 
+        public void CalculateIndicatorsTs2()
+        {
+            foreach (var chart in Charts)
+            {
+                var quotes = chart.Value.Select(x => x.Quote);
+                var ts = quotes.GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
+                var r1 = ts.Select(x => x.Supertrend1);
+                var r2 = ts.Select(x => x.Supertrend2);
+                var r3 = ts.Select(x => x.Supertrend3);
+                for (int i = 0; i < chart.Value.Count; i++)
+                {
+                    var _chart = chart.Value[i];
+                    _chart.Supertrend1 = r1.ElementAt(i);
+                    _chart.Supertrend2 = r2.ElementAt(i);
+                    _chart.Supertrend3 = r3.ElementAt(i);
+                }
+            }
+        }
+
         public List<ChartInfo> FastCalculateIndicatorsTs(string symbol, Quote lastQuote)
         {
             var chart = Charts[symbol];
@@ -496,6 +515,32 @@ namespace CryptoModel.Backtests
                     Supertrend1 = r3.ElementAt(18 + p),
                     Supertrend2 = r4.ElementAt(18 + p),
                     Supertrend3 = r5.ElementAt(18 + p),
+                };
+                p++;
+                result.Add(info);
+            }
+
+            return result;
+        }
+
+        public List<ChartInfo> FastCalculateIndicatorsTs2(string symbol, Quote lastQuote)
+        {
+            var chart = Charts[symbol];
+            var quotes = chart.Select(x => x.Quote);
+            var ts = quotes.TakeLast(20).SkipLast(1).Concat(new[] { lastQuote }).GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
+            var r1 = ts.Select(x => x.Supertrend1);
+            var r2 = ts.Select(x => x.Supertrend2);
+            var r3 = ts.Select(x => x.Supertrend3);
+
+            int p = 0;
+            var result = new List<ChartInfo>();
+            for (int i = 0; i < 2; i++)
+            {
+                var info = new ChartInfo("", new Quote())
+                {
+                    Supertrend1 = r1.ElementAt(18 + p),
+                    Supertrend2 = r2.ElementAt(18 + p),
+                    Supertrend3 = r3.ElementAt(18 + p),
                 };
                 p++;
                 result.Add(info);
@@ -608,7 +653,7 @@ namespace CryptoModel.Backtests
                     // 손절
                     if (c0.Quote.Close <= position.StopLossPrice)
                     {
-                        if (position.TakeProfitCount == 0) // 익절없이 손절
+                        if (position.Stage == 0) // 익절없이 손절
                         {
                             Money += position.StopLossPrice * position.Quantity;
                             Positions.Remove(position);
@@ -626,12 +671,12 @@ namespace CryptoModel.Backtests
                         }
                     }
                     // 1차 익절
-                    else if (position.TakeProfitCount == 0 && c0.Quote.Close >= position.TakeProfitPrice)
+                    else if (position.Stage == 0 && c0.Quote.Close >= position.TakeProfitPrice)
                     {
                         var quantity = position.Quantity / 2;
                         Money += position.TakeProfitPrice * quantity;
                         position.Quantity -= quantity;
-                        position.TakeProfitCount = 1;
+                        position.Stage = 1;
 
                         // TP/SL 재설정
                         var stopLossPrice = position.EntryPrice;
@@ -640,7 +685,7 @@ namespace CryptoModel.Backtests
                         position.TakeProfitPrice = takeProfitPrice;
                     }
                     // 2차 익절
-                    else if (position.TakeProfitCount == 1 && c0.Quote.Close >= position.TakeProfitPrice)
+                    else if (position.Stage == 1 && c0.Quote.Close >= position.TakeProfitPrice)
                     {
                         Money += position.TakeProfitPrice * position.Quantity;
 
@@ -715,7 +760,7 @@ namespace CryptoModel.Backtests
                     // 손절
                     if (c0.Quote.Close >= position.StopLossPrice)
                     {
-                        if (position.TakeProfitCount == 0) // 익절없이 손절
+                        if (position.Stage == 0) // 익절없이 손절
                         {
                             Money += position.StopLossPrice * position.Quantity;
                             Positions.Remove(position);
@@ -733,12 +778,12 @@ namespace CryptoModel.Backtests
                         }
                     }
                     // 1차 익절
-                    else if (position.TakeProfitCount == 0 && c0.Quote.Close <= position.TakeProfitPrice)
+                    else if (position.Stage == 0 && c0.Quote.Close <= position.TakeProfitPrice)
                     {
                         var quantity = position.Quantity / 2;
                         Money += position.TakeProfitPrice * quantity;
                         position.Quantity -= quantity;
-                        position.TakeProfitCount = 1;
+                        position.Stage = 1;
 
                         // TP/SL 재설정
                         var stopLossPrice = position.EntryPrice;
@@ -747,7 +792,7 @@ namespace CryptoModel.Backtests
                         position.TakeProfitPrice = takeProfitPrice;
                     }
                     // 2차 익절
-                    else if (position.TakeProfitCount == 1 && c0.Quote.Close <= position.TakeProfitPrice)
+                    else if (position.Stage == 1 && c0.Quote.Close <= position.TakeProfitPrice)
                     {
                         Money += position.TakeProfitPrice * position.Quantity;
 
@@ -821,7 +866,7 @@ namespace CryptoModel.Backtests
                         //}
                     }
                     // 1차 익절
-                    else if (position.TakeProfitCount == 0 && c0.Quote.High >= position.TakeProfitPrice)
+                    else if (position.Stage == 0 && c0.Quote.High >= position.TakeProfitPrice)
                     {
                         Money += position.TakeProfitPrice * position.Quantity;
 
@@ -843,7 +888,7 @@ namespace CryptoModel.Backtests
                     }
 
                     // 2차 익절
-                    if (position.TakeProfitCount == 1 && c0.Quote.High >= position.TakeProfitPrice)
+                    if (position.Stage == 1 && c0.Quote.High >= position.TakeProfitPrice)
                     {
                         Money += position.TakeProfitPrice * position.Quantity;
 
@@ -919,7 +964,7 @@ namespace CryptoModel.Backtests
                         //}
                     }
                     // 1차 익절
-                    else if (position.TakeProfitCount == 0 && c0.Quote.Low <= position.TakeProfitPrice)
+                    else if (position.Stage == 0 && c0.Quote.Low <= position.TakeProfitPrice)
                     {
                         Money += position.TakeProfitPrice * position.Quantity;
 
@@ -941,7 +986,7 @@ namespace CryptoModel.Backtests
                     }
 
                     // 2차 익절
-                    if (position.TakeProfitCount == 1 && c0.Quote.Low <= position.TakeProfitPrice)
+                    if (position.Stage == 1 && c0.Quote.Low <= position.TakeProfitPrice)
                     {
                         Money += position.TakeProfitPrice * position.Quantity;
 
@@ -976,10 +1021,6 @@ namespace CryptoModel.Backtests
                         continue;
                     }
 
-                    // TS 2번 3번이 연두색이고, 1번이 연두색으로 바뀌면 진입
-                    // 손절가는 2번TS선, 2번TS선이 움직임에 따라 실시간으로 수정
-                    // 1차 익절가는 1:1
-                    // 2차 정리조건은 1번TS가 빨간색이 되었을 때
                     if (c1.Supertrend1 > 0 && c2.Supertrend1 < 0 && c1.Supertrend2 > 0 && c1.Supertrend3 > 0)
                     {
                         var price = c0.Quote.Open;
@@ -989,7 +1030,6 @@ namespace CryptoModel.Backtests
                         Money -= price * quantity;
                         var newPosition = new Position(c0.DateTime, symbol, side, price)
                         {
-                            EntryPrice = price,
                             TakeProfitPrice = takeProfitPrice,
                             Quantity = quantity,
                             EntryAmount = price * quantity
@@ -1003,67 +1043,60 @@ namespace CryptoModel.Backtests
                     var st2 = (decimal)Math.Abs(c0.Supertrend2);
                     var dst2 = Calculator.TargetPrice(side, st2, -0.8m);
 
-                    // 손절
-                    if (position.TakeProfitCount == 0 && c0.Supertrend2 < 0)
+                    // 전량 정리
+                    if (c1.Supertrend2 < 0)
                     {
-                        var price = (c0.Quote.High + c0.Quote.Low) / 2;
+                        var price = c0.Quote.Open;
                         var quantity = position.Quantity;
                         Money += price * quantity;
                         Positions.Remove(position);
                         PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
                         {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
                             EntryAmount = position.EntryAmount,
                             ExitAmount = price * quantity
                         });
                         Lose++;
                         Money -= FeeSize;
                     }
-                    else if (position.TakeProfitCount == 0 && c0.Quote.Low <= dst2)
-                    {
-                        var price = dst2;
-                        var quantity = position.Quantity;
-                        Money += price * quantity;
-                        Positions.Remove(position);
-                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
-                        {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
-                            EntryAmount = position.EntryAmount,
-                            ExitAmount = price * quantity
-                        });
-                        Lose++;
-                        Money -= FeeSize;
-                    }
+                    //else if (position.Stage == 0 && c0.Quote.Low <= dst2)
+                    //{
+                    //    var price = dst2;
+                    //    var quantity = position.Quantity;
+                    //    Money += price * quantity;
+                    //    Positions.Remove(position);
+                    //    PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                    //    {
+                    //        EntryAmount = position.EntryAmount,
+                    //        ExitAmount = price * quantity
+                    //    });
+                    //    Lose++;
+                    //    Money -= FeeSize;
+                    //}
                     // 1차 익절
-                    else if (position.TakeProfitCount == 0 && c0.Quote.High >= position.TakeProfitPrice)
+                    else if (position.Stage == 0 && c0.Quote.High >= position.TakeProfitPrice)
                     {
                         var price = position.TakeProfitPrice;
                         var quantity = position.Quantity / 2;
                         Money += price * quantity;
                         position.Quantity -= quantity;
                         position.ExitAmount = price * quantity;
-                        position.TakeProfitCount = 1;
+                        position.Stage = 1;
                     }
-
                     // 2차 정리
-                    if (position.TakeProfitCount == 1 && c0.Supertrend1 < 0)
-                    {
-                        var price = (c0.Quote.High + c0.Quote.Low) / 2;
-                        var quantity = position.Quantity;
-                        Money += price * quantity;
-                        Positions.Remove(position);
-                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
-                        {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
-                            EntryAmount = position.EntryAmount,
-                            ExitAmount = position.ExitAmount + price * quantity
-                        });
-                        Win++;
-                        Money -= FeeSize;
-                    }
+                    //else if (position.Stage == 1 && c1.Supertrend1 < 0)
+                    //{
+                    //    var price = c0.Quote.Open;
+                    //    var quantity = position.Quantity;
+                    //    Money += price * quantity;
+                    //    Positions.Remove(position);
+                    //    PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                    //    {
+                    //        EntryAmount = position.EntryAmount,
+                    //        ExitAmount = position.ExitAmount + price * quantity
+                    //    });
+                    //    Win++;
+                    //    Money -= FeeSize;
+                    //}
                 }
             }
         }
@@ -1088,10 +1121,6 @@ namespace CryptoModel.Backtests
                         continue;
                     }
 
-                    // TS 2번 3번이 빨간색이고, 1번이 빨간색으로 바뀌면 진입
-                    // 손절가는 2번TS선, 2번TS선이 움직임에 따라 실시간으로 수정
-                    // 1차 익절가는 1:1
-                    // 2차 정리조건은 1번TS가 연두색이 되었을 때
                     if (c1.Supertrend1 < 0 && c2.Supertrend1 > 0 && c1.Supertrend2 < 0 && c1.Supertrend3 < 0)
                     {
                         var price = c0.Quote.Open;
@@ -1101,7 +1130,6 @@ namespace CryptoModel.Backtests
                         Money += price * quantity;
                         var newPosition = new Position(c0.DateTime, symbol, side, price)
                         {
-                            EntryPrice = price,
                             TakeProfitPrice = takeProfitPrice,
                             Quantity = quantity,
                             EntryAmount = price * quantity
@@ -1115,67 +1143,60 @@ namespace CryptoModel.Backtests
                     var st2 = (decimal)Math.Abs(c0.Supertrend2);
                     var dst2 = Calculator.TargetPrice(side, st2, -0.8m);
 
-                    // 손절
-                    if (position.TakeProfitCount == 0 && c0.Supertrend2 > 0)
+                    // 전량 정리
+                    if (c1.Supertrend2 > 0)
                     {
-                        var price = (c0.Quote.High + c0.Quote.Low) / 2;
+                        var price = c0.Quote.Open;
                         var quantity = position.Quantity;
                         Money -= price * quantity;
                         Positions.Remove(position);
                         PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
                         {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
                             EntryAmount = position.EntryAmount,
                             ExitAmount = price * quantity
                         });
                         Lose++;
                         Money -= FeeSize;
                     }
-                    else if (position.TakeProfitCount == 0 && c0.Quote.High >= dst2)
-                    {
-                        var price = dst2;
-                        var quantity = position.Quantity;
-                        Money -= price * quantity;
-                        Positions.Remove(position);
-                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
-                        {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
-                            EntryAmount = position.EntryAmount,
-                            ExitAmount = price * quantity
-                        });
-                        Lose++;
-                        Money -= FeeSize;
-                    }
+                    //else if (position.Stage == 0 && c0.Quote.High >= dst2)
+                    //{
+                    //    var price = dst2;
+                    //    var quantity = position.Quantity;
+                    //    Money -= price * quantity;
+                    //    Positions.Remove(position);
+                    //    PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                    //    {
+                    //        EntryAmount = position.EntryAmount,
+                    //        ExitAmount = price * quantity
+                    //    });
+                    //    Lose++;
+                    //    Money -= FeeSize;
+                    //}
                     // 1차 익절
-                    else if (position.TakeProfitCount == 0 && c0.Quote.Low <= position.TakeProfitPrice)
+                    else if (position.Stage == 0 && c0.Quote.Low <= position.TakeProfitPrice)
                     {
                         var price = position.TakeProfitPrice;
                         var quantity = position.Quantity / 2;
                         Money -= price * quantity;
                         position.Quantity -= quantity;
                         position.ExitAmount = price * quantity;
-                        position.TakeProfitCount = 1;
+                        position.Stage = 1;
                     }
-
                     // 2차 정리
-                    if (position.TakeProfitCount == 1 && c0.Supertrend1 > 0)
-                    {
-                        var price = (c0.Quote.High + c0.Quote.Low) / 2;
-                        var quantity = position.Quantity;
-                        Money -= price * quantity;
-                        Positions.Remove(position);
-                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
-                        {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
-                            EntryAmount = position.EntryAmount,
-                            ExitAmount = position.ExitAmount + price * quantity
-                        });
-                        Win++;
-                        Money -= FeeSize;
-                    }
+                    //else if (position.Stage == 1 && c1.Supertrend1 > 0)
+                    //{
+                    //    var price = c0.Quote.Open;
+                    //    var quantity = position.Quantity;
+                    //    Money -= price * quantity;
+                    //    Positions.Remove(position);
+                    //    PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                    //    {
+                    //        EntryAmount = position.EntryAmount,
+                    //        ExitAmount = position.ExitAmount + price * quantity
+                    //    });
+                    //    Win++;
+                    //    Money -= FeeSize;
+                    //}
                 }
             }
         }
@@ -1220,22 +1241,59 @@ namespace CryptoModel.Backtests
                 // 포지션이 있으면
                 else
                 {
-                    if (c0.Supertrend1 < 0)
+                    var per = 0m;
+                    var testPrice = c0.Quote.Open;
+                    while (testPrice >= c0.Quote.Low)
                     {
-                        var price = (c0.Quote.High + c0.Quote.Low) / 2;
-                        var quantity = position.Quantity;
-                        Money += price * quantity;
-                        Positions.Remove(position);
-                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                        var quote = new Quote
                         {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
-                            EntryAmount = position.EntryAmount,
-                            ExitAmount = position.ExitAmount + price * quantity
-                        });
-                        Win++;
-                        Money -= FeeSize;
+                            Date = c0.DateTime,
+                            Open = c0.Quote.Open,
+                            High = c0.Quote.High,
+                            Low = c0.Quote.Low,
+                            Close = testPrice,
+                            Volume = c0.Quote.Volume
+                        };
+                        var newCharts = FastCalculateIndicatorsTs2(symbol, quote);
+                        var nc0 = newCharts[^1];
+                        if (nc0.Supertrend1 < 0)
+                        {
+                            var price = testPrice;
+                            var quantity = position.Quantity;
+                            Money += price * quantity;
+                            Positions.Remove(position);
+                            PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                            {
+                                EntryPrice = position.EntryPrice,
+                                ExitPrice = price,
+                                EntryAmount = position.EntryAmount,
+                                ExitAmount = position.ExitAmount + price * quantity
+                            });
+                            Win++;
+                            Money -= FeeSize;
+                            break;
+                        }
+
+                        per -= 0.05m;
+                        testPrice = Calculator.TargetPrice(side, c0.Quote.Open, per);
                     }
+
+                    //if (c0.Supertrend1 < 0)
+                    //{
+                    //    var price = c0.Quote.Close;
+                    //    var quantity = position.Quantity;
+                    //    Money += price * quantity;
+                    //    Positions.Remove(position);
+                    //    PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                    //    {
+                    //        EntryPrice = position.EntryPrice,
+                    //        ExitPrice = price,
+                    //        EntryAmount = position.EntryAmount,
+                    //        ExitAmount = position.ExitAmount + price * quantity
+                    //    });
+                    //    Win++;
+                    //    Money -= FeeSize;
+                    //}
                 }
             }
         }
@@ -1280,20 +1338,318 @@ namespace CryptoModel.Backtests
                 // 포지션이 있으면
                 else
                 {
-                    if (c0.Supertrend1 > 0)
+                    var per = 0m;
+                    var testPrice = c0.Quote.Open;
+                    while (testPrice <= c0.Quote.High)
                     {
-                        var price = (c0.Quote.High + c0.Quote.Low) / 2;
+                        var quote = new Quote
+                        {
+                            Date = c0.DateTime,
+                            Open = c0.Quote.Open,
+                            High = c0.Quote.High,
+                            Low = c0.Quote.Low,
+                            Close = testPrice,
+                            Volume = c0.Quote.Volume
+                        };
+                        var newCharts = FastCalculateIndicatorsTs2(symbol, quote);
+                        var nc0 = newCharts[^1];
+                        if (nc0.Supertrend1 > 0)
+                        {
+                            var price = testPrice;
+                            var quantity = position.Quantity;
+                            Money -= price * quantity;
+                            Positions.Remove(position);
+                            PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                            {
+                                EntryPrice = position.EntryPrice,
+                                ExitPrice = price,
+                                EntryAmount = position.EntryAmount,
+                                ExitAmount = position.ExitAmount + price * quantity
+                            });
+                            Win++;
+                            Money -= FeeSize;
+                            break;
+                        }
+
+                        per -= 0.05m;
+                        testPrice = Calculator.TargetPrice(side, c0.Quote.Open, per);
+                    }
+
+                    //if (c0.Supertrend1 > 0)
+                    //{
+                    //    var price = c0.Quote.Close;
+                    //    var quantity = position.Quantity;
+                    //    Money -= price * quantity;
+                    //    Positions.Remove(position);
+                    //    PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                    //    {
+                    //        EntryPrice = position.EntryPrice,
+                    //        ExitPrice = price,
+                    //        EntryAmount = position.EntryAmount,
+                    //        ExitAmount = position.ExitAmount + price * quantity
+                    //    });
+                    //    Win++;
+                    //    Money -= FeeSize;
+                    //}
+                }
+            }
+        }
+
+        private bool IsEntryTs2LongBit(List<ChartInfo> charts)
+        {
+            int condition = 0;
+            for (int i = charts.Count - 2; i >= 0; i--) // 이전 봉 기준
+            {
+                var chart = charts[i];
+
+                switch (condition)
+                {
+                    case 0:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+                            condition = 1;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 1:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+                            condition = 2;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+
+                        }
+                        else if (chart.Supertrend1 > 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                }
+            }
+            return false;
+        }
+        private bool IsEntryTs2ShortBit(List<ChartInfo> charts)
+        {
+            int condition = 0;
+            for (int i = charts.Count - 2; i >= 0; i--) // 이전 봉 기준
+            {
+                var chart = charts[i];
+
+                switch (condition)
+                {
+                    case 0:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            condition = 1;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 1:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            condition = 2;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+
+                        }
+                        else if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                }
+            }
+            return false;
+        }
+
+        public void EvaluateTs2LongBit()
+        {
+            var side = PositionSide.Long;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+
+                // 포지션이 없으면
+                if (position == null)
+                {
+                    if (LongPositionCount >= MaxActiveDeals)
+                    {
+                        continue;
+                    }
+
+                    if (IsEntryTs2LongBit(charts))
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+                        var takeProfitPrice = 2 * price - 1 * stopLossPrice;
+                        var quantity = BaseOrderSize / price;
+                        Money -= price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            StopLossPrice = stopLossPrice,
+                            TakeProfitPrice = takeProfitPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                // 포지션이 있으면
+                else
+                {
+                    // 2차 익절
+                    if (position.Stage == 1 && c1.Supertrend1 < 0)
+                    {
+                        var price = c0.Quote.Open;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = position.ExitAmount + price * quantity
+                        });
+                        Win++;
+                        Money -= FeeSize;
+                    }
+                    // 1차 익절
+                    else if (position.Stage == 0 && c0.Quote.High >= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity / 2;
+                        Money += price * quantity;
+                        position.Quantity -= quantity;
+                        position.ExitAmount = price * quantity;
+                        position.Stage = 1;
+                    }
+                    // 손절
+                    else if (c0.Quote.Low <= position.StopLossPrice)
+                    {
+                        var price = position.StopLossPrice;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
+                        Money -= FeeSize;
+                    }
+                }
+            }
+        }
+
+        public void EvaluateTs2ShortBit()
+        {
+            var side = PositionSide.Short;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+
+                // 포지션이 없으면
+                if (position == null)
+                {
+                    if (ShortPositionCount >= MaxActiveDeals)
+                    {
+                        continue;
+                    }
+
+                    if (IsEntryTs2ShortBit(charts))
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+                        var takeProfitPrice = 2 * price - 1 * stopLossPrice;
+                        var quantity = BaseOrderSize / price;
+                        Money += price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            StopLossPrice = stopLossPrice,
+                            TakeProfitPrice = takeProfitPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                // 포지션이 있으면
+                else
+                {
+                    // 2차 익절
+                    if (position.Stage == 1 && c1.Supertrend1 > 0)
+                    {
+                        var price = c0.Quote.Open;
                         var quantity = position.Quantity;
                         Money -= price * quantity;
                         Positions.Remove(position);
                         PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
                         {
-                            EntryPrice = position.EntryPrice,
-                            ExitPrice = price,
                             EntryAmount = position.EntryAmount,
                             ExitAmount = position.ExitAmount + price * quantity
                         });
                         Win++;
+                        Money -= FeeSize;
+                    }
+                    // 1차 익절
+                    else if (position.Stage == 0 && c0.Quote.Low <= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity / 2;
+                        Money -= price * quantity;
+                        position.Quantity -= quantity;
+                        position.ExitAmount = price * quantity;
+                        position.Stage = 1;
+                    }
+                    // 손절
+                    else if (c0.Quote.High >= position.StopLossPrice)
+                    {
+                        var price = position.StopLossPrice;
+                        var quantity = position.Quantity;
+                        Money -= price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
                         Money -= FeeSize;
                     }
                 }

@@ -12,7 +12,7 @@ namespace CryptoModel.Backtests
         public decimal Quantity { get; set; }
         public decimal StopLossPrice { get; set; }
         public decimal TakeProfitPrice { get; set; }
-        public int TakeProfitCount { get; set; } = 0;
+        public int Stage { get; set; } = 0;
 
         public decimal EntryAmount { get; set; }
         public decimal ExitAmount { get; set; }

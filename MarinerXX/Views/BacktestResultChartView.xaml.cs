@@ -80,6 +80,12 @@ namespace MarinerXX.Views
         }
 
         #region Quote
+        private void IndexButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentHistoryIndex = int.Parse(IndexTextBox.Text) - 1;
+            Title = $"{CurrentHistoryIndex + 1}/{HistoryCount}, {CurrentHistory.Symbol}, {CurrentHistory.Side}, {CurrentHistory.Result}, {Math.Round(CurrentHistory.Income, 4)}";
+            Render();
+        }
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
@@ -363,6 +369,5 @@ namespace MarinerXX.Views
             //}
         }
         #endregion
-
     }
 }

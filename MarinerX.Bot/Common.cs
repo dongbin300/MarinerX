@@ -24,7 +24,7 @@ namespace MarinerX.Bot
         public static readonly SolidColorBrush LongColor = new(Color.FromRgb(14, 203, 129));
         public static readonly SolidColorBrush ShortColor = new(Color.FromRgb(246, 70, 93));
 
-        public static readonly KlineInterval BaseInterval = KlineInterval.FiveMinutes;
+        public static readonly KlineInterval BaseInterval = KlineInterval.ThirtyMinutes;
         public static readonly int BaseIntervalNumber = 1;
 
         public static List<SymbolDetail> SymbolDetails = new();
@@ -64,6 +64,7 @@ namespace MarinerX.Bot
         public static List<BinancePosition> Positions = new();
         public static List<BinancePosition> LongPositions => Positions.Where(p => p.PositionSide.Equals("Long")).ToList();
         public static List<BinancePosition> ShortPositions => Positions.Where(p => p.PositionSide.Equals("Short")).ToList();
+        public static List<BinanceOrder> Orders = new();
         public static Action<string, string> AddHistory = default!;
 
         public static List<BinancePosition> MockPositions = new();
@@ -88,6 +89,11 @@ namespace MarinerX.Bot
         public static BinancePosition? GetPosition(string symbol, PositionSide side)
         {
             return Positions.Find(p => p.Symbol.Equals(symbol) && p.PositionSide.Equals(side.ToString()));
+        }
+
+        public static BinanceOrder? GetOrder(string symbol, PositionSide side, FuturesOrderType type)
+        {
+            return Orders.Find(o => o.Symbol.Equals(symbol) && o.Side.Equals(side) && o.Type.Equals(type));
         }
 
         public static bool IsMockPositioning(string symbol, PositionSide side)

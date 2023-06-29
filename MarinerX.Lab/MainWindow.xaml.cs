@@ -1,11 +1,14 @@
 ﻿using Binance.Net.Clients;
+using Binance.Net.Objects;
 
 using CryptoModel;
 using CryptoModel.Scripts;
 
 using Skender.Stock.Indicators;
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -16,13 +19,22 @@ namespace MarinerX.Lab
     /// </summary>
     public partial class MainWindow : Window
     {
+        public string BinanceApiKeyPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten", "binance_api.txt");
         List<Quote> quotes = new();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            var client = new BinanceClient();
+            var apiKey = File.ReadAllLines(BinanceApiKeyPath);
+            var client = new BinanceClient(new BinanceClientOptions()
+            {
+                ApiCredentials = new BinanceApiCredentials(apiKey[0], apiKey[1])
+            });
+            var res = client.UsdFuturesApi.Account.GetPositionInformationAsync("ETHUSDT");
+            res.Wait();
+            var dd = res.Result.Data;
+
             var result = client.SpotApi.ExchangeData.GetKlinesAsync("SOLUSDT", Binance.Net.Enums.KlineInterval.OneMonth, null, null, 100);
             result.Wait();
             var data = result.Result.Data;
@@ -39,15 +51,12 @@ namespace MarinerX.Lab
                 });
             }
 
-            quotes = quotes.GetHeikinAshiCandle().ToList();
-
             double[] open = quotes.Select(x => (double)x.Open).ToArray();
             double[] high = quotes.Select(x => (double)x.High).ToArray();
             double[] low = quotes.Select(x => (double)x.Low).ToArray();
             double[] close = quotes.Select(x => (double)x.Close).ToArray();
 
-            //var ts = CustomScript.TripleSupertrend(high, low, close, 10, 1, 11, 2, 12, 3);
-            var sr = CustomScript.StochasticRsi(close, 3, 3, 14, 14);
+            var r = CustomScript.Adx(high, low, close, 14, 14);
         }
     }
 }

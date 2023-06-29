@@ -22,6 +22,7 @@ namespace MarinerX.Bot.Bots
         public int Leverage { get; set; }
         public int MaxActiveDeals { get; set; }
 
+        private PositionSide side => PositionSide.Short;
         private List<string> DealingSymbols = new();
 
         public ShortBot() : this("", "")
@@ -41,6 +42,54 @@ namespace MarinerX.Bot.Bots
         }
         #endregion
 
+        private bool IsEntryTs2ShortBit(List<ChartInfo> charts)
+        {
+            int condition = 0;
+            for (int i = charts.Count - 2; i >= 0; i--) // 이전 봉 기준
+            {
+                var chart = charts[i];
+
+                switch (condition)
+                {
+                    case 0:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            condition = 1;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 1:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            condition = 2;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+
+                        }
+                        else if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                }
+            }
+            return false;
+        }
+
         public async Task Evaluate()
         {
             try
@@ -53,30 +102,30 @@ namespace MarinerX.Bot.Bots
                 foreach (var pairQuote in Common.PairQuotes)
                 {
                     var symbol = pairQuote.Symbol;
-                    if (!Common.IsShortPositioning(symbol) && !DealingSymbols.Contains(symbol)) // 포지션이 없으면
-                    {
-                        DealingSymbols.Add(symbol);
+                    var c0 = pairQuote.Charts[^1]; // 현재 정보
+                    var c1 = pairQuote.Charts[^2]; // 1봉전 정보
 
+                    if (!Common.IsShortPositioning(symbol)) // 포지션이 없으면
+                    {
+                        if (DealingSymbols.Contains(symbol))
+                        {
+                            continue;
+                        }
+
+                        DealingSymbols.Add(symbol);
                         try
                         {
-                            var c0 = pairQuote.Charts[^1]; // 현재 정보
-                            var c1 = pairQuote.Charts[^2]; // 1봉전 정보
-                            var c2 = pairQuote.Charts[^3]; // 2봉전 정보
-                            var c3 = pairQuote.Charts[^4]; // 3봉전 정보
-                            var c4 = pairQuote.Charts[^5]; // 4봉전 정보
-
-                            // 기법 :: RSI 60라인을 데드 크로스 이후, 3봉 이내에 LSMA 10이 30을 데드 크로스하면 진입
-                            if (c0.Lsma10 < c0.Lsma30 && c1.Lsma10 > c1.Lsma30 &&
-                                ((c0.Rsi < 60 && c1.Rsi > 60) || (c1.Rsi < 60 && c2.Rsi > 60) || (c2.Rsi < 60 && c3.Rsi > 60)))
+                            // 진입 조건에 부합하면
+                            if (IsEntryTs2ShortBit(pairQuote.Charts))
                             {
                                 var price = c0.Quote.Close;
                                 var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
                                 if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
                                 {
-                                    var takeProfitPrice = Calculator.TargetPrice(PositionSide.Short, price, TargetRoe);
-                                    await SetTakeProfit(symbol, takeProfitPrice, quantity).ConfigureAwait(false);
-                                    var stoplossPrice = Calculator.TargetPrice(PositionSide.Short, price, TargetRoe / -2);
-                                    await SetStopLoss(symbol, stoplossPrice, quantity).ConfigureAwait(false);
+                                    var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+                                    await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
+                                    var takeProfitPrice = 2 * price - stopLossPrice;
+                                    await SetTakeProfit(symbol, takeProfitPrice, quantity / 2).ConfigureAwait(false);
                                 }
                             }
                         }
@@ -84,8 +133,33 @@ namespace MarinerX.Bot.Bots
                         {
                             Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
                         }
-
                         DealingSymbols.Remove(symbol);
+                    }
+                    else // 포지션이 있으면
+                    {
+                        var stopLossOrder = Common.GetOrder(symbol, side, FuturesOrderType.Stop);
+                        if (stopLossOrder == null)
+                        {
+                            continue;
+                        }
+
+                        if ((DateTime.UtcNow - stopLossOrder.CreateTime).TotalSeconds < 30)
+                        {
+                            continue;
+                        }
+
+                        var takeProfitOrder = Common.GetOrder(symbol, side, FuturesOrderType.TakeProfit);
+                        if (takeProfitOrder == null && c1.Supertrend1 > 0)
+                        {
+                            var position = Common.GetPosition(symbol, side);
+                            if (position == null)
+                            {
+                                continue;
+                            }
+                            var price = c0.Quote.Close;
+                            var quantity = Math.Abs(position.Quantity);
+                            await CloseBuy(symbol, price, quantity).ConfigureAwait(false);
+                        }
                     }
                 }
             }
@@ -128,7 +202,7 @@ namespace MarinerX.Bot.Bots
             try
             {
                 await BinanceClients.Api.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, Leverage); // 레버리지 설정
-                var limitPrice = Calculator.TargetPrice(PositionSide.Long, price, -0.25m).ToValidPrice(symbol); // -0 ~ -0.25%
+                var limitPrice = Calculator.TargetPrice(side, price, -0.25m).ToValidPrice(symbol); // -0 ~ -0.25%
 
                 var result = await BinanceClients.OpenSell(symbol, limitPrice, quantity).ConfigureAwait(false);
                 if (result.Success)
@@ -153,7 +227,7 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                var limitPrice = Calculator.TargetPrice(PositionSide.Long, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var limitPrice = Calculator.TargetPrice(side, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
 
                 var result = await BinanceClients.CloseBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
                 if (result.Success)
@@ -176,7 +250,7 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var takePrice = price.ToValidPrice(symbol);
-                var limitPrice = Calculator.TargetPrice(PositionSide.Long, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var limitPrice = Calculator.TargetPrice(side, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
 
                 var result = await BinanceClients.SetShortTakeProfit(symbol, limitPrice, quantity, takePrice).ConfigureAwait(false);
                 if (result.Success)
@@ -199,7 +273,7 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var stopPrice = price.ToValidPrice(symbol);
-                var limitPrice = Calculator.TargetPrice(PositionSide.Long, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var limitPrice = Calculator.TargetPrice(side, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
 
                 var result = await BinanceClients.SetShortStopLoss(symbol, limitPrice, quantity, stopPrice).ConfigureAwait(false);
                 if (result.Success)
@@ -217,6 +291,7 @@ namespace MarinerX.Bot.Bots
             }
         }
 
+        /*
         #region Mock
         public async Task MockEvaluate()
         {
@@ -307,5 +382,6 @@ namespace MarinerX.Bot.Bots
             }
         }
         #endregion
+        */
     }
 }

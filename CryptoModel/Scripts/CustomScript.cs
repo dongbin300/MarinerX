@@ -56,6 +56,112 @@
         /// <summary>
         /// Need more test
         /// </summary>
+        /// <param name="high"></param>
+        /// <param name="low"></param>
+        /// <param name="close"></param>
+        /// <param name="adxPeriod"></param>
+        /// <param name="diPeriod"></param>
+        /// <returns></returns>
+        public static double[] Adx(double[] high, double[] low, double[] close, int adxPeriod, int diPeriod)
+        {
+            var adx = new double[high.Length];
+            var up = new double[high.Length];
+            var down = new double[high.Length];
+            var plusDm = new double[high.Length];
+            var minusDm = new double[high.Length];
+            var trueRange = new double[high.Length];
+            var plus = new double[high.Length];
+            var minus = new double[high.Length];
+
+            up = TaScript.Change(high);
+            down = TaScript.Change(low).Select(x => -x).ToArray();
+            for (int i = 0; i < high.Length; i++)
+            {
+                if (i == 0)
+                {
+                    plusDm[i] = TaScript.NA;
+                    minusDm[i] = TaScript.NA;
+                    continue;
+                }
+
+                plusDm[i] = (up[i] > down[i] && up[i] > 0) ? up[i] : 0;
+                minusDm[i] = (up[i] < down[i] && down[i] > 0) ? down[i] : 0;
+            }
+            trueRange = TaScript.Atr(high, low, close, diPeriod);
+            return trueRange;
+        }
+
+        public static double[] Smma(double[] values, int period)
+        {
+            var smma = new double[values.Length];
+
+            smma[0] = values[0];
+            for (int i = 1; i < values.Length; i++)
+            {
+                smma[i] = (smma[i - 1] * (period - 1) + values[i]) / period;
+            }
+
+            return smma;
+        }
+
+        public static double[] Zlema(double[] values, int period)
+        {
+            var zlema = new double[values.Length];
+
+            var ema1 = TaScript.Ema(values, period);
+            var ema2 = TaScript.Ema(ema1, period);
+            for (int i = 0; i < values.Length; i++)
+            {
+                zlema[i] = 2 * ema1[i] - ema2[i];
+            }
+
+            return zlema;
+        }
+
+        /// <summary>
+        /// Impulse MACD
+        /// </summary>
+        /// <param name="high"></param>
+        /// <param name="low"></param>
+        /// <param name="close"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public static double[] Imacd(double[] high, double[] low, double[] close, int period)
+        {
+            var result = new double[high.Length];
+            var hlc = new double[high.Length];
+
+            for (int i = 0; i < high.Length; i++)
+            {
+                hlc[i] = (high[i] + low[i] + close[i]) / 3;
+            }
+
+            var hi = Smma(high, period);
+            var lo = Smma(low, period);
+            var mi = Zlema(hlc, period);
+
+            for (int i = 0; i < high.Length; i++)
+            {
+                if (mi[i] > hi[i])
+                {
+                    result[i] = mi[i] - hi[i];
+                }
+                else if (mi[i] < lo[i])
+                {
+                    result[i] = mi[i] - lo[i];
+                }
+                else
+                {
+                    result[i] = 0;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Need more test
+        /// </summary>
         /// <param name="close"></param>
         /// <param name="volume"></param>
         /// <param name="period"></param>

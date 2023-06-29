@@ -108,13 +108,13 @@ namespace MarinerX.Bot.Bots
             }
         }
 
-        public async Task GetAllKlines()
+        public async Task GetAllKlines(int limit)
         {
             try
             {
                 foreach (var symbol in MonitorSymbols)
                 {
-                    var result = await BinanceClients.Api.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, Common.BaseInterval, null, null, 40).ConfigureAwait(false);
+                    var result = await BinanceClients.Api.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, Common.BaseInterval, null, null, limit).ConfigureAwait(false);
                     var quotes = result.Data.Select(x => new Quote
                     {
                         Date = x.OpenTime,
@@ -199,10 +199,12 @@ namespace MarinerX.Bot.Bots
                     return;
                 }
 
-                foreach (var order in result.Data)
+                Common.Orders = result.Data.Select(x => new BinanceOrder(x.Id, x.Symbol, x.PositionSide, x.Type, x.Quantity, x.CreateTime)).ToList();
+
+                foreach (var order in Common.Orders)
                 {
                     // 해당 주문의 생성시간이 10초가 안 지났으면 스킵
-                    if((DateTime.UtcNow - order.CreateTime).TotalSeconds < 10)
+                    if ((DateTime.UtcNow - order.CreateTime).TotalSeconds < 10)
                     {
                         continue;
                     }
@@ -214,7 +216,7 @@ namespace MarinerX.Bot.Bots
                     }
 
                     // 해당 TP/SL 주문의 오리지널 포지션이 존재하면 주문취소하지 않음
-                    if (Common.Positions.Any(x => x.Symbol.Equals(order.Symbol) && x.PositionSide.Equals(order.PositionSide.ToString())))
+                    if (Common.Positions.Any(x => x.Symbol.Equals(order.Symbol) && x.PositionSide.Equals(order.Side.ToString())))
                     {
                         continue;
                     }
