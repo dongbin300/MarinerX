@@ -1,6 +1,7 @@
 ﻿using Binance.Net.Enums;
 
 using CryptoModel.Charts;
+using CryptoModel.Maths;
 
 namespace CryptoModel.Backtests
 {
@@ -11,7 +12,7 @@ namespace CryptoModel.Backtests
         public decimal CurrentPositionQuantity => GetCurrentPositionQuantity();
         public bool IsPositioning => CurrentPositionQuantity > 0.000001m;
         public decimal TotalIncome => GetIncome();
-        public ChartInfo ChartInfo { get; set; } = new("", new Skender.Stock.Indicators.Quote());
+        public ChartInfo ChartInfo { get; set; } = new("", new Quote());
         public decimal Upnl => GetUpnl(ChartInfo);
         public decimal EstimatedTotalIncome => TotalIncome + Upnl;
 

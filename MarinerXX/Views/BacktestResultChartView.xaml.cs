@@ -48,10 +48,8 @@ namespace MarinerXX.Views
         private readonly SKPaint CandleBuyPointerPaint = new() { Color = new SKColor(59, 207, 134, 64) };
         private readonly SKPaint CandleSellPointerPaint = new() { Color = new SKColor(237, 49, 97, 64) };
         private readonly int CandleTopBottomMargin = 30;
-        private readonly int VolumeTopBottomMargin = 5;
-        private readonly double NullValue = -39909;
 
-        public List<PositionHistory> PositionHistories { get; set; }
+        public List<PositionHistory> PositionHistories { get; set; } = new();
         public int CurrentHistoryIndex = 0;
         public PositionHistory CurrentHistory => PositionHistories[CurrentHistoryIndex];
         public int ChartCount { get; set; }
@@ -168,8 +166,8 @@ namespace MarinerXX.Views
             var start = CurrentHistory.EntryTime.AddHours(-12);
             var end = CurrentHistory.Time.AddHours(12);
             var charts = ChartLoader.GetChartPack(CurrentHistory.Symbol, MainInterval).GetCharts(start, end);
-            EntryIndex = charts.IndexOf(charts.Find(x => x.DateTime.Equals(CurrentHistory.EntryTime)));
-            ExitIndex = charts.IndexOf(charts.Find(x => x.DateTime.Equals(CurrentHistory.Time)));
+            EntryIndex = charts.IndexOf(charts.Find(x => x.DateTime.Equals(CurrentHistory.EntryTime)) ?? default!);
+            ExitIndex = charts.IndexOf(charts.Find(x => x.DateTime.Equals(CurrentHistory.Time)) ?? default!);
             ChartCount = charts.Count;
 
             var actualWidth = (float)CandleChart.ActualWidth;

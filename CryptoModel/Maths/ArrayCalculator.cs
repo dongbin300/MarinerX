@@ -1,6 +1,6 @@
-﻿namespace CryptoModel.Scripts
+﻿namespace CryptoModel.Maths
 {
-    public class TaScript
+    public class ArrayCalculator
     {
         public static readonly double NA = 0;
 
@@ -201,6 +201,13 @@
             return result;
         }
 
+        /// <summary>
+        /// True Range
+        /// </summary>
+        /// <param name="high"></param>
+        /// <param name="low"></param>
+        /// <param name="close"></param>
+        /// <returns></returns>
         public static double[] Tr(double[] high, double[] low, double[] close)
         {
             var tr = new double[high.Length];
@@ -320,7 +327,7 @@
             var direction = new double[high.Length];
 
             var atr = Atr(high, low, close, atrPeriod);
-            for(int i = 0; i < high.Length; i++)
+            for (int i = 0; i < high.Length; i++)
             {
                 var mid = (high[i] + low[i]) / 2;
                 upperBand[i] = mid + factor * atr[i];
@@ -342,6 +349,160 @@
             }
 
             return (supertrend, direction);
+        }
+
+        public static (double[], double[], double[], double[], double[], double[]) TripleSupertrend(double[] high, double[] low, double[] close, int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
+        {
+            (var supertrend1, var direction1) = Supertrend(high, low, close, factor1, atrPeriod1);
+            (var supertrend2, var direction2) = Supertrend(high, low, close, factor2, atrPeriod2);
+            (var supertrend3, var direction3) = Supertrend(high, low, close, factor3, atrPeriod3);
+
+            return (supertrend1, direction1, supertrend2, direction2, supertrend3, direction3);
+        }
+
+        public static (double[], double[]) StochasticRsi(double[] close, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
+        {
+            var rsi = Rsi(close, rsiPeriod);
+            var stoch = Stoch(rsi, rsi, rsi, stochasticPeriod, 2);
+            var k = Sma(stoch, smoothK);
+            var d = Sma(k, smoothD);
+
+            return (k, d);
+        }
+
+        /// <summary>
+        /// Need more test
+        /// </summary>
+        /// <param name="high"></param>
+        /// <param name="low"></param>
+        /// <param name="close"></param>
+        /// <param name="adxPeriod"></param>
+        /// <param name="diPeriod"></param>
+        /// <returns></returns>
+        public static double[] Adx(double[] high, double[] low, double[] close, int adxPeriod, int diPeriod)
+        {
+            var adx = new double[high.Length];
+            var up = new double[high.Length];
+            var down = new double[high.Length];
+            var plusDm = new double[high.Length];
+            var minusDm = new double[high.Length];
+            var trueRange = new double[high.Length];
+            var plus = new double[high.Length];
+            var minus = new double[high.Length];
+
+            up = Change(high);
+            down = Change(low).Select(x => -x).ToArray();
+            for (int i = 0; i < high.Length; i++)
+            {
+                if (i == 0)
+                {
+                    plusDm[i] = NA;
+                    minusDm[i] = NA;
+                    continue;
+                }
+
+                plusDm[i] = (up[i] > down[i] && up[i] > 0) ? up[i] : 0;
+                minusDm[i] = (up[i] < down[i] && down[i] > 0) ? down[i] : 0;
+            }
+            trueRange = Atr(high, low, close, diPeriod);
+            return trueRange;
+        }
+
+        public static double[] Smma(double[] values, int period)
+        {
+            var smma = new double[values.Length];
+
+            smma[0] = values[0];
+            for (int i = 1; i < values.Length; i++)
+            {
+                smma[i] = (smma[i - 1] * (period - 1) + values[i]) / period;
+            }
+
+            return smma;
+        }
+
+        public static double[] Zlema(double[] values, int period)
+        {
+            var zlema = new double[values.Length];
+
+            var ema1 = Ema(values, period);
+            var ema2 = Ema(ema1, period);
+            for (int i = 0; i < values.Length; i++)
+            {
+                zlema[i] = 2 * ema1[i] - ema2[i];
+            }
+
+            return zlema;
+        }
+
+        /// <summary>
+        /// Impulse MACD
+        /// Need more test
+        /// </summary>
+        /// <param name="high"></param>
+        /// <param name="low"></param>
+        /// <param name="close"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public static double[] Imacd(double[] high, double[] low, double[] close, int period)
+        {
+            var result = new double[high.Length];
+            var hlc = new double[high.Length];
+
+            for (int i = 0; i < high.Length; i++)
+            {
+                hlc[i] = (high[i] + low[i] + close[i]) / 3;
+            }
+
+            var hi = Smma(high, period);
+            var lo = Smma(low, period);
+            var mi = Zlema(hlc, period);
+
+            for (int i = 0; i < high.Length; i++)
+            {
+                if (mi[i] > hi[i])
+                {
+                    result[i] = mi[i] - hi[i];
+                }
+                else if (mi[i] < lo[i])
+                {
+                    result[i] = mi[i] - lo[i];
+                }
+                else
+                {
+                    result[i] = 0;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Need more test
+        /// </summary>
+        /// <param name="close"></param>
+        /// <param name="volume"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public static double[] TimeSegmentedVolume(double[] close, double[] volume, int period)
+        {
+            var tsv = new double[close.Length];
+            for (int i = 0; i < close.Length; i++)
+            {
+                if (i < period)
+                {
+                    tsv[i] = 0;
+                    continue;
+                }
+
+                double sum = 0;
+                for (int j = 0; j < period; j++)
+                {
+                    sum += volume[i - j] * (close[i - j] - close[i - j - 1]);
+                }
+                tsv[i] = sum;
+            }
+            return tsv;
         }
     }
 }

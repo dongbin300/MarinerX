@@ -1,12 +1,11 @@
-﻿using Skender.Stock.Indicators;
-
-namespace CryptoModel.Indicators
+﻿namespace CryptoModel.Indicators
 {
     /// <summary>
     /// Stochastic RSI Result
     /// </summary>
-    public class StochasticRsiResult : ResultBase
+    public class StochasticRsiResult
     {
+        public DateTime Date { get; set; }
         public double K { get; set; }
         public double D { get; set; }
 

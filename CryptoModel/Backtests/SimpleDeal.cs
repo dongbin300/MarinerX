@@ -1,6 +1,6 @@
 ﻿using Binance.Net.Enums;
 
-using Skender.Stock.Indicators;
+using CryptoModel.Maths;
 
 namespace CryptoModel.Backtests
 {

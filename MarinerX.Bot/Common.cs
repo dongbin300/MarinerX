@@ -105,5 +105,32 @@ namespace MarinerX.Bot
         {
             return MockPositions.Find(p => p.Symbol.Equals(symbol) && p.PositionSide.Equals(side.ToString()));
         }
+
+        public static readonly int PositionCoolTimeSeconds = 60;
+        public static List<PositionCoolTime> PositionCoolTimes = new ();
+        public static PositionCoolTime? GetPositionCoolTime(string symbol, PositionSide side)
+        {
+            return PositionCoolTimes.Find(p => p.Symbol.Equals(symbol) && p.Side.Equals(side));
+        }
+
+        public static void AddPositionCoolTime(string symbol, PositionSide side)
+        {
+            var positionCoolTime = GetPositionCoolTime(symbol, side);
+            if(positionCoolTime == null)
+            {
+                PositionCoolTimes.Add(new PositionCoolTime(symbol, side, DateTime.Now));
+            }
+            else
+            {
+                positionCoolTime.IsEnable = true;
+                positionCoolTime.CloseTime = DateTime.Now;
+            }
+        }
+
+        public static bool IsCoolTime(string symbol, PositionSide side)
+        {
+            var positionCoolTime = GetPositionCoolTime(symbol, side);
+            return positionCoolTime == null ? false : positionCoolTime.IsEnable;
+        }
     }
 }

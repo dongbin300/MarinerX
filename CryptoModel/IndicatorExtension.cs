@@ -1,13 +1,12 @@
 ﻿using CryptoModel.Indicators;
-using CryptoModel.Scripts;
-
-using Skender.Stock.Indicators;
+using CryptoModel.Maths;
 
 namespace CryptoModel
 {
     public static class IndicatorExtension
     {
         /// <summary>
+        /// Convert to Heikin Ashi candle
         /// First Open
         /// = Candle(0).Open
         /// N Open
@@ -29,27 +28,25 @@ namespace CryptoModel
             var result = new List<Quote>();
 
             var _q = quotes.ElementAt(0);
-            result.Add(new Quote()
-            {
-                Date = _q.Date,
-                Open = (_q.Open + _q.Close) / 2,
-                High = Math.Max(_q.High, Math.Max(_q.Open, _q.Close)),
-                Low = Math.Min(_q.Low, Math.Min(_q.Open, _q.Close)),
-                Close = (_q.Open + _q.High + _q.Low + _q.Close) / 4
-            });
+            result.Add(new Quote(
+                _q.Date,
+                (_q.Open + _q.Close) / 2,
+                Math.Max(_q.High, Math.Max(_q.Open, _q.Close)),
+                Math.Min(_q.Low, Math.Min(_q.Open, _q.Close)),
+                (_q.Open + _q.High + _q.Low + _q.Close) / 4
+                ));
 
             for (int i = 1; i < quotes.Count(); i++)
             {
                 var q = quotes.ElementAt(i);
                 var prevHa = result[i - 1];
-                result.Add(new Quote()
-                {
-                    Date = q.Date,
-                    Open = (prevHa.Open + prevHa.Close) / 2,
-                    High = Math.Max(q.High, Math.Max(q.Open, q.Close)),
-                    Low = Math.Min(q.Low, Math.Min(q.Open, q.Close)),
-                    Close = (q.Open + q.High + q.Low + q.Close) / 4
-                });
+                result.Add(new Quote(
+                    q.Date,
+                    (prevHa.Open + prevHa.Close) / 2,
+                    Math.Max(q.High, Math.Max(q.Open, q.Close)),
+                    Math.Min(q.Low, Math.Min(q.Open, q.Close)),
+                    (q.Open + q.High + q.Low + q.Close) / 4
+                ));
             }
 
             return result;
@@ -118,44 +115,15 @@ namespace CryptoModel
             return result;
         }
 
-        public static IEnumerable<JmaSlopeResult> GetJmaSlope(this IEnumerable<Quote> quotes, int period = 14)
-        {
-            var result = new List<JmaSlopeResult>();
-            var highValues = quotes.Select(q => (float)q.High).ToArray();
-            var lowValues = quotes.Select(q => (float)q.Low).ToArray();
-            var closeValues = quotes.Select(q => (float)q.Close).ToArray();
-
-            for (int i = 0; i < 14; i++)
-            {
-                result.Add(new JmaSlopeResult(quotes.ElementAt(i).Date, 0));
-            }
-
-            for (int i = 14; i < quotes.Count(); i++)
-            {
-                var _highValues = new double[period];
-                var _lowValues = new double[period];
-                var _closeValues = new double[period];
-                Array.Copy(highValues, i - period, _highValues, 0, period);
-                Array.Copy(lowValues, i - period, _lowValues, 0, period);
-                Array.Copy(closeValues, i - period, _closeValues, 0, period);
-
-                var jmaLine = 0; //CustomScript.Jma(_closeValues);
-                var jmaSlope = 0;// CustomScript.Angle(jmaLine, _highValues, _lowValues, _closeValues, period);
-                result.Add(new JmaSlopeResult(quotes.ElementAt(i).Date, jmaSlope));
-            }
-
-            return result;
-        }
-
-        public static IEnumerable<RsiResult> GetRsiV2(this IEnumerable<Quote> quotes, int period = 14)
+        public static IEnumerable<RsiResult> GetRsi(this IEnumerable<Quote> quotes, int period = 14)
         {
             var result = new List<RsiResult>();
 
             var values = quotes.Select(x => (double)x.Close).ToArray();
-            var rsi = TaScript.Rsi(values, period);
+            var rsi = ArrayCalculator.Rsi(values, period);
             for (int i = 0; i < rsi.Length; i++)
             {
-                result.Add(new RsiResult(quotes.ElementAt(i).Date) { Rsi = rsi[i] });
+                result.Add(new RsiResult(quotes.ElementAt(i).Date, rsi[i]));
             }
 
             return result;
@@ -166,7 +134,7 @@ namespace CryptoModel
             var result = new List<StochasticRsiResult>();
 
             var values = quotes.Select(x => (double)x.Close).ToArray();
-            (var k, var d) = CustomScript.StochasticRsi(values, smoothK, smoothD, rsiPeriod, stochasticPeriod);
+            (var k, var d) = ArrayCalculator.StochasticRsi(values, smoothK, smoothD, rsiPeriod, stochasticPeriod);
             for (int i = 0; i < k.Length; i++)
             {
                 result.Add(new StochasticRsiResult(quotes.ElementAt(i).Date, k[i], d[i]));
@@ -175,15 +143,15 @@ namespace CryptoModel
             return result;
         }
 
-        public static IEnumerable<EmaResult> GetEmaV2(this IEnumerable<Quote> quotes, int period)
+        public static IEnumerable<EmaResult> GetEma(this IEnumerable<Quote> quotes, int period)
         {
             var result = new List<EmaResult>();
 
             var values = quotes.Select(x => (double)x.Close).ToArray();
-            var ema = TaScript.Ema(values, period);
+            var ema = ArrayCalculator.Ema(values, period);
             for (int i = 0; i < ema.Length; i++)
             {
-                result.Add(new EmaResult(quotes.ElementAt(i).Date) { Ema = ema[i] });
+                result.Add(new EmaResult(quotes.ElementAt(i).Date, ema[i]));
             }
 
             return result;
@@ -196,7 +164,7 @@ namespace CryptoModel
             var high = quotes.Select(x => (double)x.High).ToArray();
             var low = quotes.Select(x => (double)x.Low).ToArray();
             var close = quotes.Select(x => (double)x.Close).ToArray();
-            (var supertrend1, var direction1, var supertrend2, var direction2, var supertrend3, var direction3) = CustomScript.TripleSupertrend(high, low, close, atrPeriod1, factor1, atrPeriod2, factor2, atrPeriod3, factor3);
+            (var supertrend1, var direction1, var supertrend2, var direction2, var supertrend3, var direction3) = ArrayCalculator.TripleSupertrend(high, low, close, atrPeriod1, factor1, atrPeriod2, factor2, atrPeriod3, factor3);
 
             for (int i = 0; i < supertrend1.Length; i++)
             {
@@ -216,7 +184,7 @@ namespace CryptoModel
 
             var close = quotes.Select(x => (double)x.Close).ToArray();
             var volume = quotes.Select(x => (double)x.Volume).ToArray();
-            var tsv = CustomScript.TimeSegmentedVolume(close, volume, period);
+            var tsv = ArrayCalculator.TimeSegmentedVolume(close, volume, period);
 
             for (int i = 0; i < tsv.Length; i++)
             {

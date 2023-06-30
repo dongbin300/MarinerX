@@ -324,7 +324,7 @@ namespace Albedo.ViewModels
             }
             if (Common.SupportedMarket.HasFlag(PairMarket.Bybit))
             {
-                PairMarkets.Add(new PairMarketModel(PairMarket.Bybit, "바이비트", "Resources/bybit.png"));
+                //PairMarkets.Add(new PairMarketModel(PairMarket.Bybit, "바이비트", "Resources/bybit.png"));
             }
             if (PairMarkets.Count > 0)
             {

@@ -93,10 +93,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\sort-asc.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -106,6 +102,10 @@
     <Content Include="Resources\sort.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿using MercuryTradingModel.Extensions;
+﻿using CryptoModel;
 
 using System;
 

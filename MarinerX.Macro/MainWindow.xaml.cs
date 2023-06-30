@@ -1,4 +1,4 @@
-﻿using MercuryTradingModel.Extensions;
+﻿using CryptoModel;
 
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace MarinerX.Macro
             {
                 var response = await client.GetAsync(url).ConfigureAwait(false);
 
-                if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return;
                 }
@@ -153,9 +153,9 @@ namespace MarinerX.Macro
                         }
 
                         var priceSequencePath = priceChangesPath.Down($"{symbol}_changePrices_{time:yyyy-MM-dd}.csv");
-                        File.WriteAllLines(priceSequencePath, prices.Select(x=>x.timestamp + "," + x.price));
+                        File.WriteAllLines(priceSequencePath, prices.Select(x => x.timestamp + "," + x.price));
                     }
-                    catch 
+                    catch
                     {
                     }
                 }

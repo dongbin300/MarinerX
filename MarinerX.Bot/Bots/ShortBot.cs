@@ -1,7 +1,5 @@
 ﻿using Binance.Net.Enums;
-
-using CryptoModel;
-
+using CryptoModel.Maths;
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Extensions;
 using MarinerX.Bot.Models;
@@ -107,33 +105,43 @@ namespace MarinerX.Bot.Bots
 
                     if (!Common.IsShortPositioning(symbol)) // 포지션이 없으면
                     {
-                        if (DealingSymbols.Contains(symbol))
+                        if (DateTime.Now.Minute == 0 || DateTime.Now.Minute == 30) // 캔들이 갱신되는 순간에만 진입
                         {
-                            continue;
-                        }
-
-                        DealingSymbols.Add(symbol);
-                        try
-                        {
-                            // 진입 조건에 부합하면
-                            if (IsEntryTs2ShortBit(pairQuote.Charts))
+                            if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵
                             {
-                                var price = c0.Quote.Close;
-                                var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
-                                if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
+                                continue;
+                            }
+
+                            if (DealingSymbols.Contains(symbol))
+                            {
+                                continue;
+                            }
+
+                            DealingSymbols.Add(symbol);
+                            try
+                            {
+                                // 진입 조건에 부합하면
+                                if (IsEntryTs2ShortBit(pairQuote.Charts))
                                 {
-                                    var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
-                                    await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
-                                    var takeProfitPrice = 2 * price - stopLossPrice;
-                                    await SetTakeProfit(symbol, takeProfitPrice, quantity / 2).ConfigureAwait(false);
+                                    var price = c0.Quote.Close;
+                                    var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
+                                    var halfQuantity = (quantity / 2).ToValidQuantity(symbol);
+                                    Common.AddHistory("Short Bot", $"ST1 {c1.Supertrend1}, ST2 {c1.Supertrend2}, ST3 {c1.Supertrend3}");
+                                    if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
+                                    {
+                                        var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+                                        await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
+                                        var takeProfitPrice = 2 * price - stopLossPrice;
+                                        await SetTakeProfit(symbol, takeProfitPrice, halfQuantity).ConfigureAwait(false);
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                            }
+                            DealingSymbols.Remove(symbol);
                         }
-                        catch (Exception ex)
-                        {
-                            Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-                        }
-                        DealingSymbols.Remove(symbol);
                     }
                     else // 포지션이 있으면
                     {
@@ -202,7 +210,7 @@ namespace MarinerX.Bot.Bots
             try
             {
                 await BinanceClients.Api.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, Leverage); // 레버리지 설정
-                var limitPrice = Calculator.TargetPrice(side, price, -0.25m).ToValidPrice(symbol); // -0 ~ -0.25%
+                var limitPrice = Calculator.TargetPrice(side, price, 0.25m).ToValidPrice(symbol); // -0 ~ -0.25%
 
                 var result = await BinanceClients.OpenSell(symbol, limitPrice, quantity).ConfigureAwait(false);
                 if (result.Success)
@@ -227,7 +235,7 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                var limitPrice = Calculator.TargetPrice(side, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
 
                 var result = await BinanceClients.CloseBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
                 if (result.Success)
@@ -250,7 +258,7 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var takePrice = price.ToValidPrice(symbol);
-                var limitPrice = Calculator.TargetPrice(side, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
 
                 var result = await BinanceClients.SetShortTakeProfit(symbol, limitPrice, quantity, takePrice).ConfigureAwait(false);
                 if (result.Success)
@@ -273,7 +281,7 @@ namespace MarinerX.Bot.Bots
             try
             {
                 var stopPrice = price.ToValidPrice(symbol);
-                var limitPrice = Calculator.TargetPrice(side, price, 1m).ToValidPrice(symbol); // +0 ~ +1%
+                var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
 
                 var result = await BinanceClients.SetShortStopLoss(symbol, limitPrice, quantity, stopPrice).ConfigureAwait(false);
                 if (result.Success)

@@ -1,15 +1,14 @@
-﻿using Skender.Stock.Indicators;
-
-namespace CryptoModel.Indicators
+﻿namespace CryptoModel.Indicators
 {
     /// <summary>
     /// LSMA(Least Square Moving Average) Result
     /// </summary>
-    public class LsmaResult : ResultBase
+    public class LsmaResult
     {
-        public double? Lsma { get; set; }
+        public DateTime Date { get; set; }
+        public double Lsma { get; set; }
 
-        public LsmaResult(DateTime date, double? lsma)
+        public LsmaResult(DateTime date, double lsma)
         {
             Date = date;
             Lsma = lsma;

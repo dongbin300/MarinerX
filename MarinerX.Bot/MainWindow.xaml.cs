@@ -153,6 +153,7 @@ namespace MarinerX.Bot
                 if (longPosition.IsRunning || shortPosition.IsRunning)
                 {
                     await manager.MonitorOpenOrderClosedDeal().ConfigureAwait(false);
+                    manager.MonitorPositionCoolTime();
                 }
             }
             catch (Exception ex)

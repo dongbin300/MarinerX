@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+    <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
   </ItemGroup>
 
 </Project>

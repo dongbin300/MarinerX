@@ -1,4 +1,4 @@
-﻿using Skender.Stock.Indicators;
+﻿using CryptoModel.Maths;
 
 namespace CryptoModel.Backtests
 {

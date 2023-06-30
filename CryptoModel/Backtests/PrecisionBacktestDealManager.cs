@@ -1,8 +1,7 @@
 ﻿using Binance.Net.Enums;
 
 using CryptoModel.Charts;
-
-using Skender.Stock.Indicators;
+using CryptoModel.Maths;
 
 namespace CryptoModel.Backtests
 {
@@ -79,13 +78,13 @@ namespace CryptoModel.Backtests
                 var quotes = chart.Value.Select(x => x.Quote);
                 var r1 = quotes.GetLsma(10).Select(x => x.Lsma);
                 var r2 = quotes.GetLsma(30).Select(x => x.Lsma);
-                var r3 = quotes.GetRsiV2(14).Select(x => x.Rsi);
+                var r3 = quotes.GetRsi(14).Select(x => x.Rsi);
                 for (int i = 0; i < chart.Value.Count; i++)
                 {
                     var _chart = chart.Value[i];
-                    _chart.Lsma1 = r1.ElementAt(i) ?? 0;
-                    _chart.Lsma2 = r2.ElementAt(i) ?? 0;
-                    _chart.Rsi = r3.ElementAt(i) ?? 0;
+                    _chart.Lsma1 = r1.ElementAt(i);
+                    _chart.Lsma2 = r2.ElementAt(i);
+                    _chart.Rsi = r3.ElementAt(i);
                 }
             }
         }
@@ -103,8 +102,8 @@ namespace CryptoModel.Backtests
             {
                 var info = new ChartInfo("", new Quote())
                 {
-                    Lsma1 = r1.ElementAt(9 + p) ?? 0,
-                    Lsma2 = r2.ElementAt(29 + p) ?? 0,
+                    Lsma1 = r1.ElementAt(9 + p),
+                    Lsma2 = r2.ElementAt(29 + p),
                 };
                 p++;
                 result.Add(info);
@@ -465,7 +464,7 @@ namespace CryptoModel.Backtests
                 for (int i = 0; i < chart.Value.Count; i++)
                 {
                     var _chart = chart.Value[i];
-                    _chart.Ema1 = r1.ElementAt(i) ?? 0;
+                    _chart.Ema1 = r1.ElementAt(i);
                     _chart.K = r2.ElementAt(i);
                     _chart.Supertrend1 = r3.ElementAt(i);
                     _chart.Supertrend2 = r4.ElementAt(i);
@@ -510,7 +509,7 @@ namespace CryptoModel.Backtests
             {
                 var info = new ChartInfo("", new Quote())
                 {
-                    Ema1 = r1.ElementAt(200 + p) ?? 0,
+                    Ema1 = r1.ElementAt(200 + p),
                     K = r2.ElementAt(18 + p),
                     Supertrend1 = r3.ElementAt(18 + p),
                     Supertrend2 = r4.ElementAt(18 + p),

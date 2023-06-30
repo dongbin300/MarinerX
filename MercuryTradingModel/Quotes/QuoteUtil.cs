@@ -1,6 +1,4 @@
-﻿using CryptoModel;
-
-using Skender.Stock.Indicators;
+﻿using Skender.Stock.Indicators;
 
 namespace MercuryTradingModel.Quotes
 {

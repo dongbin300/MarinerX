@@ -1,6 +1,4 @@
-﻿using Skender.Stock.Indicators;
-
-namespace CryptoModel.Charts
+﻿namespace CryptoModel.Charts
 {
     public class ChartInfo
     {

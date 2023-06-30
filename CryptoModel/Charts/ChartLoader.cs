@@ -1,7 +1,5 @@
 ﻿using Binance.Net.Enums;
 
-using Skender.Stock.Indicators;
-
 namespace CryptoModel.Charts
 {
     public class ChartLoader

@@ -1,12 +1,11 @@
-﻿using Skender.Stock.Indicators;
-
-namespace CryptoModel.Indicators
+﻿namespace CryptoModel.Indicators
 {
-    public class JmaSlopeResult : ResultBase
+    public class JmaSlopeResult
     {
-        public double? JmaSlope { get; set; }
+        public DateTime Date { get; set; }
+        public double JmaSlope { get; set; }
 
-        public JmaSlopeResult(DateTime date, double? jmaSlope)
+        public JmaSlopeResult(DateTime date, double jmaSlope)
         {
             Date = date;
             JmaSlope = jmaSlope;

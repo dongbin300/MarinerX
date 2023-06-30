@@ -1,7 +1,5 @@
 ﻿using Binance.Net.Enums;
-
-using CryptoModel;
-
+using CryptoModel.Maths;
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Extensions;
 using MarinerX.Bot.Models;
@@ -107,33 +105,43 @@ namespace MarinerX.Bot.Bots
 
                     if (!Common.IsLongPositioning(symbol)) // 포지션이 없으면
                     {
-                        if (DealingSymbols.Contains(symbol)) // 이미 주문하고 있는 중이면
+                        if (DateTime.Now.Minute == 0 || DateTime.Now.Minute == 30) // 캔들이 갱신되는 순간에만 진입
                         {
-                            continue;
-                        }
-
-                        DealingSymbols.Add(symbol);
-                        try
-                        {
-                            // 진입 조건에 부합하면
-                            if (IsEntryTs2LongBit(pairQuote.Charts))
+                            if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵
                             {
-                                var price = c0.Quote.Close;
-                                var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
-                                if (await OpenBuy(symbol, price, quantity).ConfigureAwait(false))
+                                continue;
+                            }
+
+                            if (DealingSymbols.Contains(symbol)) // 이미 주문하고 있는 중이면
+                            {
+                                continue;
+                            }
+
+                            DealingSymbols.Add(symbol);
+                            try
+                            {
+                                // 진입 조건에 부합하면
+                                if (IsEntryTs2LongBit(pairQuote.Charts))
                                 {
-                                    var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
-                                    await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
-                                    var takeProfitPrice = 2 * price - stopLossPrice;
-                                    await SetTakeProfit(symbol, takeProfitPrice, quantity / 2).ConfigureAwait(false);
+                                    var price = c0.Quote.Close;
+                                    var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
+                                    var halfQuantity = (quantity / 2).ToValidQuantity(symbol);
+                                    Common.AddHistory("Long Bot", $"ST1 {c1.Supertrend1}, ST2 {c1.Supertrend2}, ST3 {c1.Supertrend3}");
+                                    if (await OpenBuy(symbol, price, quantity).ConfigureAwait(false))
+                                    {
+                                        var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+                                        await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
+                                        var takeProfitPrice = 2 * price - stopLossPrice;
+                                        await SetTakeProfit(symbol, takeProfitPrice, halfQuantity).ConfigureAwait(false);
+                                    }
                                 }
                             }
+                            catch (Exception ex)
+                            {
+                                Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                            }
+                            DealingSymbols.Remove(symbol);
                         }
-                        catch (Exception ex)
-                        {
-                            Logger.Log(nameof(LongBot), MethodBase.GetCurrentMethod()?.Name, ex);
-                        }
-                        DealingSymbols.Remove(symbol);
                     }
                     else // 포지션이 있으면
                     {

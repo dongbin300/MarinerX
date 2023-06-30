@@ -1,7 +1,5 @@
 ﻿using Binance.Net.Enums;
 
-using Skender.Stock.Indicators;
-
 namespace CryptoModel.Charts
 {
     public class ChartPack
@@ -86,9 +84,9 @@ namespace CryptoModel.Charts
             for (int i = 0; i < Charts.Count; i++)
             {
                 var chart = Charts[i];
-                chart.Lsma1 = r1.ElementAt(i) ?? 0;
-                chart.Lsma2 = r2.ElementAt(i) ?? 0;
-                chart.Rsi = r3.ElementAt(i) ?? 0;
+                chart.Lsma1 = r1.ElementAt(i);
+                chart.Lsma2 = r2.ElementAt(i);
+                chart.Rsi = r3.ElementAt(i);
             }
         }
 
@@ -101,9 +99,9 @@ namespace CryptoModel.Charts
             for (int i = 0; i < Charts.Count; i++)
             {
                 var chart = Charts[i];
-                chart.Ema1 = r1.ElementAt(i) ?? 0;
-                chart.Ema2 = r2.ElementAt(i) ?? 0;
-                //chart.JmaSlope = r3.ElementAt(i) ?? 0;
+                chart.Ema1 = r1.ElementAt(i);
+                chart.Ema2 = r2.ElementAt(i);
+                //chart.JmaSlope = r3.ElementAt(i);
             }
         }
 

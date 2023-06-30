@@ -1,4 +1,5 @@
 ﻿using CryptoModel.Charts;
+using CryptoModel.Maths;
 
 namespace CryptoModel.Backtests
 {
@@ -9,7 +10,7 @@ namespace CryptoModel.Backtests
         public decimal CurrentPositionQuantity => GetCurrentPositionQuantity();
         public bool IsPositioning => CurrentPositionQuantity > 0.000001m;
         public decimal TotalIncome => GetIncome();
-        public ChartInfo ChartInfo { get; set; } = new("", new Skender.Stock.Indicators.Quote());
+        public ChartInfo ChartInfo { get; set; } = new("", new Quote());
         public decimal Upnl => GetUpnl(ChartInfo);
         public decimal EstimatedTotalIncome => TotalIncome + Upnl;
 
@@ -24,8 +25,8 @@ namespace CryptoModel.Backtests
         public List<decimal> SafetyOrderVolumes { get; private set; } = new();
 
         public decimal SltpRatio { get; set; }
-        private decimal StopLossRoe;
-        private decimal TakeProfitRoe;
+        private decimal StopLossRoe = 0;
+        private decimal TakeProfitRoe = 0;
 
         public int WinCount { get; set; } = 0;
         public int LoseCount { get; set; } = 0;

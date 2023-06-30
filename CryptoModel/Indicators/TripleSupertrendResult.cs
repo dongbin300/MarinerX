@@ -1,12 +1,11 @@
-﻿using Skender.Stock.Indicators;
-
-namespace CryptoModel.Indicators
+﻿namespace CryptoModel.Indicators
 {
     /// <summary>
     /// Triple Supertrend Result
     /// </summary>
-    public class TripleSupertrendResult : ResultBase
+    public class TripleSupertrendResult
     {
+        public DateTime Date { get; set; }
         public double Supertrend1 { get; set; }
         public double Supertrend2 { get; set; }
         public double Supertrend3 { get; set; }

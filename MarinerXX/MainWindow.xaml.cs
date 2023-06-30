@@ -51,7 +51,9 @@ namespace MarinerXX
             StrategyComboBoxPB.Items.Add("TS2 Single");
             StrategyComboBoxPB.SelectedIndex = 4;
 
+#pragma warning disable CS8625 // Null 리터럴을 null을 허용하지 않는 참조 형식으로 변환할 수 없습니다.
             PrecisionBacktestText_MouseLeftButtonDown(null, null);
+#pragma warning restore CS8625 // Null 리터럴을 null을 허용하지 않는 참조 형식으로 변환할 수 없습니다.
         }
 
         private void BacktestButton_Click(object sender, RoutedEventArgs e)

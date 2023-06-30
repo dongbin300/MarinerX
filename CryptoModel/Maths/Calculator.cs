@@ -1,6 +1,6 @@
 ﻿using Binance.Net.Enums;
 
-namespace CryptoModel
+namespace CryptoModel.Maths
 {
     public class Calculator
     {

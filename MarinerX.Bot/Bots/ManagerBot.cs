@@ -1,9 +1,9 @@
 ﻿using Binance.Net.Enums;
 
+using CryptoModel;
+
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Models;
-
-using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
@@ -115,15 +115,14 @@ namespace MarinerX.Bot.Bots
                 foreach (var symbol in MonitorSymbols)
                 {
                     var result = await BinanceClients.Api.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, Common.BaseInterval, null, null, limit).ConfigureAwait(false);
-                    var quotes = result.Data.Select(x => new Quote
-                    {
-                        Date = x.OpenTime,
-                        Open = x.OpenPrice,
-                        High = x.HighPrice,
-                        Low = x.LowPrice,
-                        Close = x.ClosePrice,
-                        Volume = x.Volume
-                    });
+                    var quotes = result.Data.Select(x => new Quote(
+                        x.OpenTime,
+                        x.OpenPrice,
+                        x.HighPrice,
+                        x.LowPrice,
+                        x.ClosePrice,
+                        x.Volume
+                    ));
 
                     Common.PairQuotes.Add(new PairQuote(symbol, quotes));
                 }
@@ -146,15 +145,14 @@ namespace MarinerX.Bot.Bots
                     {
                         var data = obj.Data.Data;
                         var pairQuote = Common.PairQuotes.Find(x => x.Symbol.Equals(symbol));
-                        var quote = new Quote
-                        {
-                            Date = data.OpenTime,
-                            Open = data.OpenPrice,
-                            High = data.HighPrice,
-                            Low = data.LowPrice,
-                            Close = data.ClosePrice,
-                            Volume = data.Volume
-                        };
+                        var quote = new Quote(
+                            data.OpenTime,
+                            data.OpenPrice,
+                            data.HighPrice,
+                            data.LowPrice,
+                            data.ClosePrice,
+                            data.Volume
+                        );
 
                         pairQuote?.UpdateQuote(quote);
                         pairQuote?.UpdateIndicators();
@@ -239,6 +237,30 @@ namespace MarinerX.Bot.Bots
                     else
                     {
                         Common.AddHistory("Manager Bot", $"Cancel Order {order.Symbol}, Error: {result.Error?.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(nameof(ManagerBot), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
+        }
+
+        /// <summary>
+        /// 포지션 쿨타임을 관리
+        /// 포지션 종료 후 쿨타임 시간동안에는 진입을 하지 않는다.
+        /// </summary>
+        /// <returns></returns>
+        public void MonitorPositionCoolTime()
+        {
+            try
+            {
+                var enablePositionCoolTimes = Common.PositionCoolTimes.Where(p => p.IsEnable);
+                foreach (var cooltime in enablePositionCoolTimes)
+                {
+                    if((DateTime.Now - cooltime.CloseTime).TotalSeconds > Common.PositionCoolTimeSeconds) // 쿨타임 끝
+                    {
+                        cooltime.IsEnable = false;
                     }
                 }
             }
