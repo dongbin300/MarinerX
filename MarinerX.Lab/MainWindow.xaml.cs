@@ -50,7 +50,7 @@ namespace MarinerX.Lab
 
             //var a = quotes.GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
             //var r = CustomScript.TripleSupertrend(high, low, close, 10, 1.2, 10, 3, 10, 10);
-            var r = ArrayCalculator.Macd(close, 12, 26, 9);
+            var r = ArrayCalculator.BollingerBands(close, 20, 2.0);
         }
     }
 }

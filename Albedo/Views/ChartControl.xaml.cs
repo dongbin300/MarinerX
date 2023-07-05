@@ -239,11 +239,12 @@ namespace Albedo.Views
                         break;
 
                     case MaType.Wma:
-                        ma.Data = Quotes.GetWma(period)
-                           .Select(r => r.Wma == null ?
-                           new IndicatorData(r.Date, Common.NullValue) :
-                           new IndicatorData(r.Date, (decimal)r.Wma.Value))
-                           .ToList();
+                        // TODO
+                        //ma.Data = Quotes.GetWma(period)
+                        //   .Select(r => r.Wma == null ?
+                        //   new IndicatorData(r.Date, Common.NullValue) :
+                        //   new IndicatorData(r.Date, (decimal)r.Wma.Value))
+                        //   .ToList();
                         break;
 
                     case MaType.Ema:
@@ -259,15 +260,9 @@ namespace Albedo.Views
                 }
 
                 var bbResult = Quotes.GetBollingerBands(bb.Period, bb.Deviation);
-                bb.SmaData = bbResult.Select(r => r.Sma == null ?
-                    new IndicatorData(r.Date, Common.NullValue) :
-                    new IndicatorData(r.Date, (decimal)r.Sma.Value)).ToList();
-                bb.UpperData = bbResult.Select(r => r.UpperBand == null ?
-                    new IndicatorData(r.Date, Common.NullValue) :
-                    new IndicatorData(r.Date, (decimal)r.UpperBand.Value)).ToList();
-                bb.LowerData = bbResult.Select(r => r.LowerBand == null ?
-                    new IndicatorData(r.Date, Common.NullValue) :
-                    new IndicatorData(r.Date, (decimal)r.LowerBand.Value)).ToList();
+                bb.SmaData = bbResult.Select(r => new IndicatorData(r.Date, r.Sma)).ToList();
+                bb.UpperData = bbResult.Select(r => new IndicatorData(r.Date, r.Upper)).ToList();
+                bb.LowerData = bbResult.Select(r => new IndicatorData(r.Date, r.Lower)).ToList();
             }
 
             var ic = SettingsMan.Indicators.Ic;
@@ -295,9 +290,7 @@ namespace Albedo.Views
             if (rsi.Enable)
             {
                 var rsiResult = Quotes.GetRsi(rsi.Period);
-                rsi.Data = rsiResult.Select(r => r.Rsi == null ?
-                new IndicatorData(r.Date, Common.NullValue) :
-                new IndicatorData(r.Date, (decimal)r.Rsi.Value)).ToList();
+                rsi.Data = rsiResult.Select(r => new IndicatorData(r.Date, r.Rsi)).ToList();
             }
         }
         #endregion
@@ -442,37 +435,37 @@ namespace Albedo.Views
         #endregion
 
         #region Chart Content Render
-        private decimal GetIndicatorMax(List<IndicatorData> data)
+        private double GetIndicatorMax(List<IndicatorData> data)
         {
-            var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != Common.NullValue);
+            var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
             if (values == null || !values.Any())
             {
-                return Common.NullValue;
+                return 0;
             }
             return values.Max(x => x.Value);
         }
 
-        private decimal GetIndicatorMin(List<IndicatorData> data)
+        private double GetIndicatorMin(List<IndicatorData> data)
         {
-            var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != Common.NullValue);
+            var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
             if (values == null || !values.Any())
             {
-                return Common.NullValue;
+                return 0;
             }
             return values.Min(x => x.Value);
         }
 
-        private (decimal, decimal) GetYMaxMin()
+        private (double, double) GetYMaxMin()
         {
-            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
-            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
-            decimal indicatorMax = 0;
-            decimal indicatorMin = 99999999;
+            var priceMax = (double)Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
+            var priceMin = (double)Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+            double indicatorMax = 0;
+            double indicatorMin = 99999999;
             foreach (var ma in SettingsMan.Indicators.Mas)
             {
                 var max = GetIndicatorMax(ma.Data);
                 var min = GetIndicatorMin(ma.Data);
-                min = min == Common.NullValue ? 99999999 : min;
+                min = min == 0 ? 99999999 : min;
                 indicatorMax = Math.Max(indicatorMax, max);
                 indicatorMin = Math.Min(indicatorMin, min);
             }
@@ -480,7 +473,7 @@ namespace Albedo.Views
             {
                 var max = GetIndicatorMax(bb.UpperData);
                 var min = GetIndicatorMin(bb.LowerData);
-                min = min == Common.NullValue ? 99999999 : min;
+                min = min == 0 ? 99999999 : min;
                 indicatorMax = Math.Max(indicatorMax, max);
                 indicatorMin = Math.Min(indicatorMin, min);
             }
@@ -490,8 +483,8 @@ namespace Albedo.Views
                 var max2 = GetIndicatorMax(ic.Senkou2Data);
                 var min1 = GetIndicatorMin(ic.Senkou1Data);
                 var min2 = GetIndicatorMin(ic.Senkou2Data);
-                min1 = min1 == Common.NullValue ? 99999999 : min1;
-                min2 = min2 == Common.NullValue ? 99999999 : min2;
+                min1 = min1 == 0 ? 99999999 : min1;
+                min2 = min2 == 0 ? 99999999 : min2;
                 indicatorMax = NumberUtil.Max(indicatorMax, max1, max2);
                 indicatorMin = NumberUtil.Min(indicatorMin, min1, min2);
             }
@@ -502,17 +495,17 @@ namespace Albedo.Views
             return (yMax, yMin);
         }
 
-        private void DrawIndicatorLine(SKCanvas canvas, IndicatorData preIndicator, IndicatorData indicator, int viewIndex, float actualItemFullWidth, float actualHeight, decimal yMax, decimal yMin, SKPaint paint)
+        private void DrawIndicatorLine(SKCanvas canvas, IndicatorData preIndicator, IndicatorData indicator, int viewIndex, float actualItemFullWidth, float actualHeight, double yMax, double yMin, SKPaint paint)
         {
-            if (preIndicator != null && indicator != null && preIndicator.Value != Common.NullValue && indicator.Value != Common.NullValue)
+            if (preIndicator != null && indicator != null && preIndicator.Value != 0 && indicator.Value != 0)
             {
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0m - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0 - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0 - (indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     paint
                     );
             }
@@ -564,7 +557,7 @@ namespace Albedo.Views
                     if (firstSenkou.Value != 0)
                     {
                         isFirstSenkou = false;
-                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0 - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                     }
                     for (int i = StartItemIndex; i < EndItemIndex; i++)
                     {
@@ -577,11 +570,11 @@ namespace Albedo.Views
                         if (isFirstSenkou)
                         {
                             isFirstSenkou = false;
-                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
                         else
                         {
-                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
 
                     }
@@ -596,11 +589,11 @@ namespace Albedo.Views
                         if (isFirstSenkou)
                         {
                             isFirstSenkou = false;
-                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
                         else
                         {
-                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
                     }
                     canvas.DrawPath(senkouPath, new SKPaint()
@@ -693,17 +686,17 @@ namespace Albedo.Views
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (quote.High - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0m - (quote.Low - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
                         actualItemFullWidth * viewIndex + actualItemMargin / 2,
-                        actualHeight * (float)(1.0m - (quote.Open - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
+                        actualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
                         actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
-                        actualHeight * (float)(1.0m - (quote.Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin
+                        actualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin
                         ),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                     );
@@ -861,7 +854,7 @@ namespace Albedo.Views
             var gridLevel = 4; // 4등분
             for (int i = 0; i <= gridLevel; i++)
             {
-                var gridPriceString = Math.Round(yMin + (yMax - yMin) * ((decimal)(gridLevel - i) / gridLevel), significantDigit).ToString();
+                var gridPriceString = Math.Round(yMin + (yMax - yMin) * ((gridLevel - i) / gridLevel), significantDigit).ToString();
 
                 canvas.DrawText(
                     gridPriceString,
@@ -875,7 +868,7 @@ namespace Albedo.Views
             canvas.DrawText(
                 NumberUtil.ToRoundedValueString(Quotes[EndItemIndex - 1].Close),
                 5,
-                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
+                actualHeight * (float)(1.0 - ((double)Quotes[EndItemIndex - 1].Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
                 Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                 );

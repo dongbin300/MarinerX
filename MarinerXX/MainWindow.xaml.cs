@@ -49,6 +49,7 @@ namespace MarinerXX
             StrategyComboBoxPB.Items.Add("LSMA Single");
             StrategyComboBoxPB.Items.Add("TS2 All");
             StrategyComboBoxPB.Items.Add("TS2 Single");
+            StrategyComboBoxPB.Items.Add("MACD All");
             StrategyComboBoxPB.SelectedIndex = 4;
 
 #pragma warning disable CS8625 // Null 리터럴을 null을 허용하지 않는 참조 형식으로 변환할 수 없습니다.

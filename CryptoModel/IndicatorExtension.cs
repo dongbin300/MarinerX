@@ -171,6 +171,20 @@ namespace CryptoModel
             return result;
         }
 
+        public static IEnumerable<BbResult> GetBollingerBands(this IEnumerable<Quote> quotes, int period = 20, double deviation = 2.0)
+        {
+            var result = new List<BbResult>();
+
+            var values = quotes.Select(x => (double)x.Close).ToArray();
+            (var sma, var upper, var lower) = ArrayCalculator.BollingerBands(values, period, deviation);
+            for (int i = 0; i < sma.Length; i++)
+            {
+                result.Add(new BbResult(quotes.ElementAt(i).Date, sma[i], upper[i], lower[i]));
+            }
+
+            return result;
+        }
+
         public static IEnumerable<MacdResult> GetMacd(this IEnumerable<Quote> quotes, int fastPeriod = 12, int slowPeriod = 26, int signalPeriod = 9)
         {
             var result = new List<MacdResult>();

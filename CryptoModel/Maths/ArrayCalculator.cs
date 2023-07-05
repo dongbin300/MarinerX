@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Metrics;
+﻿using Binance.Net.Objects.Models.Spot.Mining;
+
+using System.Diagnostics.Metrics;
 
 namespace CryptoModel.Maths
 {
@@ -237,6 +239,58 @@ namespace CryptoModel.Maths
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Standard Deviation
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public static double[] Stdev(double[] values, int period)
+        {
+            var result = new double[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (i < period - 1)
+                {
+                    result[i] = NA;
+                    continue;
+                }
+
+                double sum = 0;
+                var avg = SAverage(values, period, i - period + 1);
+                for (int j = i - period + 1; j < i + 1; j++)
+                {
+                    sum += (values[j] - avg) * (values[j] - avg);
+                }
+
+                result[i] = Math.Sqrt(sum / period);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Bollinger Bands
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="period"></param>
+        /// <param name="deviation"></param>
+        /// <returns></returns>
+        public static (double[], double[], double[]) BollingerBands(double[] values, int period, double deviation)
+        {
+            var sma = Sma(values, period);
+            var upper = new double[values.Length];
+            var lower = new double[values.Length];
+            var stdev = Stdev(values, period);
+            for (int i = 0; i < values.Length; i++)
+            {
+                var dev = deviation * stdev[i];
+                upper[i] = sma[i] + dev;
+                lower[i] = sma[i] - dev;
+            }
+            return (sma, upper, lower);
         }
 
         /// <summary>

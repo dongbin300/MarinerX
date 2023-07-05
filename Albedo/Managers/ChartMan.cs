@@ -10,7 +10,7 @@ using Bithumb.Net.Clients;
 using Bybit.Net.Clients;
 using Bybit.Net.Enums;
 
-using Skender.Stock.Indicators;
+using CryptoModel;
 
 using System;
 using System.Linq;

@@ -1,6 +1,6 @@
 ﻿using Albedo.Enums;
 
-using Skender.Stock.Indicators;
+using CryptoModel;
 
 using System;
 using System.Collections.Generic;
