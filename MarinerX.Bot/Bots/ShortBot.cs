@@ -92,11 +92,6 @@ namespace MarinerX.Bot.Bots
         {
             try
             {
-                if (Common.ShortPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
-                {
-                    return;
-                }
-
                 foreach (var pairQuote in Common.PairQuotes)
                 {
                     var symbol = pairQuote.Symbol;
@@ -105,6 +100,11 @@ namespace MarinerX.Bot.Bots
 
                     if (!Common.IsShortPositioning(symbol)) // 포지션이 없으면
                     {
+                        if (Common.ShortPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
+                        {
+                            continue;
+                        }
+
                         if (DateTime.Now.Minute == 0 || DateTime.Now.Minute == 30) // 캔들이 갱신되는 순간에만 진입
                         {
                             if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵

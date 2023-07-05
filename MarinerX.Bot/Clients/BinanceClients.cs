@@ -74,12 +74,12 @@ namespace MarinerX.Bot.Clients
 
         public static async Task<WebCallResult<BinanceFuturesPlacedOrder>> CloseBuy(string symbol, decimal price, decimal quantity)
         {
-            return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Buy, FuturesOrderType.Limit, quantity, price, PositionSide.Short).ConfigureAwait(false);
+            return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Buy, FuturesOrderType.Limit, quantity, price, PositionSide.Short, TimeInForce.GoodTillCanceled).ConfigureAwait(false);
         }
 
         public static async Task<WebCallResult<BinanceFuturesPlacedOrder>> CloseSell(string symbol, decimal price, decimal quantity)
         {
-            return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.Limit, quantity, price, PositionSide.Long).ConfigureAwait(false);
+            return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.Limit, quantity, price, PositionSide.Long, TimeInForce.GoodTillCanceled).ConfigureAwait(false);
         }
 
         public static async Task<WebCallResult<BinanceFuturesPlacedOrder>> SetLongTakeProfit(string symbol, decimal price, decimal quantity, decimal takePrice)

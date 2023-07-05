@@ -1,4 +1,6 @@
-﻿namespace CryptoModel.Maths
+﻿using System.Diagnostics.Metrics;
+
+namespace CryptoModel.Maths
 {
     public class ArrayCalculator
     {
@@ -147,10 +149,44 @@
         /// <param name="values"></param>
         /// <param name="period"></param>
         /// <returns></returns>
-        public static double[] Ema(double[] values, int period)
+        public static double[] Ema(double[] values, int period, int startIndex = 0)
         {
             var result = new double[values.Length];
             double alpha = 2.0 / (period + 1);
+            for (int i = startIndex; i < values.Length; i++)
+            {
+                if (i < startIndex + period - 1)
+                {
+                    result[i] = NA;
+                    continue;
+                }
+
+                if (i == startIndex + period - 1)
+                {
+                    result[i] = SAverage(values, period, startIndex);
+                    continue;
+                }
+
+                result[i] = alpha * values[i] + (1 - alpha) * result[i - 1];
+            }
+
+            return result;
+        }
+
+        public static double[] Wma(double[] values, int period)
+        {
+            var result = new double[values.Length];
+
+            /*
+             * pine_wma(values, period) =>
+    norm = 0.0
+    sum = 0.0
+    for i = 0 to period - 1
+        weight = (period - i) * period
+        norm := norm + weight
+        sum := sum + values[i] * weight
+    sum / norm
+            */
             for (int i = 0; i < values.Length; i++)
             {
                 if (i < period - 1)
@@ -159,13 +195,15 @@
                     continue;
                 }
 
-                if (i == period - 1)
+                double norm = 0;
+                double sum = 0;
+                for (int j = 0; j < period; j++)
                 {
-                    result[i] = SAverage(values, period);
-                    continue;
+                    var weight = (period - j) * period;
+                    norm += weight;
+                    sum += values[i] * weight;
                 }
-
-                result[i] = alpha * values[i] + (1 - alpha) * result[i - 1];
+                result[i] = sum / norm;
             }
 
             return result;
@@ -199,6 +237,45 @@
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// EMA based Moving Average Convergence Divergence(MACD)
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="fastPeriod"></param>
+        /// <param name="slowPeriod"></param>
+        /// <param name="signalPeriod"></param>
+        /// <returns></returns>
+        public static (double[], double[], double[]) Macd(double[] values, int fastPeriod, int slowPeriod, int signalPeriod)
+        {
+            var fast = Ema(values, fastPeriod);
+            var slow = Ema(values, slowPeriod);
+            var macd = new double[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (i < slowPeriod - 1)
+                {
+                    macd[i] = NA;
+                    continue;
+                }
+
+                macd[i] = fast[i] - slow[i];
+            }
+            var signal = Ema(macd, signalPeriod, slowPeriod - 1);
+            var hist = new double[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (i < slowPeriod + signalPeriod - 2)
+                {
+                    hist[i] = NA;
+                    continue;
+                }
+
+                hist[i] = macd[i] - signal[i];
+            }
+
+            return (macd, signal, hist);
         }
 
         /// <summary>

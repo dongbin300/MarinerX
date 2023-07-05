@@ -8,12 +8,14 @@ using MarinerX.Bot.Views;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace MarinerX.Bot
@@ -60,7 +62,7 @@ namespace MarinerX.Bot
                 });
             };
 
-            await manager.GetAllKlines(60).ConfigureAwait(false);
+            await manager.GetAllKlines(300).ConfigureAwait(false);
             await manager.StartBinanceFuturesTicker().ConfigureAwait(false);
 
             timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -99,6 +101,8 @@ namespace MarinerX.Bot
                 DispatcherService.Invoke(() =>
                 {
                     PositionDataGrid.ItemsSource = Common.Positions;
+                    IndicatorDataGrid.ItemsSource = null;
+                    IndicatorDataGrid.ItemsSource = Common.PairQuotes.OrderBy(x => x.Symbol);
                 });
 
                 /* 자산 모니터링 */
@@ -322,6 +326,38 @@ namespace MarinerX.Bot
             catch (Exception ex)
             {
                 Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
+        }
+
+
+        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            var parent = VisualTreeHelper.GetParent(child);
+
+            if (parent == null)
+                return null;
+
+            var parentT = parent as T;
+            return parentT ?? FindParent<T>(parent);
+        }
+        public Process? Start(string path)
+        {
+            ProcessStartInfo info = new()
+            {
+                FileName = path,
+                UseShellExecute = true
+            };
+
+            return Process.Start(info);
+        }
+        private void IndicatorDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var row = FindParent<DataGridRow>((DependencyObject)e.OriginalSource);
+            if (row != null && row.Item is PairQuote pairQuote)
+            {
+                var symbol = pairQuote.Symbol;
+                var url = $"https://www.tradingview.com/chart/g2jIOGTD/?symbol=BINANCE%3A{symbol}.P";
+                Start(url);
             }
         }
     }

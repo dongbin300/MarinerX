@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MarinerX Bot 230630" Height="610" Width="1400" Background="{StaticResource ChartBackground}">
+        Title="MarinerX Bot 230702.2" Height="610" Width="2000" Background="{StaticResource ChartBackground}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -17,6 +17,7 @@
                 <ColumnDefinition Width="15*"/>
                 <ColumnDefinition Width="9*"/>
                 <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="600"/>
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Bot Settings">
@@ -89,6 +90,36 @@
                     <TextBlock Style="{StaticResource Description}">Today PNL</TextBlock>
                     <TextBlock x:Name="TodayPnlText" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold" MouseLeftButtonDown="TodayPnlText_MouseLeftButtonDown"/>
                 </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Column="4" Header="Indicators">
+                <DataGrid x:Name="IndicatorDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0" MouseDoubleClick="IndicatorDataGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}"/>
+                        <DataGridTextColumn Header="Price" Width="100" Binding="{Binding CurrentPrice}"/>
+                        <DataGridTextColumn Header="Supertrend1" Width="1*" Binding="{Binding PrevSupertrend1}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{Binding PrevSupertrend1Color}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Supertrend2" Width="1*" Binding="{Binding PrevSupertrend2}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{Binding PrevSupertrend2Color}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Supertrend3" Width="1*" Binding="{Binding PrevSupertrend3}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{Binding PrevSupertrend3Color}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
             </GroupBox>
         </Grid>
 

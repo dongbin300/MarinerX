@@ -1,19 +1,32 @@
 ﻿using CryptoModel;
 
-using Skender.Stock.Indicators;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Media;
 
 namespace MarinerX.Bot.Models
 {
     public class PairQuote
     {
+        private int DecimalCount = 4;
+
         public string Symbol { get; set; }
         public List<ChartInfo> Charts { get; set; }
         public decimal CurrentPrice => Charts[^1].Quote.Close;
+        public double CurrentSupertrend1 => Math.Round(Charts[^1].Supertrend1, DecimalCount);
+        public double CurrentSupertrend2 => Math.Round(Charts[^1].Supertrend2, DecimalCount);
+        public double CurrentSupertrend3 => Math.Round(Charts[^1].Supertrend3, DecimalCount);
+        public SolidColorBrush CurrentSupertrend1Color => CurrentSupertrend1 >= 0 ? Common.LongColor : Common.ShortColor;
+        public SolidColorBrush CurrentSupertrend2Color => CurrentSupertrend2 >= 0 ? Common.LongColor : Common.ShortColor;
+        public SolidColorBrush CurrentSupertrend3Color => CurrentSupertrend3 >= 0 ? Common.LongColor : Common.ShortColor;
+        public double PrevSupertrend1 => Math.Round(Charts[^2].Supertrend1, DecimalCount);
+        public double PrevSupertrend2 => Math.Round(Charts[^2].Supertrend2, DecimalCount);
+        public double PrevSupertrend3 => Math.Round(Charts[^2].Supertrend3, DecimalCount);
+        public SolidColorBrush PrevSupertrend1Color => PrevSupertrend1 >= 0 ? Common.LongColor : Common.ShortColor;
+        public SolidColorBrush PrevSupertrend2Color => PrevSupertrend2 >= 0 ? Common.LongColor : Common.ShortColor;
+        public SolidColorBrush PrevSupertrend3Color => PrevSupertrend3 >= 0 ? Common.LongColor : Common.ShortColor;
 
         public PairQuote(string symbol, IEnumerable<Quote> quotes)
         {
@@ -48,7 +61,7 @@ namespace MarinerX.Bot.Models
         {
             try
             {
-                var ts = Charts.Select(x => x.Quote).GetTripleSupertrend(10,1.2, 10,3, 10,10);
+                var ts = Charts.Select(x => x.Quote).GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
 
                 for (int i = 0; i < Charts.Count; i++)
                 {

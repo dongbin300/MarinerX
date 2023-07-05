@@ -2,6 +2,7 @@
 using Binance.Net.Objects;
 
 using CryptoModel;
+using CryptoModel.Maths;
 
 using System;
 using System.Collections.Generic;
@@ -33,13 +34,13 @@ namespace MarinerX.Lab
             //res.Wait();
             //var dd = res.Result.Data;
 
-            var result = client.UsdFuturesApi.ExchangeData.GetKlinesAsync("DENTUSDT", Binance.Net.Enums.KlineInterval.ThirtyMinutes, null, null, 120);
+            var result = client.SpotApi.ExchangeData.GetKlinesAsync("SOLUSDT", Binance.Net.Enums.KlineInterval.OneMonth, null, null, 100);
             result.Wait();
             var data = result.Result.Data;
 
             foreach (var item in data)
             {
-                quotes.Add(new CryptoModel.Quote(item.OpenTime, item.OpenPrice, item.HighPrice, item.LowPrice, item.ClosePrice));
+                quotes.Add(new Quote(item.OpenTime, item.OpenPrice, item.HighPrice, item.LowPrice, item.ClosePrice));
             }
 
             double[] open = quotes.Select(x => (double)x.Open).ToArray();
@@ -47,8 +48,9 @@ namespace MarinerX.Lab
             double[] low = quotes.Select(x => (double)x.Low).ToArray();
             double[] close = quotes.Select(x => (double)x.Close).ToArray();
 
-            var a = quotes.GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
+            //var a = quotes.GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
             //var r = CustomScript.TripleSupertrend(high, low, close, 10, 1.2, 10, 3, 10, 10);
+            var r = ArrayCalculator.Macd(close, 12, 26, 9);
         }
     }
 }

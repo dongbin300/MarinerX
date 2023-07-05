@@ -4,7 +4,7 @@ using Albedo.Managers;
 using Albedo.Models;
 using Albedo.Utils;
 
-using Skender.Stock.Indicators;
+using CryptoModel;
 
 using SkiaSharp;
 
@@ -26,6 +26,7 @@ namespace Albedo.Views
     public partial class ChartControl : UserControl
     {
         private DispatcherTimer chartControlTimer = new();
+        private GlobalMouseEvents mouseEvents = new();
 
         public List<Quote> Quotes = new();
         public int TotalCount => Quotes.Count;
@@ -59,9 +60,11 @@ namespace Albedo.Views
             InitializeComponent();
             chartControlTimer.Interval = TimeSpan.FromMilliseconds(5);
             chartControlTimer.Tick += ChartControlTimer_Tick;
+            mouseEvents.MouseLeftButtonDown += MouseEvents_MouseLeftButtonDown;
+            mouseEvents.MouseLeftButtonUp += MouseEvents_MouseLeftButtonUp;
             Common.CalculateIndicators = CalculateIndicators;
         }
-
+        
         public void Init(List<Quote> quotes)
         {
             Quotes = quotes;
@@ -231,15 +234,11 @@ namespace Albedo.Views
                 var period = ma.Period;
                 switch (ma.Type.Type)
                 {
-                    case Enums.MaType.Sma:
-                        ma.Data = Quotes.GetSma(period)
-                            .Select(r => r.Sma == null ?
-                            new IndicatorData(r.Date, Common.NullValue) :
-                            new IndicatorData(r.Date, (decimal)r.Sma.Value))
-                            .ToList();
+                    case MaType.Sma:
+                        ma.Data = Quotes.GetSma(period).Select(r => new IndicatorData(r.Date, r.Sma)).ToList();
                         break;
 
-                    case Enums.MaType.Wma:
+                    case MaType.Wma:
                         ma.Data = Quotes.GetWma(period)
                            .Select(r => r.Wma == null ?
                            new IndicatorData(r.Date, Common.NullValue) :
@@ -247,12 +246,8 @@ namespace Albedo.Views
                            .ToList();
                         break;
 
-                    case Enums.MaType.Ema:
-                        ma.Data = Quotes.GetEma(period)
-                           .Select(r => r.Ema == null ?
-                           new IndicatorData(r.Date, Common.NullValue) :
-                           new IndicatorData(r.Date, (decimal)r.Ema.Value))
-                           .ToList();
+                    case MaType.Ema:
+                        ma.Data = Quotes.GetEma(period).Select(r => new IndicatorData(r.Date, r.Ema)).ToList();
                         break;
                 }
             }
@@ -337,13 +332,25 @@ namespace Albedo.Views
         #endregion
 
         #region Scroll
-        private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void MouseEvents_MouseLeftButtonDown(object? sender, EventArgs e)
         {
             StartMousePosition = GetCursorPosition();
-            chartControlTimer.Start();
+
+            var topLeftPoint = new Point(0, 0);
+            var bottomRightPoint = new Point(ActualWidth, ActualHeight);
+
+            var transformMatrix = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
+            topLeftPoint = transformMatrix.Transform(PointToScreen(topLeftPoint));
+            bottomRightPoint = transformMatrix.Transform(PointToScreen(bottomRightPoint));
+
+            // 차트 화면을 누른 경우
+            if (StartMousePosition.X > topLeftPoint.X && StartMousePosition.X < bottomRightPoint.X && StartMousePosition.Y > topLeftPoint.Y && StartMousePosition.Y < bottomRightPoint.Y)
+            {
+                chartControlTimer.Start();
+            }
         }
 
-        private void UserControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void MouseEvents_MouseLeftButtonUp(object? sender, EventArgs e)
         {
             chartControlTimer.Stop();
         }
@@ -554,7 +561,7 @@ namespace Albedo.Views
                     var isFirstSenkou = true;
                     var senkouPath = new SKPath();
                     var firstSenkou = ic.Senkou1Data.ValueOf(StartItemIndex);
-                    if (firstSenkou.Value != Common.NullValue)
+                    if (firstSenkou.Value != 0)
                     {
                         isFirstSenkou = false;
                         senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
@@ -563,7 +570,7 @@ namespace Albedo.Views
                     {
                         var viewIndex = i - StartItemIndex;
                         var senkou = ic.Senkou1Data.ValueOf(i);
-                        if (senkou.Value == Common.NullValue)
+                        if (senkou.Value == 0)
                         {
                             continue;
                         }
@@ -582,7 +589,7 @@ namespace Albedo.Views
                     {
                         var viewIndex = i - StartItemIndex;
                         var senkou = ic.Senkou2Data.ValueOf(i);
-                        if (senkou.Value == Common.NullValue)
+                        if (senkou.Value == 0)
                         {
                             continue;
                         }
@@ -749,7 +756,7 @@ namespace Albedo.Views
                     var pointingIndicator = CurrentMouseX == -1358 ? ma.Data.ValueOf(EndItemIndex - 1) : ma.Data.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
 
                     indicatorInfoText.Add(new SKColoredText($"{ma.Type.Type.ToString().ToUpper()} {ma.Period}", DrawingTools.BaseColor));
-                    if (pointingIndicator.Value != Common.NullValue)
+                    if (pointingIndicator.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), ma.LineColor.Color.ToSKColor()));
                     }
@@ -767,15 +774,15 @@ namespace Albedo.Views
                     var pointingIndicatorLower = CurrentMouseX == -1358 ? bb.LowerData.ValueOf(EndItemIndex - 1) : bb.LowerData.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
 
                     indicatorInfoText.Add(new SKColoredText($"BB {bb.Period},{bb.Deviation}", DrawingTools.BaseColor));
-                    if (pointingIndicatorSma.Value != Common.NullValue)
+                    if (pointingIndicatorSma.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorLower.Value, significantDigit).ToString(), bb.LowerLineColor.Color.ToSKColor(), -4));
                     }
-                    if (pointingIndicatorUpper.Value != Common.NullValue)
+                    if (pointingIndicatorUpper.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSma.Value, significantDigit).ToString(), bb.SmaLineColor.Color.ToSKColor(), -4));
                     }
-                    if (pointingIndicatorLower.Value != Common.NullValue)
+                    if (pointingIndicatorLower.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorUpper.Value, significantDigit).ToString(), bb.UpperLineColor.Color.ToSKColor(), -4));
                     }
@@ -790,15 +797,15 @@ namespace Albedo.Views
                         var pointingIndicatorKijun = CurrentMouseX == -1358 ? ic.KijunData.ValueOf(EndItemIndex - 1) : ic.KijunData.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
                         var pointingIndicatorChikou = CurrentMouseX == -1358 ? ic.ChikouData.ValueOf(EndItemIndex - 1) : ic.ChikouData.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
 
-                        if (pointingIndicatorTenkan.Value != Common.NullValue)
+                        if (pointingIndicatorTenkan.Value != 0)
                         {
                             indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorTenkan.Value, significantDigit).ToString(), ic.TenkanLineColor.Color.ToSKColor(), -4));
                         }
-                        if (pointingIndicatorKijun.Value != Common.NullValue)
+                        if (pointingIndicatorKijun.Value != 0)
                         {
                             indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorKijun.Value, significantDigit).ToString(), ic.KijunLineColor.Color.ToSKColor(), -4));
                         }
-                        if (pointingIndicatorChikou.Value != Common.NullValue)
+                        if (pointingIndicatorChikou.Value != 0)
                         {
                             indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorChikou.Value, significantDigit).ToString(), ic.ChikouLineColor.Color.ToSKColor(), -4));
                         }
@@ -807,11 +814,11 @@ namespace Albedo.Views
                     var pointingIndicatorSenkou1 = CurrentMouseX == -1358 ? ic.Senkou1Data.ValueOf(EndItemIndex - 1) : ic.Senkou1Data.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
                     var pointingIndicatorSenkou2 = CurrentMouseX == -1358 ? ic.Senkou2Data.ValueOf(EndItemIndex - 1) : ic.Senkou2Data.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
 
-                    if (pointingIndicatorSenkou1.Value != Common.NullValue)
+                    if (pointingIndicatorSenkou1.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou1.Value, significantDigit).ToString(), ic.Senkou1LineColor.Color.ToSKColor(), -4));
                     }
-                    if (pointingIndicatorSenkou2.Value != Common.NullValue)
+                    if (pointingIndicatorSenkou2.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou2.Value, significantDigit).ToString(), ic.Senkou2LineColor.Color.ToSKColor(), -4));
                     }
@@ -822,7 +829,7 @@ namespace Albedo.Views
                     var pointingIndicator = CurrentMouseX == -1358 ? rsi.Data.ValueOf(EndItemIndex - 1) : rsi.Data.ValueOf(StartItemIndex + (int)(CurrentMouseX / actualItemFullWidth));
 
                     indicatorInfoText.Add(new SKColoredText($"RSI {rsi.Period}", DrawingTools.BaseColor));
-                    if (pointingIndicator.Value != Common.NullValue)
+                    if (pointingIndicator.Value != 0)
                     {
                         indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), rsi.LineColor.Color.ToSKColor(), -4));
                     }

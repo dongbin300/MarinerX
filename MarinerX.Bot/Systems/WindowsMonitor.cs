@@ -15,7 +15,7 @@ namespace MarinerX.Bot.Systems
                 var searcher = new ManagementObjectSearcher("root\\CIMV2", $"SELECT * FROM Win32_PerfFormattedData_PerfProc_Process WHERE Name = \'{processName}\'");
                 foreach (var obj in searcher.Get())
                 {
-                    var memory = long.Parse(obj["WorkingSetPrivate"].ToString());
+                    var memory = long.Parse(obj["WorkingSetPrivate"]?.ToString() ?? default!);
                     return Math.Round((double)memory / 1000000, 1);
                 }
             }

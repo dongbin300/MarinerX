@@ -1,16 +1,15 @@
-﻿using SkiaSharp;
+﻿using Binance.Net.Clients;
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
-using System.Windows;
-using Bybit.Net.Clients;
-using Bybit.Net.Enums;
-using System.IO;
-using Binance.Net.Clients;
+using SkiaSharp;
+
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Albedo.Test
 {
@@ -82,6 +81,8 @@ namespace Albedo.Test
         SKFont font = new SKFont(SKTypeface.FromFamilyName("Meiryo UI"), 12);
         SKPaint paint = new SKPaint() { Color = SKColors.White };
         SKPaint pathPaint = new SKPaint() { Style = SKPaintStyle.Fill, Color = SKColors.White };
+
+        GlobalMouseEvents mouseEvents;
 
         List<string> MonitorSymbols { get; set; } = new()
         {
@@ -172,25 +173,37 @@ namespace Albedo.Test
         public MainWindow()
         {
             InitializeComponent();
-            List<Pnl> pnls = new List<Pnl>();
+            //List<Pnl> pnls = new List<Pnl>();
 
-            var data = File.ReadAllLines(@"C:\Users\Gaten\AppData\Roaming\Gaten\binance_api.txt");
-            BinanceClient client = new BinanceClient(new Binance.Net.Objects.BinanceClientOptions
-            {
-                ApiCredentials = new Binance.Net.Objects.BinanceApiCredentials(data[0], data[1])
-            });
-            foreach(var symbol in MonitorSymbols)
-            {
-                Thread.Sleep(250);
-                var result = client.UsdFuturesApi.Account.GetIncomeHistoryAsync(symbol, "REALIZED_PNL", DateTime.Parse("2023-06-14"), null, 1000);
-                result.Wait();
-                var d = result.Result.Data;
-                var pnl = Math.Round(d.Sum(x => x.Income), 2);
-                pnls.Add(new Pnl(symbol, pnl));
-            }
-            
+            //var data = File.ReadAllLines(@"C:\Users\Gaten\AppData\Roaming\Gaten\binance_api.txt");
+            //BinanceClient client = new BinanceClient(new Binance.Net.Objects.BinanceClientOptions
+            //{
+            //    ApiCredentials = new Binance.Net.Objects.BinanceApiCredentials(data[0], data[1])
+            //});
+            //foreach(var symbol in MonitorSymbols)
+            //{
+            //    Thread.Sleep(250);
+            //    var result = client.UsdFuturesApi.Account.GetIncomeHistoryAsync(symbol, "REALIZED_PNL", DateTime.Parse("2023-06-14"), null, 1000);
+            //    result.Wait();
+            //    var d = result.Result.Data;
+            //    var pnl = Math.Round(d.Sum(x => x.Income), 2);
+            //    pnls.Add(new Pnl(symbol, pnl));
+            //}
+
+            mouseEvents = new();
+            mouseEvents.MouseLeftButtonDown += MouseEvents_MouseLeftButtonDown;
+            mouseEvents.MouseLeftButtonUp += MouseEvents_MouseLeftButtonUp;
         }
 
+        private void MouseEvents_MouseLeftButtonUp(object? sender, EventArgs e)
+        {
+            LogList.Items.Add("UP");
+        }
+
+        private void MouseEvents_MouseLeftButtonDown(object? sender, EventArgs e)
+        {
+            LogList.Items.Add("DOWN");
+        }
 
         private void Screen_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
         {

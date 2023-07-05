@@ -143,6 +143,20 @@ namespace CryptoModel
             return result;
         }
 
+        public static IEnumerable<SmaResult> GetSma(this IEnumerable<Quote> quotes, int period)
+        {
+            var result = new List<SmaResult>();
+
+            var values = quotes.Select(x => (double)x.Close).ToArray();
+            var sma = ArrayCalculator.Sma(values, period);
+            for (int i = 0; i < sma.Length; i++)
+            {
+                result.Add(new SmaResult(quotes.ElementAt(i).Date, sma[i]));
+            }
+
+            return result;
+        }
+
         public static IEnumerable<EmaResult> GetEma(this IEnumerable<Quote> quotes, int period)
         {
             var result = new List<EmaResult>();
@@ -152,6 +166,20 @@ namespace CryptoModel
             for (int i = 0; i < ema.Length; i++)
             {
                 result.Add(new EmaResult(quotes.ElementAt(i).Date, ema[i]));
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<MacdResult> GetMacd(this IEnumerable<Quote> quotes, int fastPeriod = 12, int slowPeriod = 26, int signalPeriod = 9)
+        {
+            var result = new List<MacdResult>();
+
+            var values = quotes.Select(x => (double)x.Close).ToArray();
+            (var macd, var signal, var hist) = ArrayCalculator.Macd(values, fastPeriod, slowPeriod, signalPeriod);
+            for (int i = 0; i < macd.Length; i++)
+            {
+                result.Add(new MacdResult(quotes.ElementAt(i).Date, macd[i], signal[i], hist[i]));
             }
 
             return result;
