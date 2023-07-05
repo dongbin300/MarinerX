@@ -22,6 +22,9 @@
         public double Supertrend1 { get; set; }
         public double Supertrend2 { get; set; }
         public double Supertrend3 { get; set; }
+        public double Macd { get; set; }
+        public double MacdSignal { get; set; }
+        public double MacdHist { get; set; }
 
         public ChartInfo(string symbol, Quote quote)
         {

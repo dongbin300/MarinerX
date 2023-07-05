@@ -185,6 +185,30 @@ namespace CryptoModel
             return result;
         }
 
+        public static IEnumerable<IchimokuCloudResult> GetIchimokuCloud(this IEnumerable<Quote> quotes, int conversionPeriod = 9, int basePeriod = 26, int leadingSpanPeriod = 52)
+        {
+            var result = new List<IchimokuCloudResult>();
+
+            var interval = quotes.ElementAt(1).Date - quotes.ElementAt(0).Date;
+            var high = quotes.Select(x => (double)x.High).ToArray();
+            var low = quotes.Select(x => (double)x.Low).ToArray();
+            var close = quotes.Select(x => (double)x.Close).ToArray();
+            (var conversion, var _base, var trailingSpan, var leadingSpan1, var leadingSpan2) = ArrayCalculator.IchimokuCloud(high, low, close, conversionPeriod, basePeriod, leadingSpanPeriod);
+            for (int i = 0; i < high.Length; i++)
+            {
+                result.Add(new IchimokuCloudResult(quotes.ElementAt(i).Date, conversion[i], _base[i], trailingSpan[i], leadingSpan1[i], leadingSpan2[i]));
+            }
+            // TODO : value sync to time
+            var nextDateTime = result[^1].Date;
+            for (int i = high.Length; i < high.Length + basePeriod - 1; i++)
+            {
+                nextDateTime += interval;
+                result.Add(new IchimokuCloudResult(nextDateTime, 0, 0, 0, leadingSpan1[i], leadingSpan2[i]));
+            }
+
+            return result;
+        }
+
         public static IEnumerable<MacdResult> GetMacd(this IEnumerable<Quote> quotes, int fastPeriod = 12, int slowPeriod = 26, int signalPeriod = 9)
         {
             var result = new List<MacdResult>();

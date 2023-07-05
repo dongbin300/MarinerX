@@ -1655,5 +1655,98 @@ namespace CryptoModel.Backtests
             }
         }
         #endregion
+
+        #region MACD
+        public void CalculateIndicatorsMacd()
+        {
+            foreach (var chart in Charts)
+            {
+                var quotes = chart.Value.Select(x => x.Quote);
+                var e = quotes.GetEma(200).Select(x => x.Ema);
+                var macd = quotes.GetMacd(12, 26, 9);
+                var m = macd.Select(x => x.Macd);
+                var s = macd.Select(x => x.Signal);
+                var h = macd.Select(x => x.Hist);
+                for (int i = 0; i < chart.Value.Count; i++)
+                {
+                    var _chart = chart.Value[i];
+                    _chart.Ema1 = e.ElementAt(i);
+                    _chart.Macd = m.ElementAt(i);
+                    _chart.MacdSignal = s.ElementAt(i);
+                    _chart.MacdHist = h.ElementAt(i);
+                }
+            }
+        }
+
+        public void EvaluateMacdLongNextCandle()
+        {
+            var side = PositionSide.Long;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+                var c2 = charts[^3];
+
+                // 포지션이 없으면
+                if (position == null)
+                {
+                    if (LongPositionCount >= MaxActiveDeals)
+                    {
+                        continue;
+                    }
+
+                    // MACD가 Signal을 음의 자리에서 골든크로스, EMA 200 위
+                    if ((double)c1.Quote.Close > c1.Ema1 && c1.MacdSignal < 0 && c1.Macd > c1.MacdSignal && c2.Macd < c2.MacdSignal)
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+                        var takeProfitPrice = 2 * price - 1 * stopLossPrice;
+                        var quantity = BaseOrderSize / price;
+                        Money -= price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            TakeProfitPrice = takeProfitPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                // 포지션이 있으면
+                else
+                {
+                    var st2 = (decimal)Math.Abs(c0.Supertrend2);
+                    var dst2 = Calculator.TargetPrice(side, st2, -0.8m);
+
+                    if (c1.Supertrend2 < 0)
+                    {
+                        var price = c0.Quote.Open;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
+                        Money -= FeeSize;
+                    }
+                    else if (position.Stage == 0 && c0.Quote.High >= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity / 2;
+                        Money += price * quantity;
+                        position.Quantity -= quantity;
+                        position.ExitAmount = price * quantity;
+                        position.Stage = 1;
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

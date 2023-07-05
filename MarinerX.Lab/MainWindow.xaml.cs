@@ -48,9 +48,9 @@ namespace MarinerX.Lab
             double[] low = quotes.Select(x => (double)x.Low).ToArray();
             double[] close = quotes.Select(x => (double)x.Close).ToArray();
 
-            //var a = quotes.GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
+            var a = quotes.GetIchimokuCloud(2,5 , 10);
             //var r = CustomScript.TripleSupertrend(high, low, close, 10, 1.2, 10, 3, 10, 10);
-            var r = ArrayCalculator.BollingerBands(close, 20, 2.0);
+            //var r = ArrayCalculator.IchimokuCloud(high, low, close, 2, 5, 10);
         }
     }
 }

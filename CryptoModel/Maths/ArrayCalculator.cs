@@ -271,6 +271,71 @@ namespace CryptoModel.Maths
             return result;
         }
 
+        public static (double[], double[], double[], double[], double[]) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
+        {
+            var displacementOffset = basePeriod - 1;
+            var conversion = new double[high.Length];
+            var _base = new double[high.Length];
+            var trailingSpan = new double[high.Length];
+            var leadingSpan1 = new double[high.Length];
+            var leadingSpan2 = new double[high.Length];
+
+            for (int i = 0; i < high.Length; i++)
+            {
+                if (i < conversionPeriod - 1)
+                {
+                    conversion[i] = NA;
+                }
+                else
+                {
+                    conversion[i] = (Max(high, conversionPeriod, i + 1 - conversionPeriod) + Min(low, conversionPeriod, i + 1 - conversionPeriod)) / 2;
+                }
+
+                if (i < basePeriod - 1)
+                {
+                    _base[i] = NA;
+                }
+                else
+                {
+                    _base[i] = (Max(high, basePeriod, i + 1 - basePeriod) + Min(low, basePeriod, i + 1 - basePeriod)) / 2;
+                }
+
+                trailingSpan[i] = close[i];
+
+                if (i < basePeriod - 1)
+                {
+                    leadingSpan1[i] = NA;
+                }
+                else
+                {
+                    leadingSpan1[i] = (conversion[i] + _base[i]) / 2;
+                }
+
+                if (i < leadingSpanPeriod - 1)
+                {
+                    leadingSpan2[i] = NA;
+                }
+                else
+                {
+                    leadingSpan2[i] = (Max(high, leadingSpanPeriod, i + 1 - leadingSpanPeriod) + Min(low, leadingSpanPeriod, i + 1 - leadingSpanPeriod)) / 2;
+                }
+            }
+
+            // Trailing span : shift left
+            var displacementTrailingSpan = new double[high.Length];
+            Array.Copy(trailingSpan, displacementOffset, displacementTrailingSpan, 0, high.Length - displacementOffset);
+            // Fill rest with last value
+            Array.Fill(displacementTrailingSpan, displacementTrailingSpan[high.Length - displacementOffset - 1], high.Length - displacementOffset, displacementOffset);
+
+            // Leading span 1,2 : shift right
+            var displacementLeadingSpan1 = new double[high.Length + displacementOffset];
+            Array.Copy(leadingSpan1, 0, displacementLeadingSpan1, displacementOffset, high.Length);
+            var displacementLeadingSpan2 = new double[high.Length + displacementOffset];
+            Array.Copy(leadingSpan2, 0, displacementLeadingSpan2, displacementOffset, high.Length);
+
+            return (conversion, _base, displacementTrailingSpan, displacementLeadingSpan1, displacementLeadingSpan2);
+        }
+
         /// <summary>
         /// Bollinger Bands
         /// </summary>
