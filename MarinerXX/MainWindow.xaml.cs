@@ -41,7 +41,7 @@ namespace MarinerXX
             PrecisionBacktestGrid.Visibility = Visibility.Hidden;
             PrecisionBacktestRectangle.Visibility = Visibility.Hidden;
 
-            IntervalComboBoxPB.SelectedIndex = 4;
+            IntervalComboBoxPB.SelectedIndex = 2;
             StrategyComboBoxPB.Items.Clear();
             StrategyComboBoxPB.Items.Add("TS1 All");
             StrategyComboBoxPB.Items.Add("TS1 Single");
@@ -50,7 +50,7 @@ namespace MarinerXX
             StrategyComboBoxPB.Items.Add("TS2 All");
             StrategyComboBoxPB.Items.Add("TS2 Single");
             StrategyComboBoxPB.Items.Add("MACD All");
-            StrategyComboBoxPB.SelectedIndex = 4;
+            StrategyComboBoxPB.SelectedIndex = 6;
 
 #pragma warning disable CS8625 // Null 리터럴을 null을 허용하지 않는 참조 형식으로 변환할 수 없습니다.
             PrecisionBacktestText_MouseLeftButtonDown(null, null);
@@ -219,6 +219,10 @@ namespace MarinerXX
 
                     case 5:
                         Strategy6(symbols, interval, startDate, endDate);
+                        break;
+
+                    case 6:
+                        Strategy7(symbols, interval, startDate, endDate, takeProfitRoe);
                         break;
                 }
             }
@@ -613,18 +617,18 @@ namespace MarinerXX
                     dealManager.RemoveOldChart();
                 }
 
-                dealManager.CalculateIndicatorsLsma();
-                dealManager.EvaluateLsmaLongNextCandle();
-                dealManager.EvaluateLsmaShortNextCandle();
+                dealManager.CalculateIndicatorsMacd();
+                dealManager.EvaluateMacdLongNextCandle();
+                dealManager.EvaluateMacdShortNextCandle();
 
                 if (i % 96 == 0)
                 {
-                    var content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.SimplePnl.Round(2)}" + Environment.NewLine;
+                    var content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.Money.Round(2)}" + Environment.NewLine;
                     File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), content);
                 }
             }
 
-            var _content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.SimplePnl.Round(2)}" + Environment.NewLine;
+            var _content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.Money.Round(2)}" + Environment.NewLine + Environment.NewLine;
             File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), _content);
 
             foreach (var h in dealManager.PositionHistories)
@@ -633,6 +637,10 @@ namespace MarinerXX
                     $"{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result}" + Environment.NewLine
                     );
             }
+
+            var resultChartView = new BacktestResultChartView();
+            resultChartView.Init(dealManager.PositionHistories, interval);
+            resultChartView.Show();
         }
     }
 }

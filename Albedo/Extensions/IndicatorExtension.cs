@@ -16,7 +16,7 @@ namespace Albedo.Extensions
 
         public static IndicatorData ValueOf(this IEnumerable<IndicatorData> data, int index)
         {
-            return data.ElementAtOrDefault(index) ?? new IndicatorData(DateTime.MinValue, Common.NullValue);
+            return data.ElementAtOrDefault(index) ?? new IndicatorData(DateTime.MinValue, 0);
         }
     }
 }

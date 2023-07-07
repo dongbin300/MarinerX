@@ -268,22 +268,12 @@ namespace Albedo.Views
             var ic = SettingsMan.Indicators.Ic;
             if (ic.Enable)
             {
-                var icResult = Quotes.GetIchimoku(ic.ShortPeriod, ic.MidPeriod, ic.LongPeriod);
-                ic.TenkanData = icResult.Select(r => r.TenkanSen == null ?
-                new IndicatorData(r.Date, Common.NullValue) :
-                new IndicatorData(r.Date, r.TenkanSen.Value)).ToList();
-                ic.KijunData = icResult.Select(r => r.KijunSen == null ?
-                new IndicatorData(r.Date, Common.NullValue) :
-                new IndicatorData(r.Date, r.KijunSen.Value)).ToList();
-                ic.ChikouData = icResult.Select(r => r.ChikouSpan == null ?
-                new IndicatorData(r.Date, Common.NullValue) :
-                new IndicatorData(r.Date, r.ChikouSpan.Value)).ToList();
-                ic.Senkou1Data = icResult.Select(r => r.SenkouSpanA == null ?
-                new IndicatorData(r.Date, Common.NullValue) :
-                new IndicatorData(r.Date, r.SenkouSpanA.Value)).ToList();
-                ic.Senkou2Data = icResult.Select(r => r.SenkouSpanB == null ?
-                new IndicatorData(r.Date, Common.NullValue) :
-                new IndicatorData(r.Date, r.SenkouSpanB.Value)).ToList();
+                var icResult = Quotes.GetIchimokuCloud(ic.ShortPeriod, ic.MidPeriod, ic.LongPeriod);
+                ic.TenkanData = icResult.Select(r => new IndicatorData(r.Date, r.Conversion)).ToList();
+                ic.KijunData = icResult.Select(r => new IndicatorData(r.Date, r.Base)).ToList();
+                ic.ChikouData = icResult.Select(r => new IndicatorData(r.Date, r.TrailingSpan)).ToList();
+                ic.Senkou1Data = icResult.Select(r => new IndicatorData(r.Date, r.LeadingSpan1)).ToList();
+                ic.Senkou2Data = icResult.Select(r => new IndicatorData(r.Date, r.LeadingSpan2)).ToList();
             }
 
             var rsi = SettingsMan.Indicators.Rsi;

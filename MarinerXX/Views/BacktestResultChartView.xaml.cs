@@ -163,8 +163,8 @@ namespace MarinerXX.Views
                 return;
             }
 
-            var start = CurrentHistory.EntryTime.AddHours(-12);
-            var end = CurrentHistory.Time.AddHours(12);
+            var start = CurrentHistory.EntryTime.AddHours(-3);
+            var end = CurrentHistory.Time.AddHours(3);
             var charts = ChartLoader.GetChartPack(CurrentHistory.Symbol, MainInterval).GetCharts(start, end);
             EntryIndex = charts.IndexOf(charts.Find(x => x.DateTime.Equals(CurrentHistory.EntryTime)) ?? default!);
             ExitIndex = charts.IndexOf(charts.Find(x => x.DateTime.Equals(CurrentHistory.Time)) ?? default!);
@@ -178,9 +178,12 @@ namespace MarinerXX.Views
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
 
-            var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), (double)charts.Max(x => x.Quote.High))));
+            var yMax = Math.Max(charts.Max(x => Math.Abs(x.Ema1)), (double)charts.Max(x => x.Quote.High));
+            var yMin = Math.Min(charts.Min(x => Math.Abs(x.Ema1)), (double)charts.Min(x => x.Quote.Low));
+
+            //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), (double)charts.Max(x => x.Quote.High))));
             //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), Math.Max(charts.Max(x => x.Ema1), (double)charts.Max(x => x.Quote.High)))));
-            var yMin = Math.Min(charts.Min(x => Math.Abs(x.Supertrend3)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend2)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend1)), (double)charts.Min(x => x.Quote.Low))));
+            //var yMin = Math.Min(charts.Min(x => Math.Abs(x.Supertrend3)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend2)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend1)), (double)charts.Min(x => x.Quote.Low))));
             //var yMin = Math.Min(charts.Min(x => Math.Abs(x.Supertrend3)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend2)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend1)), Math.Min(charts.Min(x => x.Ema1), (double)charts.Min(x => x.Quote.Low)))));
             var digit = 4;
 
@@ -199,14 +202,14 @@ namespace MarinerXX.Views
             for (int i = 0; i < charts.Count; i++)
             {
                 var quote = charts[i].Quote;
-                //var ema = charts[i].Ema1;
-                var st1 = charts[i].Supertrend1;
-                var st2 = charts[i].Supertrend2;
-                var st3 = charts[i].Supertrend3;
-                //var preEma = i == 0 ? charts[i].Ema1 : charts[i - 1].Ema1;
-                var preSt1 = i == 0 ? charts[i].Supertrend1 : charts[i - 1].Supertrend1;
-                var preSt2 = i == 0 ? charts[i].Supertrend2 : charts[i - 1].Supertrend2;
-                var preSt3 = i == 0 ? charts[i].Supertrend3 : charts[i - 1].Supertrend3;
+                var ema = charts[i].Ema1;
+                //var st1 = charts[i].Supertrend1;
+                //var st2 = charts[i].Supertrend2;
+                //var st3 = charts[i].Supertrend3;
+                var preEma = i == 0 ? charts[i].Ema1 : charts[i - 1].Ema1;
+                //var preSt1 = i == 0 ? charts[i].Supertrend1 : charts[i - 1].Supertrend1;
+                //var preSt2 = i == 0 ? charts[i].Supertrend2 : charts[i - 1].Supertrend2;
+                //var preSt3 = i == 0 ? charts[i].Supertrend3 : charts[i - 1].Supertrend3;
                 var viewIndex = i;
 
                 // EMA
@@ -224,30 +227,30 @@ namespace MarinerXX.Views
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preSt1) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                        actualHeight * (float)(1.0 - (Math.Abs(preEma) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(st1) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = st1 > 0 ? SKColors.Green : SKColors.Red }
+                        actualHeight * (float)(1.0 - (Math.Abs(ema) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                    new SKPaint() { Color = ema > 0 ? SKColors.Green : SKColors.Red }
                     );
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preSt2) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(st2) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = st2 > 0 ? SKColors.Green : SKColors.Red }
-                    );
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preSt3) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(st3) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = st3 > 0 ? SKColors.Green : SKColors.Red }
-                    );
+                //canvas.DrawLine(
+                //    new SKPoint(
+                //        actualItemFullWidth * (viewIndex - 0.5f),
+                //        actualHeight * (float)(1.0 - (Math.Abs(preSt2) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                //    new SKPoint(
+                //        actualItemFullWidth * (viewIndex + 0.5f),
+                //        actualHeight * (float)(1.0 - (Math.Abs(st2) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                //    new SKPaint() { Color = st2 > 0 ? SKColors.Green : SKColors.Red }
+                //    );
+                //canvas.DrawLine(
+                //    new SKPoint(
+                //        actualItemFullWidth * (viewIndex - 0.5f),
+                //        actualHeight * (float)(1.0 - (Math.Abs(preSt3) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                //    new SKPoint(
+                //        actualItemFullWidth * (viewIndex + 0.5f),
+                //        actualHeight * (float)(1.0 - (Math.Abs(st3) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                //    new SKPaint() { Color = st3 > 0 ? SKColors.Green : SKColors.Red }
+                //    );
 
                 canvas.DrawLine(
                     new SKPoint(
@@ -300,7 +303,9 @@ namespace MarinerXX.Views
                 var changeText = pointingChart.Quote.Close >= pointingChart.Quote.Open ? $"+{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}" : $"{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}";
                 canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close}", 3, 10, CandleInfoFont, CandleInfoPaint);
 
-                canvas.DrawText($"ST1 {Math.Round(pointingChart.Supertrend1, digit)} ST2 {Math.Round(pointingChart.Supertrend2, digit)} ST3 {Math.Round(pointingChart.Supertrend3, digit)}", 3, 23, CandleInfoFont, CandleInfoPaint);
+
+
+                //canvas.DrawText($"ST1 {Math.Round(pointingChart.Supertrend1, digit)} ST2 {Math.Round(pointingChart.Supertrend2, digit)} ST3 {Math.Round(pointingChart.Supertrend3, digit)}", 3, 23, CandleInfoFont, CandleInfoPaint);
 
                 //canvas.DrawText($"EMA200 {Math.Round(pointingChart.Ema1, digit)} ST1 {Math.Round(pointingChart.Supertrend1, digit)} ST2 {Math.Round(pointingChart.Supertrend2, digit)} ST3 {Math.Round(pointingChart.Supertrend3, digit)} K {Math.Round(pointingChart.K, digit)} D {Math.Round(pointingChart.D, digit)}", 3, 23, CandleInfoFont, CandleInfoPaint);
             }
