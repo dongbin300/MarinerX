@@ -21,7 +21,7 @@ namespace MercuryTradingModel.Signals
             Formula = formula;
         }
 
-        private decimal? GetElementValue(IElement element, Asset asset, ChartInfo chart)
+        private decimal? GetElementValue(IElement element, Asset asset, MercuryChartInfo chart)
         {
             return element switch
             {
@@ -33,7 +33,7 @@ namespace MercuryTradingModel.Signals
             };
         }
 
-        public virtual bool IsFlare(Asset asset, ChartInfo chart, ChartInfo prevChart) => Formula switch
+        public virtual bool IsFlare(Asset asset, MercuryChartInfo chart, MercuryChartInfo prevChart) => Formula switch
         {
             ComparisonFormula x => IsFlare(x, asset, chart, prevChart),
             CrossFormula x => IsFlare(x, asset, chart, prevChart),
@@ -42,7 +42,7 @@ namespace MercuryTradingModel.Signals
             _ => false
         };
 
-        private bool IsFlare(IFormula? formula, Asset asset, ChartInfo chart, ChartInfo prevChart)
+        private bool IsFlare(IFormula? formula, Asset asset, MercuryChartInfo chart, MercuryChartInfo prevChart)
         {
             return formula switch
             {

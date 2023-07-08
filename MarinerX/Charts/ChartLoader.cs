@@ -9,9 +9,6 @@ using MarinerX.Apis;
 using MarinerX.Utils;
 
 using MercuryTradingModel.Charts;
-using MercuryTradingModel.Extensions;
-
-using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
@@ -75,7 +72,7 @@ namespace MarinerX.Charts
                                     Close = decimal.Parse(e[4]),
                                     Volume = decimal.Parse(e[5])
                                 };
-                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                                chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                             }
                         }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
                         break;
@@ -99,7 +96,7 @@ namespace MarinerX.Charts
                                 Close = decimal.Parse(e[4]),
                                 Volume = decimal.Parse(e[5])
                             };
-                            chartPack.AddChart(new ChartInfo(symbol, quote));
+                            chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                         }
                         break;
 
@@ -164,7 +161,7 @@ namespace MarinerX.Charts
                                     Close = decimal.Parse(e[4]),
                                     Volume = decimal.Parse(e[5])
                                 };
-                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                                chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                             }
                         }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
                         break;
@@ -188,7 +185,7 @@ namespace MarinerX.Charts
                                 Close = decimal.Parse(e[4]),
                                 Volume = decimal.Parse(e[5])
                             };
-                            chartPack.AddChart(new ChartInfo(symbol, quote));
+                            chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                         }
                         break;
 
@@ -319,7 +316,7 @@ namespace MarinerX.Charts
                                     Close = decimal.Parse(e[4]),
                                     Volume = decimal.Parse(e[5])
                                 };
-                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                                chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                             }
                         }
                     }
@@ -400,7 +397,7 @@ namespace MarinerX.Charts
                                     Close = decimal.Parse(e[4]),
                                     Volume = decimal.Parse(e[5])
                                 };
-                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                                chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                             }
                         }
                         catch (FileNotFoundException)
@@ -467,7 +464,7 @@ namespace MarinerX.Charts
                                     Close = decimal.Parse(e[4]),
                                     Volume = decimal.Parse(e[5])
                                 };
-                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                                chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                             }
                         }
                         catch (FileNotFoundException)
@@ -479,7 +476,7 @@ namespace MarinerX.Charts
 
                     var quotes = chartPack.Charts.Select(x => x.Quote);
                     var srsi = quotes.GetStochasticRsi(3, 3, 14, 14);
-                    var ema = quotes.GetEmaV2(200).Select(x => x.Ema);
+                    var ema = quotes.GetEma(200).Select(x => x.Ema);
                     var k = srsi.Select(x => x.K);
                     var _d = srsi.Select(x => x.D);
                     var supertrends = quotes.GetTripleSupertrend(10, 1, 11, 2, 12, 3);
@@ -541,7 +538,7 @@ namespace MarinerX.Charts
                                     Close = decimal.Parse(e[4]),
                                     Volume = decimal.Parse(e[5])
                                 };
-                                chartPack.AddChart(new ChartInfo(symbol, quote));
+                                chartPack.AddChart(new MercuryChartInfo(symbol, quote));
                             }
                         }
                         catch (FileNotFoundException)

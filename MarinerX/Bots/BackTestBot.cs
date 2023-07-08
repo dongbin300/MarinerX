@@ -58,7 +58,7 @@ namespace MarinerX.Bots
             charts.CalculateIndicators(TradingModel.ChartElements, TradingModel.NamedElements);
 
             // Back test start!
-            ChartInfo? info = default!;
+            MercuryChartInfo? info = default!;
             var info0 = charts.Select(TradingModel.StartTime);
             bool first = true;
             Worker.For(0, tickCount, 1, (i) =>

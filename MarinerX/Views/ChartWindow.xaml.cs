@@ -21,7 +21,7 @@ namespace MarinerX.Views
             Screen.Content = backTestChartControl;
         }
 
-        public void AddChartInfo(ChartInfo info)
+        public void AddChartInfo(MercuryChartInfo info)
         {
             backTestChartControl.Quotes.Add(info.Quote);
             backTestChartControl.TotalCount = backTestChartControl.End = backTestChartControl.Quotes.Count;

@@ -1,4 +1,6 @@
-﻿namespace MercuryTradingModel.TradingModels
+﻿using CryptoModel;
+
+namespace MercuryTradingModel.TradingModels
 {
     public class TradingModelPath
     {

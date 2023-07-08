@@ -14,6 +14,6 @@ namespace MercuryTradingModel.Interfaces
         decimal MakerFee { get; }
         decimal TakerFee { get; }
 
-        BackTestTradeInfo Run(Asset asset, ChartInfo chartm, string tag);
+        BackTestTradeInfo Run(Asset asset, MercuryChartInfo chartm, string tag);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Skender.Stock.Indicators;
+﻿using CryptoModel;
 
 using static System.Math;
 

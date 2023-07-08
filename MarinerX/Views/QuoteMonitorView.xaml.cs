@@ -1,19 +1,13 @@
 ﻿using Binance.Net.Enums;
 
+using CryptoModel;
+
 using MarinerX.Apis;
 using MarinerX.Charts;
-using MarinerX.Markets;
-using MarinerX.Utils;
-
-using MercuryTradingModel.Indicators;
-using MercuryTradingModel.Maths;
-
-using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -62,7 +56,9 @@ namespace MarinerX.Views
         DispatcherTimer timer = new DispatcherTimer();
         DispatcherTimer timer2 = new DispatcherTimer();
         readonly KlineInterval DefaultInterval = KlineInterval.FiveMinutes;
-        bool isRunning;
+#pragma warning disable CS0414
+        private bool isRunning;
+#pragma warning restore CS0414
         readonly List<string> MonitorSymbolNames = new()
         {
             "AAVEUSDT",
@@ -219,7 +215,7 @@ namespace MarinerX.Views
             foreach (var symbol in MonitorSymbolNames)
             {
                 var quotes = BinanceClientApi.GetQuotes(symbol, DefaultInterval, null, null, 30);
-                RsiValues.Add(symbol, quotes.GetRsi(14).Last().Rsi.Value);
+                RsiValues.Add(symbol, quotes.GetRsi(14).Last().Rsi);
             }
         }
 

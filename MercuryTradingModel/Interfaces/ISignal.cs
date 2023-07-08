@@ -6,6 +6,6 @@ namespace MercuryTradingModel.Interfaces
     public interface ISignal
     {
         IFormula Formula { get; set; }
-        abstract bool IsFlare(Asset asset, ChartInfo chart, ChartInfo prevChart);
+        abstract bool IsFlare(Asset asset, MercuryChartInfo chart, MercuryChartInfo prevChart);
     }
 }

@@ -1,8 +1,4 @@
-﻿using Binance.Net.Objects.Models.Spot.Mining;
-
-using System.Diagnostics.Metrics;
-
-namespace CryptoModel.Maths
+﻿namespace CryptoModel.Maths
 {
     public class ArrayCalculator
     {
@@ -16,6 +12,24 @@ namespace CryptoModel.Maths
         public static double Nz(double value, double replacement = 0)
         {
             return value == 0 ? replacement : value;
+        }
+
+        /// <summary>
+        /// NaN value -> previous nearest non-NaN value
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static double FixNan(double[] values, int index)
+        {
+            for (int i = index; i >= 0; i--)
+            {
+                if (values[i] != 0)
+                {
+                    return values[i];
+                }
+            }
+            return 0;
         }
 
         /// <summary>
@@ -434,10 +448,10 @@ namespace CryptoModel.Maths
         /// <param name="close"></param>
         /// <param name="period"></param>
         /// <returns></returns>
-        public static double[] Atr(double[] high, double[] low, double[] close, int period)
+        public static double[] Atr(double[] high, double[] low, double[] close, int period, int startIndex = 0)
         {
             var tr = Tr(high, low, close);
-            return Rma(tr, period);
+            return Rma(tr, period, startIndex);
         }
 
         /// <summary>
@@ -583,8 +597,9 @@ namespace CryptoModel.Maths
             var plusDm = new double[high.Length];
             var minusDm = new double[high.Length];
             var trueRange = new double[high.Length];
-            var plus = new double[high.Length];
-            var minus = new double[high.Length];
+            var _plus = new double[high.Length];
+            var _minus = new double[high.Length];
+            var diff2 = new double[high.Length];
 
             up = Change(high);
             down = Change(low).Select(x => -x).ToArray();
@@ -600,8 +615,38 @@ namespace CryptoModel.Maths
                 plusDm[i] = (up[i] > down[i] && up[i] > 0) ? up[i] : 0;
                 minusDm[i] = (up[i] < down[i] && down[i] > 0) ? down[i] : 0;
             }
-            trueRange = Atr(high, low, close, diPeriod);
-            return trueRange;
+            trueRange = Atr(high, low, close, diPeriod, 1);
+            var __plus = Rma(plusDm, diPeriod, 1);
+            var __minus = Rma(minusDm, diPeriod, 1);
+            for (int i = 0; i < high.Length; i++)
+            {
+                if (trueRange[i] == 0)
+                {
+                    _plus[i] = 0;
+                    _minus[i] = 0;
+                }
+                else
+                {
+                    _plus[i] = 100 * __plus[i] / trueRange[i];
+                    _minus[i] = 100 * __minus[i] / trueRange[i];
+                }
+            }
+            for (int i = 0; i < high.Length; i++)
+            {
+                var plus = FixNan(_plus, i);
+                var minus = FixNan(_minus, i);
+                var sum = plus + minus;
+                var diff = Math.Abs(plus - minus);
+                diff2[i] = diff / (sum == 0 ? 1 : sum);
+            }
+
+            var _adx = Rma(diff2, adxPeriod, diPeriod);
+            for (int i = 0; i < high.Length; i++)
+            {
+                adx[i] = 100 * _adx[i];
+            }
+
+            return adx;
         }
 
         public static double[] Smma(double[] values, int period)

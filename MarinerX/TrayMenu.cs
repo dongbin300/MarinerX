@@ -349,8 +349,12 @@ namespace MarinerX
             try
             {
                 var fileNames = ChartLoader.GetInvalidDataFileNames();
+                if(fileNames == null)
+                {
+                    return;
+                }
 
-                MessageBox.Show(fileNames?.Count + "건\n" + string.Join("\n", fileNames));
+                MessageBox.Show(fileNames.Count + "건\n" + string.Join("\n", fileNames));
             }
             catch (Exception ex)
             {

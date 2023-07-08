@@ -19,7 +19,7 @@ namespace MercuryTradingModel.Orders
         {
         }
 
-        public BackTestTradeInfo Run(Asset asset, ChartInfo chart, string tag = "")
+        public BackTestTradeInfo Run(Asset asset, MercuryChartInfo chart, string tag = "")
         {
             return new BackTestTradeInfo("", "", "", "", "", "", "", "", "", "", "");
         }

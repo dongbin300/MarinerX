@@ -1,6 +1,4 @@
-﻿using MercuryTradingModel.Indicators;
-
-using Skender.Stock.Indicators;
+﻿using CryptoModel;
 
 using System;
 using System.Collections.Generic;
@@ -43,7 +41,7 @@ namespace MarinerX.Charts
 
         public void CalculateIndicators()
         {
-            CurrentRsi = Math.Round(Quotes.TakeLast(15).GetRsi().Last().Rsi ?? 0, 2);
+            CurrentRsi = Math.Round(Quotes.TakeLast(15).GetRsi().Last().Rsi, 2);
             CurrentRi = Math.Round(Quotes.TakeLast(15).GetRi(14).Last().Ri, 2);
         }
     }

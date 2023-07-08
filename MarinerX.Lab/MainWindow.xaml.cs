@@ -49,7 +49,7 @@ namespace MarinerX.Lab
             double[] close = quotes.Select(x => (double)x.Close).ToArray();
 
             var a = quotes.GetIchimokuCloud(2, 5, 10);
-            //var r = ArrayCalculator.IchimokuCloud(high, low, close, 2, 5, 10);
+            var r = ArrayCalculator.Adx(high, low, close, 14, 14);
         }
     }
 }

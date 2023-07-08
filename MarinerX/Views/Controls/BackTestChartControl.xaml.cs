@@ -1,8 +1,8 @@
-﻿using MarinerX.Bots;
+﻿using CryptoModel;
+
+using MarinerX.Bots;
 
 using MercuryTradingModel.Enums;
-
-using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;

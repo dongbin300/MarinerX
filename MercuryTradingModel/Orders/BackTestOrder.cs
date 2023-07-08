@@ -1,12 +1,11 @@
-﻿using MercuryTradingModel.Extensions;
-using MercuryTradingModel.Assets;
+﻿using MercuryTradingModel.Assets;
 using MercuryTradingModel.Charts;
 using MercuryTradingModel.Enums;
+using MercuryTradingModel.Extensions;
 using MercuryTradingModel.Interfaces;
 using MercuryTradingModel.Trades;
 
 using Newtonsoft.Json;
-using Binance.Net.Objects.Models.Spot;
 
 namespace MercuryTradingModel.Orders
 {
@@ -31,7 +30,7 @@ namespace MercuryTradingModel.Orders
             Price = price;
         }
 
-        public BackTestTradeInfo Run(Asset asset, ChartInfo chart, string tag = "")
+        public BackTestTradeInfo Run(Asset asset, MercuryChartInfo chart, string tag = "")
         {
             if (Type == OrderType.Market)
             {
@@ -141,6 +140,11 @@ namespace MercuryTradingModel.Orders
 
         public BackTestTradeInfo Run(Asset asset, string symbol)
         {
+            if(Price == null)
+            {
+                return new BackTestTradeInfo(symbol, "-", "Side Error", "", "", "", "", "", "", "", "");
+            }
+
             var quantity = Amount.Value;
             switch (Side)
             {

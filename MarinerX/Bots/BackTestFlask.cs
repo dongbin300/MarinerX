@@ -84,7 +84,7 @@ namespace MarinerX.Bots
                 );
 
             // Back test start!
-            ChartInfo? info = default!;
+            MercuryChartInfo? info = default!;
             var info0 = charts.Select(_startTime);
             bool first = true;
             //bool isPositioning = false;
@@ -214,7 +214,7 @@ namespace MarinerX.Bots
 
         public record OrderContent(PositionSide side, decimal price, decimal quantity);
 
-        public BackTestTradeInfo Order(Asset asset, ChartInfo chart, PositionSide side, OrderAmountType orderType, decimal amount, string tag = "", bool isManualPrice = false, decimal manualPrice = 0)
+        public BackTestTradeInfo Order(Asset asset, MercuryChartInfo chart, PositionSide side, OrderAmountType orderType, decimal amount, string tag = "", bool isManualPrice = false, decimal manualPrice = 0)
         {
             var price = isManualPrice ? manualPrice : chart.Quote.Close;
 

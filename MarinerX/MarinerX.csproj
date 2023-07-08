@@ -37,6 +37,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
+	  <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
 	</ItemGroup>
 </Project>

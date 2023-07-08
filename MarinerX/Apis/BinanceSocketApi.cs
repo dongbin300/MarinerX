@@ -2,18 +2,16 @@
 using Binance.Net.Enums;
 using Binance.Net.Interfaces;
 using Binance.Net.Objects;
-using Binance.Net.Objects.Models;
 using Binance.Net.Objects.Models.Futures.Socket;
 
-using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Sockets;
+
+using CryptoModel;
 
 using MarinerX.Charts;
 using MarinerX.Utils;
 
 using MercuryTradingModel.Charts;
-
-using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;

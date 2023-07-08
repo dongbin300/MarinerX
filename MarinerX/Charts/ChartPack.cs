@@ -1,11 +1,11 @@
 ﻿using Binance.Net.Enums;
 
+using CryptoModel;
+
 using MercuryTradingModel.Charts;
 using MercuryTradingModel.Elements;
 using MercuryTradingModel.Enums;
 using MercuryTradingModel.Indicators;
-
-using Skender.Stock.Indicators;
 
 using System;
 using System.Collections.Generic;
@@ -20,10 +20,10 @@ namespace MarinerX.Charts
     {
         public string Symbol => Charts.First().Symbol;
         public KlineInterval Interval = KlineInterval.OneMinute;
-        public IList<ChartInfo> Charts { get; set; } = new List<ChartInfo>();
+        public IList<MercuryChartInfo> Charts { get; set; } = new List<MercuryChartInfo>();
         public DateTime StartTime => Charts.Min(x => x.DateTime);
         public DateTime EndTime => Charts.Max(x => x.DateTime);
-        public ChartInfo? CurrentChart;
+        public MercuryChartInfo? CurrentChart;
 
         public ChartPack(KlineInterval interval)
         {
@@ -31,7 +31,7 @@ namespace MarinerX.Charts
             CurrentChart = null;
         }
 
-        public void AddChart(ChartInfo chart)
+        public void AddChart(MercuryChartInfo chart)
         {
             Charts.Add(chart);
         }
@@ -85,21 +85,14 @@ namespace MarinerX.Charts
                 });
             }
 
-            var newChart = newQuotes.Select(candle => new ChartInfo(Symbol, candle)).ToList();
+            var newChart = newQuotes.Select(candle => new MercuryChartInfo(Symbol, candle)).ToList();
             Charts = newChart;
         }
 
-        public decimal GetChartElementValue(IEnumerable<double?> data, int index)
+        public decimal GetChartElementValue(IEnumerable<double> data, int index)
         {
             var value = data.ElementAt(index);
-            if (value == null)
-            {
-                return -100000;
-            }
-            else
-            {
-                return (decimal)value.Value;
-            }
+            return (decimal)value;
         }
 
         public void CalculateCommasIndicatorsRobHoffman()
@@ -180,10 +173,10 @@ namespace MarinerX.Charts
                     ChartElementType.rsi => quotes.GetRsi((int)chartElement.Parameters[0]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Rsi))),
                     ChartElementType.macd_macd => quotes.GetMacd((int)chartElement.Parameters[0], (int)chartElement.Parameters[1], (int)chartElement.Parameters[2]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Macd))),
                     ChartElementType.macd_signal => quotes.GetMacd((int)chartElement.Parameters[0], (int)chartElement.Parameters[1], (int)chartElement.Parameters[2]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Signal))),
-                    ChartElementType.macd_hist => quotes.GetMacd((int)chartElement.Parameters[0], (int)chartElement.Parameters[1], (int)chartElement.Parameters[2]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Histogram))),
+                    ChartElementType.macd_hist => quotes.GetMacd((int)chartElement.Parameters[0], (int)chartElement.Parameters[1], (int)chartElement.Parameters[2]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Hist))),
                     ChartElementType.bb_sma => quotes.GetBollingerBands((int)chartElement.Parameters[0], (double)chartElement.Parameters[1]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Sma))),
-                    ChartElementType.bb_upper => quotes.GetBollingerBands((int)chartElement.Parameters[0], (double)chartElement.Parameters[1]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.UpperBand))),
-                    ChartElementType.bb_lower => quotes.GetBollingerBands((int)chartElement.Parameters[0], (double)chartElement.Parameters[1]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.LowerBand))),
+                    ChartElementType.bb_upper => quotes.GetBollingerBands((int)chartElement.Parameters[0], (double)chartElement.Parameters[1]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Upper))),
+                    ChartElementType.bb_lower => quotes.GetBollingerBands((int)chartElement.Parameters[0], (double)chartElement.Parameters[1]).Select(x => new ChartElementResult(chartElement.ElementType, Convert.ToDecimal(x.Lower))),
                     _ => default!
                 };
                 chartElementResults.Add(result.ToList());
@@ -210,10 +203,10 @@ namespace MarinerX.Charts
                     ChartElementType.rsi => quotes.GetRsi((int)namedElement.Parameters[0]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Rsi))),
                     ChartElementType.macd_macd => quotes.GetMacd((int)namedElement.Parameters[0], (int)namedElement.Parameters[1], (int)namedElement.Parameters[2]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Macd))),
                     ChartElementType.macd_signal => quotes.GetMacd((int)namedElement.Parameters[0], (int)namedElement.Parameters[1], (int)namedElement.Parameters[2]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Signal))),
-                    ChartElementType.macd_hist => quotes.GetMacd((int)namedElement.Parameters[0], (int)namedElement.Parameters[1], (int)namedElement.Parameters[2]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Histogram))),
+                    ChartElementType.macd_hist => quotes.GetMacd((int)namedElement.Parameters[0], (int)namedElement.Parameters[1], (int)namedElement.Parameters[2]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Hist))),
                     ChartElementType.bb_sma => quotes.GetBollingerBands((int)namedElement.Parameters[0], (double)namedElement.Parameters[1]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Sma))),
-                    ChartElementType.bb_upper => quotes.GetBollingerBands((int)namedElement.Parameters[0], (double)namedElement.Parameters[1]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.UpperBand))),
-                    ChartElementType.bb_lower => quotes.GetBollingerBands((int)namedElement.Parameters[0], (double)namedElement.Parameters[1]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.LowerBand))),
+                    ChartElementType.bb_upper => quotes.GetBollingerBands((int)namedElement.Parameters[0], (double)namedElement.Parameters[1]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Upper))),
+                    ChartElementType.bb_lower => quotes.GetBollingerBands((int)namedElement.Parameters[0], (double)namedElement.Parameters[1]).Select(x => new NamedElementResult(namedElement.Name, Convert.ToDecimal(x.Lower))),
                     _ => default!
                 };
                 namedElementResults.Add(result.ToList());
@@ -229,17 +222,17 @@ namespace MarinerX.Charts
             }
         }
 
-        public ChartInfo Select()
+        public MercuryChartInfo Select()
         {
             return CurrentChart = GetChart(StartTime);
         }
 
-        public ChartInfo Select(DateTime time)
+        public MercuryChartInfo Select(DateTime time)
         {
             return CurrentChart = GetChart(time);
         }
 
-        public ChartInfo Next() =>
+        public MercuryChartInfo Next() =>
             CurrentChart == null ?
             CurrentChart = default! :
             CurrentChart = GetChart(Interval switch
@@ -259,6 +252,6 @@ namespace MarinerX.Charts
                 _ => CurrentChart.DateTime.AddMinutes(1)
             });
 
-        public ChartInfo GetChart(DateTime dateTime) => Charts.First(x => x.DateTime.Equals(dateTime));
+        public MercuryChartInfo GetChart(DateTime dateTime) => Charts.First(x => x.DateTime.Equals(dateTime));
     }
 }

@@ -185,7 +185,7 @@ namespace MarinerXX.Views
             //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), Math.Max(charts.Max(x => x.Ema1), (double)charts.Max(x => x.Quote.High)))));
             //var yMin = Math.Min(charts.Min(x => Math.Abs(x.Supertrend3)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend2)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend1)), (double)charts.Min(x => x.Quote.Low))));
             //var yMin = Math.Min(charts.Min(x => Math.Abs(x.Supertrend3)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend2)), Math.Min(charts.Min(x => Math.Abs(x.Supertrend1)), Math.Min(charts.Min(x => x.Ema1), (double)charts.Min(x => x.Quote.Low)))));
-            var digit = 4;
+            //var digit = 4;
 
             // Draw Grid
             //var gridLevel = 4; // 4등분

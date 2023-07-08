@@ -1,12 +1,10 @@
 ﻿using Binance.Net.Enums;
 using Binance.Net.Objects.Models.Spot;
 
-using MarinerX.Markets;
-using MarinerX.Utils;
-
 using CryptoModel;
 
-using Skender.Stock.Indicators;
+using MarinerX.Markets;
+using MarinerX.Utils;
 
 using System;
 using System.Collections.Generic;

@@ -8,7 +8,7 @@ namespace MercuryTradingModel.Interfaces
         IFormula Formula { get; set; }
         int Life { get; set; }
         int CurrentLife { get; set; }
-        abstract bool CheckFlare(Asset asset, ChartInfo chart, ChartInfo prevChart);
+        abstract bool CheckFlare(Asset asset, MercuryChartInfo chart, MercuryChartInfo prevChart);
         abstract void Expire();
     }
 }

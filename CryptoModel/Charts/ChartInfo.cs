@@ -25,6 +25,7 @@
         public double Macd { get; set; }
         public double MacdSignal { get; set; }
         public double MacdHist { get; set; }
+        public double Adx { get; set; }
 
         public ChartInfo(string symbol, Quote quote)
         {

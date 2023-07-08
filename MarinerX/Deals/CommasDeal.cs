@@ -26,7 +26,7 @@ namespace MarinerX.Deals
             return $"{TakenTime}, {Income}, {Roe}%";
         }
 
-        public decimal GetCurrentRoe(ChartInfo info)
+        public decimal GetCurrentRoe(MercuryChartInfo info)
         {
             return StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, BuyAveragePrice, (info.Quote.Low + info.Quote.High) / 2);
         }

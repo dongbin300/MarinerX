@@ -623,18 +623,18 @@ namespace MarinerXX
 
                 if (i % 96 == 0)
                 {
-                    var content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.Money.Round(2)}" + Environment.NewLine;
+                    var content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine;
                     File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), content);
                 }
             }
 
-            var _content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.Money.Round(2)}" + Environment.NewLine + Environment.NewLine;
+            var _content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine + Environment.NewLine;
             File.AppendAllText(CryptoPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), _content);
 
             foreach (var h in dealManager.PositionHistories)
             {
                 File.AppendAllText(CryptoPath.Desktop.Down($"positionhistory.csv"),
-                    $"{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result}" + Environment.NewLine
+                    $"{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result},{Math.Round(h.Income, 4)}" + Environment.NewLine
                     );
             }
 

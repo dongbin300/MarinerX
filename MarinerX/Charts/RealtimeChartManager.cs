@@ -1,8 +1,8 @@
 ﻿using Binance.Net.Enums;
 
-using MarinerX.Apis;
+using CryptoModel;
 
-using Skender.Stock.Indicators;
+using MarinerX.Apis;
 
 using System.Collections.Generic;
 

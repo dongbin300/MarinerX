@@ -1662,22 +1662,28 @@ namespace CryptoModel.Backtests
             foreach (var chart in Charts)
             {
                 var quotes = chart.Value.Select(x => x.Quote);
-                var e = quotes.GetEma(200).Select(x => x.Ema);
                 var macd = quotes.GetMacd(12, 26, 9);
                 var m = macd.Select(x => x.Macd);
                 var s = macd.Select(x => x.Signal);
-                var st = quotes.GetSupertrend(10, 5).Select(x=>x.Supertrend);
+                var st = quotes.GetSupertrend(10, 3).Select(x=>x.Supertrend);
+                var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
                 for (int i = 0; i < chart.Value.Count; i++)
                 {
                     var _chart = chart.Value[i];
-                    _chart.Ema1 = e.ElementAt(i);
                     _chart.Macd = m.ElementAt(i);
                     _chart.MacdSignal = s.ElementAt(i);
                     _chart.Supertrend1 = st.ElementAt(i);
+                    _chart.Adx = adx.ElementAt(i);
                 }
             }
         }
 
+        /// <summary>
+        /// 진입 : MACD가 Signal을 음의 자리에서 골든크로스, ADX가 30이상, 너무 길지 않은 양봉(이더기준 0.5% 미만)
+        /// 손절 : 이전 저점(이전10봉), 즉시
+        /// 1차 익절 : 손절비 1:1, 즉시
+        /// 2차 정리 : 슈퍼트렌드(10,3) < 0, 즉시
+        /// </summary>
         public void EvaluateMacdLongNextCandle()
         {
             var side = PositionSide.Long;
@@ -1689,6 +1695,9 @@ namespace CryptoModel.Backtests
                 var c0 = charts[^1];
                 var c1 = charts[^2];
                 var c2 = charts[^3];
+                var bottomPrice = charts.TakeLast(31).Min(x => x.Quote.Low);
+                var c1CandleLength = Math.Abs(Calculator.Roe(side, c1.Quote.Open, c1.Quote.Close));
+                var bottomLength = Calculator.Roe(side, c0.Quote.Open, bottomPrice);
 
                 if (position == null)
                 {
@@ -1697,12 +1706,13 @@ namespace CryptoModel.Backtests
                         continue;
                     }
 
-                    // MACD가 Signal을 음의 자리에서 골든크로스, EMA 200 위
-                    if ((double)c1.Quote.Close > c1.Ema1 && c1.MacdSignal < 0 && c1.Macd > c1.MacdSignal && c2.Macd < c2.MacdSignal)
+                    if (c1.Adx > 30 && c1.Macd < 0 && c1.Macd > c1.MacdSignal && c2.Macd < c2.MacdSignal &&
+                        c1CandleLength < 0.5m &&
+                        bottomLength > -10)
                     {
                         var price = c0.Quote.Open;
-                        var stopLossPrice = Calculator.TargetPrice(side, (decimal)c1.Ema1, -0.2m);
-                        var takeProfitPrice = 3 * price - 2 * stopLossPrice;
+                        var stopLossPrice = bottomPrice;
+                        var takeProfitPrice = 2 * price - 1 * stopLossPrice;
                         var quantity = BaseOrderSize / price;
                         Money -= price * quantity;
                         var newPosition = new Position(c0.DateTime, symbol, side, price)
@@ -1769,6 +1779,9 @@ namespace CryptoModel.Backtests
                 var c0 = charts[^1];
                 var c1 = charts[^2];
                 var c2 = charts[^3];
+                var topPrice = charts.TakeLast(31).Max(x => x.Quote.High);
+                var c1CandleLength = Math.Abs(Calculator.Roe(side, c1.Quote.Open, c1.Quote.Close));
+                var topLength = Calculator.Roe(side, c0.Quote.Open, topPrice);
 
                 if (position == null)
                 {
@@ -1777,12 +1790,13 @@ namespace CryptoModel.Backtests
                         continue;
                     }
 
-                    // MACD가 Signal을 음의 자리에서 골든크로스, EMA 200 위
-                    if ((double)c1.Quote.Close < c1.Ema1 && c1.MacdSignal > 0 && c1.Macd < c1.MacdSignal && c2.Macd > c2.MacdSignal)
+                    if (c1.Adx > 30 && c1.Macd > 0 && c1.Macd < c1.MacdSignal && c2.Macd > c2.MacdSignal &&
+                        c1CandleLength < 0.5m &&
+                        topLength > -10)
                     {
                         var price = c0.Quote.Open;
-                        var stopLossPrice = Calculator.TargetPrice(side, (decimal)c1.Ema1, -0.2m);
-                        var takeProfitPrice = 3 * price - 2 * stopLossPrice;
+                        var stopLossPrice = topPrice;
+                        var takeProfitPrice = 2 * price - 1 * stopLossPrice;
                         var quantity = BaseOrderSize / price;
                         Money += price * quantity;
                         var newPosition = new Position(c0.DateTime, symbol, side, price)

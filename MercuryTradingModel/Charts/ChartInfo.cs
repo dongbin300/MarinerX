@@ -1,12 +1,12 @@
-﻿using MercuryTradingModel.Assets;
+﻿using CryptoModel;
+
+using MercuryTradingModel.Assets;
 using MercuryTradingModel.Elements;
 using MercuryTradingModel.Enums;
 
-using Skender.Stock.Indicators;
-
 namespace MercuryTradingModel.Charts
 {
-    public class ChartInfo
+    public class MercuryChartInfo
     {
         // Basic Info
         public string Symbol { get; set; }
@@ -18,7 +18,7 @@ namespace MercuryTradingModel.Charts
         public IList<ChartElementResult> ChartElements { get; set; } = new List<ChartElementResult>();
         public IList<NamedElementResult> NamedElements { get; set; } = new List<NamedElementResult>();
 
-        public ChartInfo(string symbol, Quote quote)
+        public MercuryChartInfo(string symbol, Quote quote)
         {
             Symbol = symbol;
             Quote = quote;

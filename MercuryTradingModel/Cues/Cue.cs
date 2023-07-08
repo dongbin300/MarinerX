@@ -26,7 +26,7 @@ namespace MercuryTradingModel.Cues
             Life = life;
         }
 
-        public virtual bool CheckFlare(Asset asset, ChartInfo chart, ChartInfo prevChart)
+        public virtual bool CheckFlare(Asset asset, MercuryChartInfo chart, MercuryChartInfo prevChart)
         {
             var formula = new Signal(Formula);
             if (formula.IsFlare(asset, chart, prevChart))
