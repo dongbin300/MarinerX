@@ -4,6 +4,7 @@ using CryptoModel;
 
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Models;
+using MarinerX.Bot.Systems;
 
 using System;
 using System.Collections.Generic;
@@ -227,40 +228,24 @@ namespace MarinerX.Bot.Bots
                         if (order.Type == FuturesOrderType.TakeProfit)
                         {
                             Common.AddHistory("Manager Bot", $"Stop Loss {order.Symbol}");
+                            if (Common.IsSound)
+                            {
+                                Sound.Play("Resources/loss.wav", 0.3);
+                            }
                         }
                         // TP 처리되고 SL 남았으면
                         else if (order.Type == FuturesOrderType.Stop)
                         {
                             Common.AddHistory("Manager Bot", $"Take Profit {order.Symbol}");
+                            if (Common.IsSound)
+                            {
+                                Sound.Play("Resources/profit.wav", 0.5);
+                            }
                         }
                     }
                     else
                     {
                         Common.AddHistory("Manager Bot", $"Cancel Order {order.Symbol}, Error: {result.Error?.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ManagerBot), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
-
-        /// <summary>
-        /// 포지션 쿨타임을 관리
-        /// 포지션 종료 후 쿨타임 시간동안에는 진입을 하지 않는다.
-        /// </summary>
-        /// <returns></returns>
-        public void MonitorPositionCoolTime()
-        {
-            try
-            {
-                var enablePositionCoolTimes = Common.PositionCoolTimes.Where(p => p.IsEnable);
-                foreach (var cooltime in enablePositionCoolTimes)
-                {
-                    if((DateTime.Now - cooltime.CloseTime).TotalSeconds > Common.PositionCoolTimeSeconds) // 쿨타임 끝
-                    {
-                        cooltime.IsEnable = false;
                     }
                 }
             }

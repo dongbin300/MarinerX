@@ -1,11 +1,14 @@
 ﻿using Binance.Net.Enums;
+
 using CryptoModel.Maths;
+
 using MarinerX.Bot.Clients;
 using MarinerX.Bot.Extensions;
-using MarinerX.Bot.Models;
+using MarinerX.Bot.Systems;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -40,54 +43,6 @@ namespace MarinerX.Bot.Bots
         }
         #endregion
 
-        private bool IsEntryTs2ShortBit(List<ChartInfo> charts)
-        {
-            int condition = 0;
-            for (int i = charts.Count - 2; i >= 0; i--) // 이전 봉 기준
-            {
-                var chart = charts[i];
-
-                switch (condition)
-                {
-                    case 0:
-                        if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
-                        {
-                            condition = 1;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                        break;
-                    case 1:
-                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
-                        {
-                            condition = 2;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                        break;
-                    case 2:
-                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
-                        {
-
-                        }
-                        else if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                        break;
-                }
-            }
-            return false;
-        }
-
         public async Task Evaluate()
         {
             try
@@ -98,6 +53,16 @@ namespace MarinerX.Bot.Bots
                     var c0 = pairQuote.Charts[^1]; // 현재 정보
                     var c1 = pairQuote.Charts[^2]; // 1봉전 정보
 
+                    if (c0.Quote.Date.Minute != DateTime.Now.Minute) // 차트 시간과 현재 시간의 동기화 실패
+                    {
+                        continue;
+                    }
+
+                    var minPrice = pairQuote.Charts.SkipLast(1).TakeLast(24).Min(x => x.Quote.Low);
+                    var maxPrice = pairQuote.Charts.SkipLast(1).TakeLast(24).Max(x => x.Quote.High);
+                    var slPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.1m;
+                    var tpPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 0.9m;
+
                     if (!Common.IsShortPositioning(symbol)) // 포지션이 없으면
                     {
                         if (Common.ShortPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
@@ -105,43 +70,49 @@ namespace MarinerX.Bot.Bots
                             continue;
                         }
 
-                        if (DateTime.Now.Minute == 0 || DateTime.Now.Minute == 30) // 캔들이 갱신되는 순간에만 진입
+                        if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵
                         {
-                            if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            if (DealingSymbols.Contains(symbol))
-                            {
-                                continue;
-                            }
+                        if (DealingSymbols.Contains(symbol)) // 이미 주문하고 있는 중이면
+                        {
+                            continue;
+                        }
 
-                            DealingSymbols.Add(symbol);
-                            try
+                        DealingSymbols.Add(symbol);
+                        try
+                        {
+                            // 진입 조건에 부합하면
+                            if (pairQuote.IsPowerDeadCross(14) &&
+                                c1.Macd > 0 &&
+                                c1.Stoch > 80 &&
+                                tpPer > 1.0m)
                             {
-                                // 진입 조건에 부합하면
-                                if (IsEntryTs2ShortBit(pairQuote.Charts))
+                                //Common.AddHistory("Short Bot", $"c1:{c1CandleLength.Round(2)}, min:{minPrice.Round(6)}, max:{maxPrice.Round(6)}, sl%:{slPer.Round(4)}, tp%:{tpPer.Round(4)}");
+                                var price = c0.Quote.Close;
+                                var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
+                                var halfQuantity = (quantity / 2).ToValidQuantity(symbol);
+                                if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
                                 {
-                                    var price = c0.Quote.Close;
-                                    var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
-                                    var halfQuantity = (quantity / 2).ToValidQuantity(symbol);
-                                    Common.AddHistory("Short Bot", $"ST1 {c1.Supertrend1}, ST2 {c1.Supertrend2}, ST3 {c1.Supertrend3}");
-                                    if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
+                                    var stopLossPrice = Calculator.TargetPrice(side, c0.Quote.Open, slPer);
+                                    var takeProfitPrice = Calculator.TargetPrice(side, c0.Quote.Open, tpPer);
+                                    await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
+                                    await SetTakeProfit(symbol, takeProfitPrice, halfQuantity).ConfigureAwait(false);
+
+                                    Common.AddPositionCoolTime(symbol, side);
+                                    if (Common.IsSound)
                                     {
-                                        var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
-                                        await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
-                                        var takeProfitPrice = 2 * price - stopLossPrice;
-                                        await SetTakeProfit(symbol, takeProfitPrice, halfQuantity).ConfigureAwait(false);
+                                        Sound.Play("Resources/entry.wav", 0.5);
                                     }
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-                            }
-                            DealingSymbols.Remove(symbol);
                         }
+                        catch (Exception ex)
+                        {
+                            Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+                        }
+                        DealingSymbols.Remove(symbol);
                     }
                     else // 포지션이 있으면
                     {
@@ -157,7 +128,7 @@ namespace MarinerX.Bot.Bots
                         }
 
                         var takeProfitOrder = Common.GetOrder(symbol, side, FuturesOrderType.TakeProfit);
-                        if (takeProfitOrder == null && c1.Supertrend1 > 0)
+                        if (takeProfitOrder == null && c1.Supertrend > 0)
                         {
                             var position = Common.GetPosition(symbol, side);
                             if (position == null)

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Reflection;
 using System.Windows.Media;
 
@@ -21,13 +22,18 @@ namespace MarinerX.Bot
 
         public static readonly string BinanceApiKeyPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten", "binance_api.txt");
 
+        public static readonly SolidColorBrush OffColor = new(Color.FromRgb(80, 80, 80));
+        public static readonly SolidColorBrush WhiteColor = new(Color.FromRgb(222, 222, 222));
         public static readonly SolidColorBrush LongColor = new(Color.FromRgb(14, 203, 129));
         public static readonly SolidColorBrush ShortColor = new(Color.FromRgb(246, 70, 93));
+        public static readonly SolidColorBrush MixColor = new(Color.FromRgb(125, 136, 111));
 
-        public static readonly KlineInterval BaseInterval = KlineInterval.ThirtyMinutes;
+        public static readonly KlineInterval BaseInterval = KlineInterval.FiveMinutes;
         public static readonly int BaseIntervalNumber = 1;
 
         public static List<SymbolDetail> SymbolDetails = new();
+
+        public static bool IsSound = false;
 
         public static void LoadSymbolDetail()
         {
@@ -122,15 +128,14 @@ namespace MarinerX.Bot
             }
             else
             {
-                positionCoolTime.IsEnable = true;
-                positionCoolTime.CloseTime = DateTime.Now;
+                positionCoolTime.LatestEntryTime = DateTime.Now;
             }
         }
 
         public static bool IsCoolTime(string symbol, PositionSide side)
         {
             var positionCoolTime = GetPositionCoolTime(symbol, side);
-            return positionCoolTime == null ? false : positionCoolTime.IsEnable;
+            return positionCoolTime == null ? false : positionCoolTime.IsCoolTime();
         }
     }
 }

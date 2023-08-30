@@ -16,4 +16,10 @@
     <ProjectReference Include="..\CryptoModel\CryptoModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\symbol_detail.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

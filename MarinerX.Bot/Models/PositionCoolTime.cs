@@ -6,17 +6,20 @@ namespace MarinerX.Bot.Models
 {
     public class PositionCoolTime
     {
-        public bool IsEnable { get; set; }
         public string Symbol { get; set; }
         public PositionSide Side { get; set; }
-        public DateTime CloseTime { get; set; }
+        public DateTime LatestEntryTime { get; set; }
 
-        public PositionCoolTime(string symbol, PositionSide side, DateTime closeTime)
+        public PositionCoolTime(string symbol, PositionSide side, DateTime latestEntryTime)
         {
-            IsEnable = true;
             Symbol = symbol;
             Side = side;
-            CloseTime = closeTime;
+            LatestEntryTime = latestEntryTime;
+        }
+
+        public bool IsCoolTime()
+        {
+            return (DateTime.Now - LatestEntryTime).TotalSeconds < 120;
         }
     }
 }

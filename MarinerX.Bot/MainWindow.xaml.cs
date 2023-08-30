@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -29,10 +28,13 @@ namespace MarinerX.Bot
         DispatcherTimer timer5s = new();
         DispatcherTimer timer1m = new();
         ManagerBot manager = new("매니저 봇", "심볼 모니터링, 포지션 모니터링, 자산 모니터링 등등 전반적인 시스템을 관리하는 봇입니다.");
-        LongBot longPosition = new("롱 봇", "롱 포지션 매매를 하는 봇입니다.");
-        ShortBot shortPosition = new("숏 봇", "숏 포지션 매매를 하는 봇입니다.");
+        LongBot longBot = new("롱 봇", "롱 포지션 매매를 하는 봇입니다.");
+        ShortBot shortBot = new("숏 봇", "숏 포지션 매매를 하는 봇입니다.");
 
         IEnumerable<BinanceRealizedPnlHistory> todayRealizedPnlHistory = default!;
+
+        double balance = -1;
+        double todayPnl = 0;
 
         public MainWindow()
         {
@@ -73,15 +75,35 @@ namespace MarinerX.Bot
             timer5s.Tick += Timer5s_Tick;
             timer5s.Start();
 
-            //timer1m.Interval = TimeSpan.FromMinutes(1);
-            //timer1m.Tick += Timer1m_Tick;
+            timer1m.Interval = TimeSpan.FromMinutes(1);
+            timer1m.Tick += Timer1m_Tick;
+            timer1m.Start();
         }
 
-        private async void Timer1m_Tick(object? sender, EventArgs e)
+        private void Timer1m_Tick(object? sender, EventArgs e)
         {
             try
             {
-                await Task.Delay(5);
+                if (!Common.IsSound)
+                {
+                    return;
+                }
+
+                if (double.TryParse(UpperAlarmTextBox.Text, out var upper))
+                {
+                    if (balance > upper)
+                    {
+                        Sound.Play("Resources/upper.wav", 0.5);
+                    }
+                }
+
+                if (double.TryParse(LowerAlarmTextBox.Text, out var lower))
+                {
+                    if (balance < lower)
+                    {
+                        Sound.Play("Resources/lower.wav", 0.5);
+                    }
+                }
 
                 /* 주문 모니터링 - 5분이 넘도록 체결이 안되는 주문 취소 (이 부분은 좀 더 테스트 필요) */
                 //await longPosition.MonitorOpenOrderTimeout().ConfigureAwait(false);
@@ -109,6 +131,7 @@ namespace MarinerX.Bot
                 (var total, var avbl, var bnb) = await manager.GetBinanceBalance();
                 DispatcherService.Invoke(() =>
                 {
+                    balance = total;
                     BalanceText.Text = $"{total} USDT";
                     BnbText.Text = $"{bnb} BNB";
                 });
@@ -119,7 +142,7 @@ namespace MarinerX.Bot
                 {
                     if (todayRealizedPnlHistory != null && !todayRealizedPnlHistory.Any(x => x == null))
                     {
-                        var todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
+                        todayPnl = Math.Round(todayRealizedPnlHistory.Sum(x => x.RealizedPnl), 3);
                         if (todayPnl >= 0)
                         {
                             TodayPnlText.Foreground = Common.LongColor;
@@ -133,14 +156,20 @@ namespace MarinerX.Bot
                     }
                 });
 
-                if (longPosition.IsRunning)
+                /* 매시 0분 0초에 보고서 작성 */
+                if(DateTime.Now.Minute == 0 && DateTime.Now.Second == 0)
                 {
-                    await longPosition.Evaluate().ConfigureAwait(false);
+                    Logger.LogReport(total, bnb, todayPnl, longBot.BaseOrderSize, longBot.Leverage, longBot.MaxActiveDeals);
                 }
 
-                if (shortPosition.IsRunning)
+                if (longBot.IsRunning)
                 {
-                    await shortPosition.Evaluate().ConfigureAwait(false);
+                    await longBot.Evaluate().ConfigureAwait(false);
+                }
+
+                if (shortBot.IsRunning)
+                {
+                    await shortBot.Evaluate().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -154,10 +183,9 @@ namespace MarinerX.Bot
             try
             {
                 /* 주문 검수 */
-                if (longPosition.IsRunning || shortPosition.IsRunning)
+                if (longBot.IsRunning || shortBot.IsRunning)
                 {
                     await manager.MonitorOpenOrderClosedDeal().ConfigureAwait(false);
-                    manager.MonitorPositionCoolTime();
                 }
             }
             catch (Exception ex)
@@ -171,10 +199,10 @@ namespace MarinerX.Bot
         {
             try
             {
-                longPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
+                longBot.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
                 //longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
-                longPosition.Leverage = int.Parse(LeverageTextBox.Text);
-                longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
+                longBot.Leverage = int.Parse(LeverageTextBox.Text);
+                longBot.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
                 timer.Start();
 
@@ -206,13 +234,13 @@ namespace MarinerX.Bot
         {
             try
             {
-                longPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
+                longBot.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
                 //longPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
-                longPosition.Leverage = int.Parse(LeverageTextBox.Text);
-                longPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
+                longBot.Leverage = int.Parse(LeverageTextBox.Text);
+                longBot.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
                 Common.AddHistory("Master", "Long Bot On");
-                longPosition.IsRunning = true;
+                longBot.IsRunning = true;
             }
             catch (Exception ex)
             {
@@ -225,7 +253,7 @@ namespace MarinerX.Bot
             try
             {
                 Common.AddHistory("Master", "Long Bot Off");
-                longPosition.IsRunning = false;
+                longBot.IsRunning = false;
             }
             catch (Exception ex)
             {
@@ -237,13 +265,13 @@ namespace MarinerX.Bot
         {
             try
             {
-                shortPosition.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
+                shortBot.BaseOrderSize = int.Parse(BaseOrderSizeTextBox.Text);
                 //shortPosition.TargetRoe = decimal.Parse(TargetProfitTextBox.Text);
-                shortPosition.Leverage = int.Parse(LeverageTextBox.Text);
-                shortPosition.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
+                shortBot.Leverage = int.Parse(LeverageTextBox.Text);
+                shortBot.MaxActiveDeals = int.Parse(MaxActiveDealsTextBox.Text);
 
                 Common.AddHistory("Master", "Short Bot On");
-                shortPosition.IsRunning = true;
+                shortBot.IsRunning = true;
             }
             catch (Exception ex)
             {
@@ -256,7 +284,7 @@ namespace MarinerX.Bot
             try
             {
                 Common.AddHistory("Master", "Short Bot Off");
-                shortPosition.IsRunning = false;
+                shortBot.IsRunning = false;
             }
             catch (Exception ex)
             {
@@ -358,6 +386,31 @@ namespace MarinerX.Bot
                 var symbol = pairQuote.Symbol;
                 var url = $"https://www.tradingview.com/chart/g2jIOGTD/?symbol=BINANCE%3A{symbol}.P";
                 Start(url);
+            }
+        }
+
+        private void SoundCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            Common.IsSound = true;
+        }
+
+        private void SoundCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Common.IsSound = false;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (longBot.IsRunning || shortBot.IsRunning)
+            {
+                if (MessageBox.Show("로봇이 작동 중입니다.\n정말 종료하시겠습니까?", "확인", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    e.Cancel = false;
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
             }
         }
     }

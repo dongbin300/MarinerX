@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerXX", "MarinerXX\Mari
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerX.Bot", "MarinerX.Bot\MarinerX.Bot.csproj", "{5B2476FF-E635-4BAD-A9C7-D68529375DDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoModel", "CryptoModel\CryptoModel.csproj", "{08CBE5AC-CF6F-442D-98FE-705DE01D7A2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoModel", "CryptoModel\CryptoModel.csproj", "{08CBE5AC-CF6F-442D-98FE-705DE01D7A2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarinerX.ChartViewer", "MarinerX.ChartViewer\MarinerX.ChartViewer.csproj", "{EAB1110B-9942-4C4D-B8CD-8DD01894D19D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{08CBE5AC-CF6F-442D-98FE-705DE01D7A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08CBE5AC-CF6F-442D-98FE-705DE01D7A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08CBE5AC-CF6F-442D-98FE-705DE01D7A2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAB1110B-9942-4C4D-B8CD-8DD01894D19D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB1110B-9942-4C4D-B8CD-8DD01894D19D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB1110B-9942-4C4D-B8CD-8DD01894D19D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB1110B-9942-4C4D-B8CD-8DD01894D19D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

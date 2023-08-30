@@ -580,15 +580,6 @@
             return (k, d);
         }
 
-        /// <summary>
-        /// Need more test
-        /// </summary>
-        /// <param name="high"></param>
-        /// <param name="low"></param>
-        /// <param name="close"></param>
-        /// <param name="adxPeriod"></param>
-        /// <param name="diPeriod"></param>
-        /// <returns></returns>
         public static double[] Adx(double[] high, double[] low, double[] close, int adxPeriod, int diPeriod)
         {
             var adx = new double[high.Length];

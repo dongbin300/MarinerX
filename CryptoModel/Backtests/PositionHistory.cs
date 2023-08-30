@@ -21,6 +21,7 @@ namespace CryptoModel.Backtests
         public decimal EntryAmount { get; set; }
         public decimal ExitAmount { get; set; }
         public decimal Income => Side == PositionSide.Long ? ExitAmount - EntryAmount : EntryAmount - ExitAmount;
+        public int EntryCount { get; set; }
 
         public PositionHistory(DateTime time, DateTime entryTime, string symbol, PositionSide side, PositionResult result)
         {

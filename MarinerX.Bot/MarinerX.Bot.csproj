@@ -5,17 +5,37 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>chart2.ico</ApplicationIcon>
+    <ApplicationIcon>chart3.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\entry.wav" />
+    <None Remove="Resources\loss.wav" />
+    <None Remove="Resources\lower.wav" />
+    <None Remove="Resources\profit.wav" />
     <None Remove="Resources\symbol_detail.csv" />
     <None Remove="Resources\symbol_detail_2023-06-08.csv" />
+    <None Remove="Resources\upper.wav" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="chart2.ico" />
+    <Content Include="chart3.ico" />
+    <Content Include="Resources\entry.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\loss.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\lower.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\profit.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\symbol_detail.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\upper.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

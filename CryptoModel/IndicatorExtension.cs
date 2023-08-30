@@ -3,6 +3,14 @@ using CryptoModel.Maths;
 
 namespace CryptoModel
 {
+    public enum QuoteType
+    {
+        Open,
+        High,
+        Low,
+        Close
+    }
+
     public static class IndicatorExtension
     {
         /// <summary>
@@ -129,6 +137,22 @@ namespace CryptoModel
             return result;
         }
 
+        public static IEnumerable<StochResult> GetStoch(this IEnumerable<Quote> quotes, int period)
+        {
+            var result = new List<StochResult>();
+
+            var high = quotes.Select(x => (double)x.High).ToArray();
+            var low = quotes.Select(x => (double)x.Low).ToArray();
+            var close = quotes.Select(x => (double)x.Close).ToArray();
+            var k = ArrayCalculator.Stoch(high, low, close, period);
+            for (int i = 0; i < k.Length; i++)
+            {
+                result.Add(new StochResult(quotes.ElementAt(i).Date, k[i]));
+            }
+
+            return result;
+        }
+
         public static IEnumerable<StochasticRsiResult> GetStochasticRsi(this IEnumerable<Quote> quotes, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
         {
             var result = new List<StochasticRsiResult>();
@@ -171,11 +195,18 @@ namespace CryptoModel
             return result;
         }
 
-        public static IEnumerable<BbResult> GetBollingerBands(this IEnumerable<Quote> quotes, int period = 20, double deviation = 2.0)
+        public static IEnumerable<BbResult> GetBollingerBands(this IEnumerable<Quote> quotes, int period = 20, double deviation = 2.0, QuoteType quoteType = QuoteType.Close)
         {
             var result = new List<BbResult>();
 
-            var values = quotes.Select(x => (double)x.Close).ToArray();
+            var values = quoteType switch
+            {
+                QuoteType.Open => quotes.Select(x => (double)x.Open).ToArray(),
+                QuoteType.High => quotes.Select(x => (double)x.High).ToArray(),
+                QuoteType.Low => quotes.Select(x => (double)x.Low).ToArray(),
+                QuoteType.Close or _ => quotes.Select(x => (double)x.Close).ToArray(),
+            };
+
             (var sma, var upper, var lower) = ArrayCalculator.BollingerBands(values, period, deviation);
             for (int i = 0; i < sma.Length; i++)
             {

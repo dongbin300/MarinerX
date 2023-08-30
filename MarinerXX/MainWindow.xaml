@@ -70,8 +70,11 @@
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Vertical" Grid.Row="0">
-                <TextBlock Style="{StaticResource Description}">Symbol</TextBlock>
-                <TextBox x:Name="SymbolTextBoxPB" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource Description}">Symbol</TextBlock>
+                    <TextBlock x:Name="SymbolCountTextPB" TextAlignment="Right" VerticalAlignment="Center" Width="40" Foreground="{StaticResource Long}"></TextBlock>
+                </StackPanel>
+                <TextBox x:Name="SymbolTextBoxPB" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper" TextChanged="SymbolTextBoxPB_TextChanged"/>
                 <TextBlock Style="{StaticResource Description}">Start Date</TextBlock>
                 <TextBox x:Name="StartDateTextBoxPB" Text="2022-01-01"/>
                 <TextBlock Style="{StaticResource Description}">End Date</TextBlock>

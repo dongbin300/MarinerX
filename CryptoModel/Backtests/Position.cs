@@ -17,6 +17,8 @@ namespace CryptoModel.Backtests
         public decimal EntryAmount { get; set; }
         public decimal ExitAmount { get; set; }
 
+        public int EntryCount { get; set; } = 0;
+
 
         public Position(DateTime time, string symbol, PositionSide side, decimal entryPrice)
         {
